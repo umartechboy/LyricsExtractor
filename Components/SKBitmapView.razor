@@ -1,0 +1,70 @@
+﻿@using SkiaSharp
+@using System.Text.Json.Serialization
+@inject IJSRuntime JSRuntime
+
+<img id="@imgId" skBitmap" src="@imgSrc" style="@Style"/>
+@code {
+	SKBitmapViewInfo Info { get; set; } = new SKBitmapViewInfo();
+	[Parameter]
+	public EventCallback<SKBitmapViewPaintArgs> OnPaintBitmap { get; set; }
+	string imgId = Guid.NewGuid().ToString();
+	string imgSrc;
+	[Parameter]
+	public string Style { get; set; } = "height: 100%; width: 100%;";
+
+	protected override void OnInitialized()
+	{
+
+	}
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await JSRuntime.InvokeVoidAsync("elementSizeObserver.observeSizeChanges", imgId, (Action<int, int>)((width, height) =>
+			{
+				// Handle size change here
+				Console.WriteLine($"Width: {width}, Height: {height}");
+			}));
+		}
+	}
+	public void Invalidate()
+	{
+		if (Info.Canvas == null)
+			return;
+		OnPaintBitmap.InvokeAsync(new SKBitmapViewPaintArgs(Info));
+		imgSrc = ConvertToBase64String(Info.Bitmap.Encode(SKEncodedImageFormat.Jpeg, 100).ToArray());
+
+	}
+	static string ConvertToBase64String(byte[] imageData)
+	{
+		string base64Image = Convert.ToBase64String(imageData);
+		// Optional: Construct data URI
+		string dataURI = $"data:image/jpeg;base64,{base64Image}";
+		return dataURI;
+	}
+	void OnSizeChanged(int width, int height)
+	{
+		Info.Width = width;
+		Info.Height = height;
+		Info.Bitmap = new SKBitmap(width, height);
+		Info.Canvas = new SKCanvas(Info.Bitmap);
+	}
+
+	public class SKBitmapViewInfo
+	{
+		public int Width { get; set; }
+		public int Height { get; set; }
+		public SKBitmap Bitmap { get; set; }
+		public SKCanvas Canvas { get; set; }
+
+	}
+	public class SKBitmapViewPaintArgs
+	{
+		public SKBitmapViewInfo Info { get; private set; }
+		public SKCanvas Canvas { get => Info.Canvas; }
+		public SKBitmapViewPaintArgs(SKBitmapViewInfo info)
+		{
+			Info = info;
+		}
+	}
+}

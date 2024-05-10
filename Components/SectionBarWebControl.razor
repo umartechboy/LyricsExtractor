@@ -1,0 +1,160 @@
+﻿@using SkiaSharp
+@using SubtitleEditor.SectionDef
+@using static LyricsExtractor.Components.SKBitmapView
+
+<div style="width: 100%; height: 100%; cursor:@Cursor;"
+	@onmousemove:stopPropagation="true"
+	@onmousedown:preventDefault="true"
+	@onmouseup:preventDefault="true"
+	@onmouseenter:preventDefault="true"
+	@onmouseleave:preventDefault="true"
+	@onclick:preventDefault="true">
+	<SKBitmapView @ref=skView 
+			  Style="width: 100%; height: 100%;"
+			  @* OnPaintSurface="async (e) => await OnPaint(e)" *@
+			  OnPaintBitmap="@OnPaint"
+			  IgnorePixelScaling="true"
+			  @onmousemove="OnMouseMove"
+			  @onmousedown="OnMouseDown"
+			  @onmouseup="OnMouseUp"
+			  @onmouseenter="OnMouseEnter"
+			  @onmouseleave="OnMouseLeave"
+			  @onclick="OnClick"
+	></SKBitmapView>
+</div>
+@code {
+    [Parameter]
+    public SKColor BackgroundColor { get; set; } = SKColors.Gray;
+    [Parameter]
+    public EventCallback<double> SeekUpdate { get; set; }
+    [Parameter]
+    public double SeekPosition { get; set; }
+    [Parameter]
+    public EventCallback<Clip> EditClip { get; set; }
+    [Parameter]
+    public EventCallback RenderPreview { get; set; }
+    [Parameter]
+    public int LabelsSectionWidth { get; set; }
+
+    public static Dictionary<Cursors, string> CursorsMap = new Dictionary<Cursors, string>
+	{
+		{ Cursors.Default, "auto" },
+		{ Cursors.IBeam, "text" },
+		{ Cursors.NoMoveHoriz, "grab" },
+		{ Cursors.VSplit, "col-resize" }
+	};
+
+    protected SKBitmapView skView = null;
+    public SectionBar sectionBar;
+    protected string Cursor = "auto";
+
+    SKPoint lastMove;
+
+    protected override async Task OnInitializedAsync()
+    {
+        sectionBar = new SectionBar(()=> skView?.Invalidate(), 5);
+        // LabelsSectionWidth has some glitch with reset bounds. Fixing width.
+        //sectionBar.LabelsSectionWidth = LabelsSectionWidth;
+        sectionBar.SeekPointChanged += async (s, e) => {
+            SeekPosition = e.Value;
+
+            await sectionBar.CacheCurrentFrameImages();
+            await SeekUpdate.InvokeAsync(e.Value); 
+        };
+        sectionBar.OnRequestToRenderPreview += async (s, e) => await RenderPreview.InvokeAsync();
+        sectionBar.OnClipEditRequest += async (s, e) => await EditClip.InvokeAsync(e.Clip);
+        sectionBar.Layers[0].Add(new SubtitleClip(0, 5, "Hello, world")); // sample sub
+        sectionBar.Layers[1].Add(new AudioClip(0, 5, null, "", null)); // sample sub
+        sectionBar.Layers[2].Add(new VideoClip(0, 5)); // sample sub
+        sectionBar.Layers[3].Add(new PhotoClip(0, 5)); // sample sub
+        sectionBar.DiableDefaultEmptySectionStrip = false;
+        sectionBar.DiableDefaultSectionGroupStrip = false;
+        sectionBar.DiableDefaultSectionStrip = false;
+        sectionBar.Maximum = 10D;
+        sectionBar.Minimum = 0D;
+        sectionBar.MultiSelection = false;
+        sectionBar.SeekPosition = 0D;
+        sectionBar.ZoomEnd = 120D;
+        sectionBar.ZoomStart = 0D;
+        sectionBar.ResetBounds();
+
+        sectionBar.OnDebug += (s, e) => Console.WriteLine(e.Message);
+    }
+    protected async Task OnPaint(SKBitmapViewPaintArgs e)
+    {
+        var canvas = e.Canvas;
+        sectionBar.Width = e.Info.Width;
+        sectionBar.Height = e.Info.Height;
+        Cursor = CursorsMap[sectionBar.Cursor];
+
+        canvas.Clear(BackgroundColor);
+        // Draw debug rect
+        canvas.DrawRect(lastMove.X, lastMove.Y, 10, 10, new SKPaint()
+			{
+				Typeface = SKTypeface.FromFamilyName("ARIAL"),
+				Color = SKColors.White,
+			});
+
+        if (sectionBar != null)
+            sectionBar.OnPaint(e);	
+    }
+    public async Task SetSeek(double t)
+    {
+        sectionBar.SeekPosition = t;
+        SeekPosition = t; // this is required for render frame
+                          // also cache the video frames here.
+        await sectionBar.CacheCurrentFrameImages();
+        Invalidate();
+    }
+    public void ResetMaxTime()
+    {
+        sectionBar.ResetMaxTime();
+        skView.Invalidate();
+    }
+    public void OnMouseMove(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        lastMove = new SKPoint((float)e.OffsetX, (float)e.OffsetY);
+        sectionBar.NotifyMouseMove(new SubtitleEditor.SectionDef.MouseEventArgs(e));
+    }
+	public void OnMouseDown(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+	{
+        sectionBar.NotifyMouseDown(new SubtitleEditor.SectionDef.MouseEventArgs(e));
+	}
+	public void OnMouseUp(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+	{
+        sectionBar.NotifyMouseUp(new SubtitleEditor.SectionDef.MouseEventArgs(e));
+	}
+	public void OnMouseEnter(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+	{
+        sectionBar.NotifyMouseEnter(new SubtitleEditor.SectionDef.MouseEventArgs(e));
+	}
+	public void OnMouseLeave(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+	{
+        sectionBar.NotifyMouseLeave(new SubtitleEditor.SectionDef.MouseEventArgs(e));
+	}
+	public void OnClick(EventArgs e)
+	{
+        sectionBar.NotifyMouseClick(new SubtitleEditor.SectionDef.MouseEventArgs()
+			{
+				Location = new System.Drawing.Point((int)Math.Round(lastMove.X), (int)Math.Round(lastMove.Y)),
+				Clicks = 1,
+				Button = MouseButtons.Left
+			});
+	}
+	public async Task RenderFrame(double position, SKCanvas canvas, RenderConfig config)
+	{
+		await sectionBar.RenderFrameAsync(position, canvas, config);
+	}
+	public async Task RenderCurrentFrame(SKCanvas canvas, RenderConfig config)
+	{
+		await sectionBar.RenderFrameAsync(SeekPosition, canvas, config);
+	}
+	public async Task RenderCurrentFrameAtT(SKCanvas canvas, double t, RenderConfig config)
+	{
+		await sectionBar.RenderFrameAsync(t, canvas, config);
+	}
+	public void Invalidate()
+	{
+		sectionBar.Invalidate();
+	}
+}
