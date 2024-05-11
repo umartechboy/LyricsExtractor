@@ -1,26 +1,23 @@
-﻿@using SkiaSharp
+﻿@rendermode InteractiveServer
+@using SkiaSharp
 @using SubtitleEditor.SectionDef
 @using static LyricsExtractor.Components.SKBitmapView
 
-<div style="width: 100%; height: 100%; cursor:@Cursor;"
+<div style="width: 500px; height: 500px; cursor:@Cursor;"
 	@onmousemove:stopPropagation="true"
 	@onmousedown:preventDefault="true"
 	@onmouseup:preventDefault="true"
 	@onmouseenter:preventDefault="true"
 	@onmouseleave:preventDefault="true"
-	@onclick:preventDefault="true">
+    @onclick:preventDefault="true">
 	<SKBitmapView @ref=skView 
-			  Style="width: 100%; height: 100%;"
-			  @* OnPaintSurface="async (e) => await OnPaint(e)" *@
-			  OnPaintBitmap="@OnPaint"
-			  IgnorePixelScaling="true"
-			  @onmousemove="OnMouseMove"
-			  @onmousedown="OnMouseDown"
-			  @onmouseup="OnMouseUp"
-			  @onmouseenter="OnMouseEnter"
-			  @onmouseleave="OnMouseLeave"
-			  @onclick="OnClick"
-	></SKBitmapView>
+	    OnPaintBitmap="@OnPaint"
+        @onmousemove="OnMouseMove"
+        @onmousedown="OnMouseDown"
+        @onmouseup="OnMouseUp"
+        @onmouseenter="OnMouseEnter"
+        @onmouseleave="OnMouseLeave"
+        @onclick="OnClick"></SKBitmapView>
 </div>
 @code {
     [Parameter]

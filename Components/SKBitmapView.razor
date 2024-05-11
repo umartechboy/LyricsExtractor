@@ -1,17 +1,39 @@
-﻿@using SkiaSharp
+﻿@rendermode InteractiveServer
+@using SkiaSharp
 @using System.Text.Json.Serialization
 @inject IJSRuntime JSRuntime
 
-<img id="@imgId" skBitmap" src="@imgSrc" style="@Style"/>
+<img id="@imgId"
+	 @onmousemove="OnMouseMove"
+	 @onmousedown="OnMouseDown"
+	 @onmouseup="OnMouseUp"
+	 @onmouseenter="OnMouseEnter"
+	 @onmouseleave="OnMouseLeave"
+	 @onclick="OnClick" 
+	 src="@imgSrc" style="@Style" />
 @code {
 	SKBitmapViewInfo Info { get; set; } = new SKBitmapViewInfo();
 	[Parameter]
 	public EventCallback<SKBitmapViewPaintArgs> OnPaintBitmap { get; set; }
-	string imgId = Guid.NewGuid().ToString();
-	string imgSrc;
+	[Parameter]
+	public EventCallback<MouseEventArgs> onmousemove { get; set; }
+	[Parameter]
+	public EventCallback<MouseEventArgs> onmousedown { get; set; }
+	[Parameter]
+	public EventCallback<MouseEventArgs> onmouseup { get; set; }
+	[Parameter]
+	public EventCallback<MouseEventArgs> onmouseenter { get; set; }
+	[Parameter]
+	public EventCallback<MouseEventArgs> onmouseleave { get; set; }
+	[Parameter]
+	public EventCallback<MouseEventArgs> onclick { get; set; }
 	[Parameter]
 	public string Style { get; set; } = "height: 100%; width: 100%;";
+	[Parameter]
+	public int RenderQuality { get; set; } = 80;
 
+	string imgId = Guid.NewGuid().ToString();
+	string imgSrc;
 	protected override void OnInitialized()
 	{
 
@@ -20,19 +42,47 @@
 	{
 		if (firstRender)
 		{
-			await JSRuntime.InvokeVoidAsync("elementSizeObserver.observeSizeChanges", imgId, (Action<int, int>)((width, height) =>
-			{
-				// Handle size change here
-				Console.WriteLine($"Width: {width}, Height: {height}");
-			}));
+			await JSRuntime.InvokeVoidAsync("elementSizeObserver.observeSizeChanges", imgId, DotNetObjectReference.Create(this));
 		}
+	}
+	public void OnMouseMove(MouseEventArgs e)
+	{
+		onmousemove.InvokeAsync(e);
+	}
+	public void OnMouseDown(MouseEventArgs e)
+	{
+		onmousedown.InvokeAsync(e);
+	}
+	public void OnMouseUp(MouseEventArgs e)
+	{
+		onmouseup.InvokeAsync(e);
+	}
+	public void OnMouseEnter(MouseEventArgs e)
+	{
+		onmouseenter.InvokeAsync(e);
+	}
+	public void OnMouseLeave(MouseEventArgs e)
+	{
+		onmouseleave.InvokeAsync(e);
+	}
+	public void OnClick(MouseEventArgs e)
+	{
+		onclick.InvokeAsync(e);
+	}
+
+	[JSInvokable]
+	public void ElementSizeChanged(double width, double height)
+	{
+		if (Info.Bitmap != null) Info.Bitmap.Dispose();
+		Info = new SKBitmapViewInfo((int)width, (int)height);
 	}
 	public void Invalidate()
 	{
 		if (Info.Canvas == null)
 			return;
 		OnPaintBitmap.InvokeAsync(new SKBitmapViewPaintArgs(Info));
-		imgSrc = ConvertToBase64String(Info.Bitmap.Encode(SKEncodedImageFormat.Jpeg, 100).ToArray());
+		imgSrc = ConvertToBase64String(Info.Bitmap.Encode(SKEncodedImageFormat.Jpeg, RenderQuality).ToArray());
+		InvokeAsync(() => { StateHasChanged(); });
 
 	}
 	static string ConvertToBase64String(byte[] imageData)
@@ -44,18 +94,26 @@
 	}
 	void OnSizeChanged(int width, int height)
 	{
-		Info.Width = width;
-		Info.Height = height;
-		Info.Bitmap = new SKBitmap(width, height);
-		Info.Canvas = new SKCanvas(Info.Bitmap);
+		Info = new SKBitmapViewInfo(width, height);
 	}
 
 	public class SKBitmapViewInfo
 	{
-		public int Width { get; set; }
-		public int Height { get; set; }
-		public SKBitmap Bitmap { get; set; }
-		public SKCanvas Canvas { get; set; }
+		public int Width { get => Bitmap == null ? 0 : Bitmap.Width; }
+		public int Height { get => Bitmap == null ? 0 : Bitmap.Height; }
+		public SKBitmap? Bitmap { get; private set; }
+		public SKCanvas? Canvas { get; private set; }
+		public SKBitmapViewInfo()
+		{
+
+		}
+		public SKBitmapViewInfo(int width, int height)
+		{
+			if (width == 0 || height == 0)
+				return;
+			Bitmap = new SKBitmap(width, height);
+			Canvas = new SKCanvas(Bitmap);
+		}
 
 	}
 	public class SKBitmapViewPaintArgs
