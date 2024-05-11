@@ -3,6 +3,7 @@
 @using System.Text
 @using System.Net.Http.Headers
 @using System.Text.Json
+@using LyricsExtractor.Components.Editors
 @using LyricsExtractor.Services
 @using SkiaSharp
 @using SubtitleEditor.Automation
@@ -62,7 +63,7 @@
             <MudPaper Class="d-flex align-center justify-center mud-width-full py-8 px-2">
                 @if (ClipUnderEditing is SubtitleClip)
                 {
-                    <SubtitleEditor.Editors.SubtitleClipEditor 
+                    <SubtitleClipEditor 
                     OnAChange="SubtitleEditorOnAChange"
                     Text="@ClipEditorSource"
                     FontFamily="@SubtitleEditorFontFamily"
@@ -83,12 +84,12 @@
                     DurationHH="@ClipEditorDurationHH"
                     DurationMM="@ClipEditorDurationMM"
                     DurationSS="@ClipEditorDurationSS"
-                    DurationFF="@ClipEditorDurationFF"></SubtitleEditor.Editors.SubtitleClipEditor>
+                    DurationFF="@ClipEditorDurationFF"></SubtitleClipEditor>
                 }
                 @if (ClipUnderEditing is PhotoClip)
                 {
                     
-                    <SubtitleEditor.Editors.PhotoClipEditor 
+                    <PhotoClipEditor 
                     OnAChange="PhotoEditorOnAChange"
                     SelectedImage="@ClipEditorSource"
                     SelectedImageData="@PhotoEditorData"
@@ -104,12 +105,12 @@
                     DurationHH="@ClipEditorDurationHH"
                     DurationMM="@ClipEditorDurationMM"
                     DurationSS="@ClipEditorDurationSS"
-                    DurationFF="@ClipEditorDurationFF"></SubtitleEditor.Editors.PhotoClipEditor>
+                    DurationFF="@ClipEditorDurationFF"></PhotoClipEditor>
                 }
                 @if (ClipUnderEditing is VideoClip)
                 {
 
-                    <SubtitleEditor.Editors.VideoClipEditor 
+                    <VideoClipEditor 
                     OnAChange="VideoEditorOnAChange"
                     SelectedVideo="@ClipEditorSource"
                     SelectedVideoData="@VideoEditorData"
@@ -126,7 +127,7 @@
                     DurationHH="@ClipEditorDurationHH"
                     DurationMM="@ClipEditorDurationMM"
                     DurationSS="@ClipEditorDurationSS"
-                    DurationFF="@ClipEditorDurationFF"></SubtitleEditor.Editors.VideoClipEditor>
+                    DurationFF="@ClipEditorDurationFF"></VideoClipEditor>
                 }
                 @if(ClipUnderEditing == null)
                 {
@@ -1093,6 +1094,7 @@
             ClipEditorDurationSS = TimeSpan.FromSeconds(duration).Seconds;
             ClipEditorDurationFF = (int)(TimeSpan.FromSeconds(duration).Milliseconds * 30 / 1000);
         }
+        StateHasChanged();
     }
 
     // Subtitle Clip Editor
