@@ -38,15 +38,21 @@ window.getDimensions = function (elementId) {
     }
 };
 window.elementSizeObserver = {
-    observeSizeChanges: function (elementId, callback) {
-        const targetElement = document.getElementById(elementId);
-        if (!targetElement) return;
+    observeSizeChanges(elementId, dotNetObjectReference) {
+        const element = document.getElementById(elementId);
+        if (!element) {
+            console.error("Element with ID", elementId, "not found");
+            return;
+        }
 
-        const observer = new ResizeObserver(() => {
-            const rect = targetElement.getBoundingClientRect();
-            callback(rect.width, rect.height);
+        const observer = new ResizeObserver(entries => {
+            const entry = entries[0];
+            const width = entry.contentRect.width;
+            const height = entry.contentRect.height;
+            dotNetObjectReference.invokeMethodAsync("ElementSizeChanged", width, height);
         });
+        observer.observe(element);
 
-        observer.observe(targetElement);
+        return () => observer.disconnect(); // Cleanup function to stop observing
     }
 };
