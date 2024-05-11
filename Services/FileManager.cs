@@ -9,7 +9,7 @@ namespace LyricsExtractor.Services
 
         public static byte[] GetBytes(string path)
         {
-            var p = Path.Combine(Root, path).Replace("/", ".").Trim('.');
+            var p = Path.Combine(Root, path.Trim('/')).Replace("/", ".").Trim('.');
             using (var s = Assembly.GetExecutingAssembly().GetManifestResourceStream(p))
             {
                 using (var ms = new MemoryStream())

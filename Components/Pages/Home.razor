@@ -3,6 +3,8 @@
 @using System.Text
 @using System.Net.Http.Headers
 @using System.Text.Json
+@using FFMpegCore
+@using FFMpegCore.Pipes
 @using LyricsExtractor.Components.Editors
 @using LyricsExtractor.Services
 @using SkiaSharp
@@ -21,6 +23,7 @@
 @inject IJSRuntime Runtime
 @inject ISnackbar Snackbar
 
+<MudDialogProvider />
 
 <PageTitle>Home</PageTitle>
 
@@ -271,13 +274,13 @@
                 <MudItem Class="pa-2 px-8 align-start d-flex" Style="width: 100%;" >
                     <MudText Class="pa-2 px-8">@option.Label</MudText>
                     <MudSpacer />
-                        @if (option.Data == null)
+                        @if (!option.HasData)
                         {
                             @if (option.HasDefault)
                             {
-                                <MudButton Style="margin-top: 5px; margin-right: 10px;" Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick=@(async ()=> { downloadingFileProgressOpen = true; processProgressTitle = "Please wait..."; processProgressText = "Downloading " + option.DefaultDataSource; await option.DefaultSelected(); downloadingFileProgressOpen = false;})>Load Default</MudButton>
+                                <MudButton Style="margin-top: 5px; margin-right: 10px;" Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick=@(async ()=> await option.DefaultSelected())>Load Default</MudButton>
                             }
-                            <MudFileUpload T="IBrowserFile" Accept=@option.AcceptedFormats FilesChanged="(Func<IBrowserFile, Task>)option.FileSelected" MaximumFileCount="100">
+                            <MudFileUpload T="IBrowserFile" Accept=@option.AcceptedFormats FilesChanged="async (file) =>{ await option.FileSelected(file); await InvokeAsync(() => StateHasChanged()); }" MaximumFileCount="100">
                                 <ButtonTemplate>
                                     <MudButton HtmlTag="label"
                                                Variant="Variant.Filled"
@@ -289,10 +292,10 @@
                                 </ButtonTemplate>
                             </MudFileUpload>
                         }
-                        @if (option.Data != null)
+                        else
                         {
                             <MudText Class="pa-2 px-8" Typo="Typo.subtitle2">@option.LoadedDataLabel</MudText>
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear" OnClick="()=> option.Data = null" Variant="Variant.Filled" Color="Color.Transparent"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear" OnClick="()=> {option.ClearData(); InvokeAsync(()=> StateHasChanged());}" Variant="Variant.Filled" Color="Color.Transparent"></MudIconButton>
                         }
                 </MudItem>
             }
@@ -468,14 +471,18 @@
             return;
         var canvas = e.Canvas;
 
-        canvas.Clear();
+        canvas.Clear(SKColors.White);
         canvas.Translate((e.Info.Width - width) / 2, (e.Info.Height - height) / 2);
         canvas.DrawRect(0, 0, width, height, new SkiaSharp.SKPaint()
             {
                 IsStroke = true,
                 StrokeWidth = 2,
                 Color = SkiaSharp.SKColors.Gray
-            });
+            }); 
+        canvas.DrawRect(0, 0, width, height, new SkiaSharp.SKPaint()
+        {
+            Color = SkiaSharp.SKColors.Black
+        });
         float scale = width / 100;
         canvas.Scale(scale, scale);
         try
@@ -635,44 +642,56 @@
         whisperMenuOpen = false;
         progressDiscrete = true;
         processProgressOpen = true;
-        StateHasChanged();
-        processIsRender = false;
-
-        await GetFFMpeg();
         double duration = 0;
-        void durationExtracter(Logs l)
-        {
-            FFLog.AppendLine(l.Message);
-            if (l.Message.Trim().StartsWith("Duration:"))
+        InvokeAsync(() => StateHasChanged());
+        processIsRender = false;
+        var binInfo = new FFMpegCore.FFOptions()
             {
-                var d = l.Message.Trim().Substring(10).Split(',')[0];
-                var parts = d.Split(':', '.').Select(p => int.Parse(p)).ToArray();
-                var h = parts[0];
-                var m = parts[1];
-                var s = parts[2];
-                var f = parts[3];
-                duration = h * 3600 + m * 60 + s;
-            }
-
-            Console.WriteLine("ffmpeg: " + l.Message);
-        };
-        void progressUpdate(Progress p)
+                BinaryFolder = "FFMpeg/bin",
+                TemporaryFilesFolder = "FFMpeg/temp"
+            };
+        byte[] wave;
+        using (var stream = new MemoryStream(mp3))
         {
-            processProgress = p.Ratio * 100;
-            processProgressText = Math.Round(processProgress).ToString() + "% converted";
-            StateHasChanged();
+            using (var outStream = new MemoryStream())
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                var info = await FFProbe.AnalyseAsync(stream, binInfo);
+                duration = info.Duration.TotalSeconds;
+                if (duration < 1)
+                    throw new Exception("No audio found in the selected file");
+                stream.Seek(0, SeekOrigin.Begin);
+                try
+                {
+                    var converted = await FFMpegArguments
+                        .FromPipeInput(new StreamPipeSource(stream))
+                        .OutputToPipe(new StreamPipeSink(outStream),
+                    options => options
+                     .ForceFormat("wav")
+                     .WithAudioSamplingRate(16000))
+                    .NotifyOnProgress((p) =>
+                    {
+                        processProgressText = $"Preparing audio for Whisper";
+                        processProgress = (float)p;
+                        InvokeAsync(() => { StateHasChanged(); });
+
+                    }, info.Duration)
+                    .NotifyOnError((e) =>
+                    {
+                        
+                    })
+                    .ProcessAsynchronously(true, binInfo);
+                }
+                catch (Exception ex)
+                {
+
+                }
+                wave = outStream.ToArray();
+            }
         }
-        FFmpegFactory.Logger += durationExtracter;
-        FFmpegFactory.Progress += progressUpdate;
-        processProgressText = "Converting to WAVE format";
         StateHasChanged();
-
-        VideoClipEditor.FFMpeg.WriteFile("input.mp3", mp3);
-        await VideoClipEditor.FFMpeg.Run("-i", "input.mp3", "-ar", "16000", "output.wav");
-        FFmpegFactory.Logger -= durationExtracter;
-        FFmpegFactory.Progress -= progressUpdate;
-
-        var wave = await VideoClipEditor.FFMpeg.ReadFile("output.wav");
+        if (wave == null)
+            return 0;
 
         var base64Data = Convert.ToBase64String(wave);
         audioSrc = $"data:audio/wav;base64,{base64Data}";
@@ -835,84 +854,38 @@
     AutomationOption SVA_LogoOption = new AutomationOption(){ Label = "Logo", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/concatenated.webm"};
     AutomationOption SVA_AudioOption = new AutomationOption() { Label = "Audio", HasDefault = false, AcceptedFormats = ".mp3, .wav, .ogg"};
     List<AutomationOption> SVA_Options = new List<AutomationOption>();
-    bool SVA_OptionsIncomplete { get => SVA_Options.Any(o => o.Data == null); }
+    bool SVA_OptionsIncomplete { get => SVA_Options.Any(o => !o.HasData); }
     async Task SVA_Process()
     {
         SVA_MenuOpen = false;
         processProgressOpen = true;
+        processProgressTitle = "Processing Data";
+        processProgressText = "Uploading Data";
+
+        foreach(var option in SVA_Options)
+            await option.GetData(); // cache
         var Layers = sectionBarControl.sectionBar.Layers;
         foreach (var layer in Layers)
             layer.Clear();
 
-        // we have the options here and the data too. Lets begin with Whisper        
-        //var totalDuration = await ExtractLyricsAndFill(SVA_AudioOption.Data, SVA_AudioOption.DefaultDataSource, useCloudWhisper);
-        var totalDuration = 185.0;
-        if (totalDuration == 0) // failure
-            return;
-        // Audio layer is now filled
-        // Loadf FFMPEG for remaining ops
-        await GetFFMpeg();
-        double parsedVideoDuration = 0;
-        int parsedVideoFrames = 0;
-        void logs(Logs l)
+        // Process Audio first
+        var totalDuration = await ExtractLyricsAndFill(await SVA_AudioOption.GetData(), "music", false);
+        processProgressTitle = "Preparing to render";
+        processProgressText = "Creating the canvas";
+
+        List<SKBitmap> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
         {
-            FFLog.AppendLine(l.Message);
-            if (l.Message.Trim().StartsWith("Duration:"))
-            {
-                var d = l.Message.Trim().Substring(10).Split(',')[0];
-                var parts = d.Split(':', '.').Select(p => int.Parse(p)).ToArray();
-                var h = parts[0];
-                var m = parts[1];
-                var s = parts[2];
-                var f = parts[3];
-                parsedVideoDuration = h * 3600 + m * 60 + s;
-            }
-            if (l.Message.Trim().StartsWith("frame="))
-            {
-                parsedVideoFrames = int.Parse(l.Message.Split("fps")[0].Trim().Substring(6).Trim());
-                processProgressText = "Extracted " + parsedVideoFrames + " frames";
-            }
-
-            Console.WriteLine("ffmpeg: " + l.Message);
-        };
-
-        void ProgressChange(Progress m)
-        {
-            processProgress = (int)(m.Ratio * 100.0f);
-            if (processProgress < 0)
-                processProgress = 0;
-            else if (processProgress > 100)
-                processProgress = 100;
-            // Console.WriteLine($"Progress {m.Ratio}");
-
-            if (m.Ratio >= 1)
-            {
-                StateHasChanged();
-            }
-            StateHasChanged();
-
-        }
-
-        async Task<List<SKBitmap>> getVideoFrames(string videoFileSeed, AutomationOption option)
-        {
-            var FFName = Path.GetFileName(option.LoadedDataLabel);
-            VideoClipEditor.FFMpeg.WriteFile(FFName, option.Data);
-            parsedVideoDuration = 0; parsedVideoFrames = 0;
-            //await VideoClipEditor.ConvertFFMpegToPngs(videoFileSeed, FFName);
-            if (parsedVideoFrames == 0)
-                return new List<SKBitmap>();
             var frames = new List<SKBitmap>();
-            for (int i = 1; i <= parsedVideoFrames; i++)
+            for (int i = 1; i <= totalFrames; i++)
             {
-                processProgressText = "Converting frame " + i + " of " + parsedVideoFrames;
-                processProgress = (int)((i / (float)parsedVideoFrames) * 100);
-                StateHasChanged();
+                var f = Path.Combine(dir, frameSeed + i.ToString().PadLeft(indexChars, '0') + extension);
+                processProgressText = "Converting frame " + i + " of " + totalFrames;
+                processProgress = (int)((i / (float)totalFrames) * 100);
+                InvokeAsync(() => StateHasChanged());
+
                 try
                 {
-                    var png = videoFileSeed + "_frames_" + i.ToString().PadLeft(4, '0') + ".png";
-                    var frame = await VideoClipEditor.FFMpeg?.ReadFile(png);
-                    var bmp = SkiaSharp.SKBitmap.Decode(frame);
-                    VideoClipEditor.FFMpeg?.UnlinkFile(png);
+                    var bmp = SkiaSharp.SKBitmap.Decode(f);
                     frames.Add(bmp);
                 }
                 catch (Exception ex)
@@ -920,18 +893,66 @@
                     break;
                 }
             }
-            VideoClipEditor.FFMpeg.UnlinkFile(FFName);
             return frames;
         }
-        FFmpegFactory.Logger += logs;
-        FFmpegFactory.Progress += ProgressChange;
-
-        if (VideoClipEditor.FFMpeg == null)
+        async Task<List<SKBitmap>> getVideoFrames(string videoFileSeed, AutomationOption option)
         {
-            //create an instance
-            VideoClipEditor.FFMpeg = FFmpegFactory.CreateFFmpeg();
-            //download all dependencies from cdn
-            await VideoClipEditor.FFMpeg.Load(); //parameter false means not to trigger events in ffmpeg Clase instance
+            InvokeAsync(() => { StateHasChanged(); });
+            var ms = new MemoryStream();
+            int totalFrames = 0;
+            var ffmpegTemp = "FFMpeg/temp";
+            if (Directory.Exists(ffmpegTemp))
+                Directory.CreateDirectory(ffmpegTemp);
+            var framesIndexSize = 4;
+            var framesExtension = ".png";
+            var framesSeed =  videoFileSeed + "_frame_";
+            var outputFiles = Path.Combine(ffmpegTemp, $"{framesSeed}%0{framesIndexSize}d.png");
+            var binInfo = new FFMpegCore.FFOptions()
+                {
+                    BinaryFolder = "FFMpeg/bin",
+                    TemporaryFilesFolder = ffmpegTemp
+                };
+            try
+            {
+                using (var stream = new MemoryStream(await option.GetData()))
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var info = await FFProbe.AnalyseAsync(stream, binInfo);
+                    totalFrames = (int)Math.Round(info.Duration.TotalSeconds * 30);
+
+                    if (totalFrames < 1)
+                        throw new Exception("No frames found in the selected video");
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var converted = await FFMpegArguments
+                        .FromPipeInput(new StreamPipeSource(stream))
+                        .OutputToFile(outputFiles, true,
+                    options => options
+                    .WithArgument(new FFMpegCore.Arguments.CustomArgument(@"-vf fps=30")))
+                    .NotifyOnProgress((p) =>
+                    {
+                        var fi = Math.Round((p / 100 * info.Duration).TotalSeconds * 30);
+                        processProgressText = $"Extracted frame {fi} of {totalFrames}";
+                        processProgress = (float)p;
+                        InvokeAsync(() => { StateHasChanged(); });
+
+                    }, info.Duration)
+                    .ProcessAsynchronously(true, binInfo);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add("There was an error processing the video: " + ex, Severity.Error);
+                processProgressOpen = false;
+                InvokeAsync(() => { StateHasChanged(); });
+                return null;
+            }
+            InvokeAsync(() => { StateHasChanged(); });
+
+            // We have our PNGs in the drive. We don't need to load all of them to memory.
+            // But lets try loading them first as SKBitmaps.
+
+            return ConvertPNGsToSKBitmaps(totalFrames, ffmpegTemp, framesSeed, framesIndexSize, framesExtension);
         }
         List<SKBitmap> frames;
         double introDuration = 3;
@@ -981,14 +1002,10 @@
         // Lets add the Background
         Layers[3].Add(new PhotoClip(introDuration, totalDuration - outroDuration) { 
             Label = "background",
-            Data = SkiaSharp.SKBitmap.Decode(SVA_BackgroundOption.Data) 
+            //Data = SkiaSharp.SKBitmap.Decode(SVA_BackgroundOption.Data) 
         });
 
         // All Done!
-
-        FFmpegFactory.Logger -= logs;
-        FFmpegFactory.Progress -= ProgressChange;
-
         sectionBarControl.ResetMaxTime();
         sectionBarControl.Invalidate();
         await RenderPreview();

@@ -552,7 +552,7 @@ namespace SubtitleEditor.SectionDef
         {
             Data = data;
             WaveData = waveData;
-            openWav(out double[] left, out double[] right);
+            //openWav(out double[] left, out double[] right);
             this.left = left;
 			this.right = right;
 			this.Color = System.Drawing.Color.FromArgb(30, 168, 150);
@@ -587,6 +587,8 @@ namespace SubtitleEditor.SectionDef
                 tMin = min;
             if (tMax > max)
                 tMax = max;
+            if (left == null)
+                return;
 			for (double t = 0; t <= End - Start; t += tpp)
             {
                 var level = Math.Abs(getLeft(t));
