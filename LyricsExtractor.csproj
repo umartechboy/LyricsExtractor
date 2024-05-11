@@ -7,8 +7,37 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Properties\Resources\fonts\Anton-Regular.ttf" />
+    <None Remove="Properties\Resources\fonts\Jacquard12Charted-Regular.ttf" />
+    <None Remove="Properties\Resources\fonts\Jersey15-Regular.ttf" />
+    <None Remove="Properties\Resources\user_data\background.jpg" />
+    <None Remove="Properties\Resources\user_data\concatenated.webm" />
+    <None Remove="Properties\Resources\user_data\cool_burn.mp4" />
+    <None Remove="Properties\Resources\user_data\edosz.ttf" />
+    <None Remove="Properties\Resources\user_data\intro.webm" />
+    <None Remove="Properties\Resources\user_data\karma.mp3" />
+    <None Remove="Properties\Resources\user_data\outro.mov" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FFmpegBlazor" Version="1.0.0.7" />
+    <PackageReference Include="MudBlazor" Version="6.19.1" />
     <PackageReference Include="SkiaSharp" Version="2.88.8" />
     <PackageReference Include="SkiaSharp.Views.Blazor" Version="2.88.8" />
+    <PackageReference Include="Whisper.net" Version="1.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources\fonts\Anton-Regular.ttf" />
+    <EmbeddedResource Include="Properties\Resources\fonts\Jacquard12Charted-Regular.ttf" />
+    <EmbeddedResource Include="Properties\Resources\fonts\Jersey15-Regular.ttf" />
+    <EmbeddedResource Include="Properties\Resources\user_data\background.jpg" />
+    <EmbeddedResource Include="Properties\Resources\user_data\concatenated.webm" />
+    <EmbeddedResource Include="Properties\Resources\user_data\cool_burn.mp4" />
+    <EmbeddedResource Include="Properties\Resources\user_data\edosz.ttf" />
+    <EmbeddedResource Include="Properties\Resources\user_data\intro.webm" />
+    <EmbeddedResource Include="Properties\Resources\user_data\karma.mp3" />
+    <EmbeddedResource Include="Properties\Resources\user_data\outro.mov" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using LyricsExtractor.Components.Editors;
+using SkiaSharp;
 using System.Drawing;
 using Color = System.Drawing.Color;
 
@@ -616,7 +617,7 @@ namespace SubtitleEditor.SectionDef
 		{
 			this.Color = System.Drawing.Color.FromArgb(255, 113, 91);
 		}
-		public HybridSKBitmap[]? Data { get; set; }
+		public SKBitmap[]? Data { get; set; }
 		public float Size { get; set; } = 100;
         public SKBlendMode BlendMode { get; set; } = SKBlendMode.SrcOver;
         public VideoClipEditor.StretchingModes StretchingMode { get; set; } = VideoClipEditor.StretchingModes.Clip;
@@ -666,7 +667,7 @@ namespace SubtitleEditor.SectionDef
                 var indexToRender = getIndex(position);
                 if (indexToRender < 0) // cant render
                     return;
-                var bmp = await Data[indexToRender].GetSKBimap();
+                var bmp = Data[indexToRender];
                 if (bmp == null)
                 {
                     Console.WriteLine("bmp null at: " + indexToRender);
@@ -697,25 +698,27 @@ namespace SubtitleEditor.SectionDef
 		}
         public async Task CacheFrame(double position)
         {
-            if (Data != null && position >= Start && position <= End)
-            {
-                var indexToRender = getIndex(position);
-                if (indexToRender >= 0)
-                    await Data[indexToRender].GetSKBimap();
-            }
-            else
-            { }
+            // No need for this on the server
+            //if (Data != null && position >= Start && position <= End)
+            //{
+            //    var indexToRender = getIndex(position);
+            //    if (indexToRender >= 0)
+            //        await Data[indexToRender].GetSKBimap();
+            //}
+            //else
+            //{ }
         }
         public void FreeFrameCache(double position)
         {
-            if (Data != null && position >= Start && position <= End)
-            {
-                var indexToRender = getIndex(position);
-                if (indexToRender >= 0)
-                    Data[indexToRender].FreeALL();
-            }
-            else
-            { }
+            // No need for this on the server
+            //if (Data != null && position >= Start && position <= End)
+            //{
+            //    var indexToRender = getIndex(position);
+            //    if (indexToRender >= 0)
+            //        Data[indexToRender].FreeALL();
+            //}
+            //else
+            //{ }
         }
         //public override void OnPaintBefore(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
         //{
@@ -921,55 +924,46 @@ namespace SubtitleEditor.SectionDef
         public float SubtitleOverlap { get; set; } = 0.2F;
         public SKPoint SubtitleLocation { get; set; }
     }
-    public class HybridSKBitmap 
-    {
-        public string? FFMpegFile { get; set; }
-        SKBitmap Bitmap;
-        //public FFMPEG? FFMpeg { get; set; }
-        //public HybridSKBitmap(string fName, FFMPEG fFMPEG, SKBitmap data = null)
-        //{
-        //    FFMpegFile = fName;
-        //    FFMpeg = fFMPEG;
-        //}
-        public void FreeALL()
-        {
-            //if (FFMpegFile != "")
-            //{
-            //    FFMpegFile = ""; // mark that we dont have a file at the back
-            //    FFMpeg?.UnlinkFile(FFMpegFile);
-            //}
-            if (Bitmap != null)
-            {
-                Bitmap.Dispose();
-                Bitmap = null;
-            }
-			GC.Collect();
-        }
-        public async Task<SKBitmap> GetSKBimap()
-        {
-            if (Bitmap == null)
-            {
-                try
-                {
-                    ////Console.WriteLine("Get SKBitmap for: " + FFMpegFile);
-                    //var buffer = await FFMpeg?.ReadFile(FFMpegFile);
-                    //Bitmap = SKBitmap.Decode(buffer);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Exception while decoding: " + ex);
-                }
-            }
-            return Bitmap;
-        }
-    }
-}
-namespace VideoClipEditor
-{
-    public enum StretchingModes
-    {
-        Clip,
-        Stretch,
-        Loop
-    }
+   // public class HybridSKBitmap 
+   // {
+   //     public string? FFMpegFile { get; set; }
+   //     SKBitmap Bitmap;
+   //     //public FFMPEG? FFMpeg { get; set; }
+   //     //public HybridSKBitmap(string fName, FFMPEG fFMPEG, SKBitmap data = null)
+   //     //{
+   //     //    FFMpegFile = fName;
+   //     //    FFMpeg = fFMPEG;
+   //     //}
+   //     public void FreeALL()
+   //     {
+   //         //if (FFMpegFile != "")
+   //         //{
+   //         //    FFMpegFile = ""; // mark that we dont have a file at the back
+   //         //    FFMpeg?.UnlinkFile(FFMpegFile);
+   //         //}
+   //         if (Bitmap != null)
+   //         {
+   //             Bitmap.Dispose();
+   //             Bitmap = null;
+   //         }
+			//GC.Collect();
+   //     }
+   //     public async Task<SKBitmap> GetSKBimap()
+   //     {
+   //         if (Bitmap == null)
+   //         {
+   //             try
+   //             {
+   //                 ////Console.WriteLine("Get SKBitmap for: " + FFMpegFile);
+   //                 //var buffer = await FFMpeg?.ReadFile(FFMpegFile);
+   //                 //Bitmap = SKBitmap.Decode(buffer);
+   //             }
+   //             catch (Exception ex)
+   //             {
+   //                 Console.WriteLine("Exception while decoding: " + ex);
+   //             }
+   //         }
+   //         return Bitmap;
+   //     }
+   // }
 }

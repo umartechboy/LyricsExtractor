@@ -1,4 +1,6 @@
 using LyricsExtractor.Components;
+using LyricsExtractor.Services;
+using MudBlazor.Services;
 
 namespace LyricsExtractor
 {
@@ -11,6 +13,9 @@ namespace LyricsExtractor
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+
+            builder.Services.AddMudServices();
+            FileManager.Root = "LyricsExtractor.Properties.Resources/";
 
             var app = builder.Build();
 

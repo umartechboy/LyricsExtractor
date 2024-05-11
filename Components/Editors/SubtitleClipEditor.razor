@@ -1,0 +1,218 @@
+﻿@using MudBlazor
+@using MudBlazor.Utilities
+@using SkiaSharp
+@using SubtitleEditor.SectionDef
+<MudGrid>
+    <MudItem md="12">
+        <MudTextField T="string" Label="Caption text" Variant="Variant.Text" @bind-Value="Text" TextChanged="@OnATextChanged" Immediate="true" AutoGrow Lines="3" HelperText="Long lines automatically break to fit width" />
+     </MudItem>
+     <MudDivider DividerType="DividerType.FullWidth" />
+    <MudItem md="3" Class="py-0">
+         <MudNumericField @bind-Value="StartingHH" TextChanged="@OnATextChanged" Label="hours" Immediate="true"  Variant="Variant.Filled" Min="0.0" Max="1000" />
+     </MudItem>
+     <MudItem md="3" Class="py-0">
+         <MudNumericField @bind-Value="StartingMM" TextChanged="@OnATextChanged" Label="minutes" Immediate="true"  Variant="Variant.Filled" Min="0.0" Max="59" />
+     </MudItem>
+     <MudItem md="3" Class="py-0">
+         <MudNumericField @bind-Value="StartingSS" TextChanged="@OnATextChanged" Label="seconds" Immediate="true"  Variant="Variant.Filled" Min="0.0" Max="59" />
+     </MudItem>
+     <MudItem md="3" Class="py-0">
+         <MudNumericField @bind-Value="StartingFF" TextChanged="@OnATextChanged" Label="frame" Immediate="true"  Variant="Variant.Filled" Min="0.0" Max="29" />
+     </MudItem>
+     <MudItem md="12" Class="py-0">
+         <MudText GutterBottom="true">Start Time</MudText>
+     </MudItem>
+     <MudDivider DividerType="DividerType.FullWidth" />
+     <MudItem md="3" Class="py-0">
+         <MudNumericField Value="@DurationHH" TextChanged="@OnATextChanged" Label="hours" Immediate="true"  Variant="Variant.Filled" Min="0.0" Max="1000" />
+     </MudItem>
+     <MudItem md="3" Class="py-0">
+         <MudNumericField @bind-Value="@DurationMM" TextChanged="@OnATextChanged" Label="minutes" Immediate="true"  Variant="Variant.Filled" Min="0.0" Max="59" />
+     </MudItem>
+     <MudItem md="3" Class="py-0">
+         <MudNumericField @bind-Value="DurationSS" TextChanged="@OnATextChanged" Label="seconds" Immediate="true"  Variant="Variant.Filled" Min="0.0" Max="59" />
+     </MudItem>
+     <MudItem md="3" Class="py-0">
+         <MudNumericField @bind-Value="DurationFF" TextChanged="@OnATextChanged" Label="frame" Immediate="true"  Variant="Variant.Filled" Min="0.0" Max="29" />
+     </MudItem>
+     <MudItem md="12" Class="py-0">
+         <MudText GutterBottom="true">Duration</MudText>
+     </MudItem>
+     <MudDivider DividerType="DividerType.FullWidth" />
+     <MudItem md="8" Class="py-0">
+         <MudSelect @bind-Value="@FontFamily" TextChanged="@OnATextChanged" Label="Font Family" Variant="Variant.Outlined">
+             @foreach (var tf in TypeFaces)
+         {
+                <MudSelectItem Value="@tf.FamilyName" />
+         }
+         </MudSelect>
+     </MudItem>
+    <MudItem md="4" Class="py-0">
+
+        <MudFileUpload T="IBrowserFile" Accept=".ttf" FilesChanged="UploadTypeFace" MaximumFileCount="100">
+            <ButtonTemplate>
+                <MudButton HtmlTag="label"
+                           Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           for="@context.Id">
+                    <MudIcon Icon="@Icons.Material.Filled.FileUpload" Title="Favorite" />
+                </MudButton>
+            </ButtonTemplate>
+        </MudFileUpload>
+    </MudItem>
+    <MudItem md="6" Class="py-0">
+        <MudSlider T="float" Value="@FontSize" ValueChanged="@OnFontSizeChanged" Immediate=true Min="1" Max="100">Size</MudSlider>
+    </MudItem>
+    <MudItem md="6" Class="py-0">
+        <MudSlider T="float" Value="@YPosition" ValueChanged="@OnYPositionChanged" Immediate=true Min="0" Max="100">Position</MudSlider>
+    </MudItem>
+    <MudItem md="6" Class="py-0">
+        <MudColorPicker Label="Color" ValueChanged="OnColorChanged" Value="TextColor" ColorPickerView="ColorPickerView.Spectrum" />
+    </MudItem>
+    <MudItem md="6" Class="py-0">
+        <MudColorPicker Label="Shadow Color" ValueChanged="OnShadowColorChanged" Value="ShadowColor" ColorPickerView="ColorPickerView.Spectrum" />
+    </MudItem>
+    <MudItem md="6" Class="py-0">
+        <MudSlider T="float" Value="@ShadowSize" ValueChanged="@OnShadowSizeChanged" Immediate=true Min="0" Max="10">Shadow Size</MudSlider>
+    </MudItem>
+    <MudItem md="6" Class="py-0">
+        <MudSlider T="float" Value="@ShadowDistance" ValueChanged="@OnShadowDistanceChanged" Immediate=true Min="0" Max="20">Shadow Distance</MudSlider>
+    </MudItem>
+    <MudDivider DividerType="DividerType.FullWidth" />
+
+    <MudItem md="12" Class="py-0">
+        <MudNumericField @bind-Value="@Overlap" TextChanged="@OnATextChanged" Label="Fade In/Out" Immediate="true" Variant="Variant.Filled" Min="0.0" Max="10" />
+    </MudItem>
+    <MudDivider DividerType="DividerType.FullWidth" />
+    <MudItem md="6" Class="py-0">
+        <MudSelect @bind-Value="@BlendMode" TextChanged="@OnATextChanged" Label="Blend Mode" Variant="Variant.Outlined">
+            @foreach (var bm in blendModes)
+            {
+                <MudSelectItem Value="@bm.Key">@bm.Value</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem md="6" Class="py-0">
+        <MudSlider T="int" Value="@Opacity" ValueChanged="@OnOpacityChanged" Immediate=true Min="0" Max="255">Opacity</MudSlider>
+    </MudItem>
+</MudGrid>
+@inject ISnackbar Snackbar
+@code {
+
+    [Parameter] 
+    public string Text { get; set; }
+    [Parameter]
+    public string FontFamily { get; set; }
+    [Parameter]
+    public float FontSize { get; set; }
+    [Parameter]
+    public SKBlendMode BlendMode { get; set; } = SKBlendMode.SrcOver;
+    [Parameter]
+    public int Opacity { get; set; } = 255;
+    [Parameter]
+    public float ShadowSize { get; set; }
+    [Parameter]
+    public float ShadowDistance { get; set; }
+    [Parameter]
+    public MudColor TextColor { get; set; }
+    [Parameter]
+    public MudColor ShadowColor { get; set; }
+    [Parameter]
+    public float YPosition { get; set; }
+    [Parameter]
+    public double Overlap { get; set; }
+    [Parameter] 
+    public double StartingHH { get; set; }    
+    [Parameter] 
+    public double StartingMM { get; set; }    
+    [Parameter] 
+    public double StartingSS { get; set; }    
+    [Parameter] 
+    public double StartingFF { get; set; }    
+    [Parameter] 
+    public double DurationHH { get; set; }    
+    [Parameter] 
+    public double DurationMM { get; set; }    
+    [Parameter] 
+    public double DurationSS { get; set; }    
+    [Parameter] 
+    public double DurationFF { get; set; }
+    [Parameter]
+    public EventCallback<SubtitleClipEditor> OnAChange { get; set; }
+    [Parameter]
+    public List<SkiaSharp.SKTypeface> TypeFaces { get; set; }
+
+
+    Dictionary<SKBlendMode, string> blendModes = new Dictionary<SKBlendMode, string>
+    {
+    {SKBlendMode.SrcOver,"Normal"},
+    {SKBlendMode.ColorDodge, "Color Dodge"},
+    {SKBlendMode.Multiply, "Multiply"},
+    {SKBlendMode.ColorBurn, "Color Burn"},
+    {SKBlendMode.Difference, "Differnce"},
+    {SKBlendMode.Screen, "Screen"},
+    {SKBlendMode.Exclusion, "Excluion"},
+    {SKBlendMode.Darken, "Darken" }
+    };
+    private async Task OnOpacityChanged(int value) // Ensure correct casing (OnValueChanged)
+    {
+        Opacity = value;
+        await OnAChange.InvokeAsync(this);
+    }
+
+    protected async Task OnATextChanged(string d)
+    {
+        await OnAChange.InvokeAsync(this);
+    }
+    private async Task OnFontSizeChanged(float value) // Ensure correct casing (OnValueChanged)
+    {
+        FontSize = value;
+        await OnAChange.InvokeAsync(this);
+    }
+
+    private async Task OnYPositionChanged(float value) // Ensure correct casing (OnValueChanged)
+    {
+        YPosition = value;
+        await OnAChange.InvokeAsync(this);
+    }
+    private async Task OnShadowSizeChanged(float value) // Ensure correct casing (OnValueChanged)
+    {
+        ShadowSize = value;
+        await OnAChange.InvokeAsync(this);
+    }
+
+    private async Task OnShadowDistanceChanged(float value) // Ensure correct casing (OnValueChanged)
+    {
+        ShadowDistance = value;
+        await OnAChange.InvokeAsync(this);
+    }
+    private async Task OnColorChanged(MudColor c)
+    {
+        TextColor = c;
+        await OnAChange.InvokeAsync(this);
+    }
+    private async Task OnShadowColorChanged(MudColor c)
+    {
+        ShadowColor = c;
+        await OnAChange.InvokeAsync(this);
+    }
+    protected async Task UploadTypeFace(IBrowserFile file)
+    {
+        var stream = file.OpenReadStream(10000000); 
+        var inputFileDataBuffer = new byte[file.Size];
+
+        //read all bytes
+        await stream.ReadAsync(inputFileDataBuffer);
+        var ms = new MemoryStream(inputFileDataBuffer);
+        var tf = SkiaSharp.SKTypeface.FromStream(ms);
+        if (TypeFaces.Any(t => t.FamilyName == tf.FamilyName))
+        {
+            Snackbar.Add($"\"{tf.FamilyName}\" alread added", Severity.Warning);
+            return;
+        }
+
+        TypeFaces.Add(tf);
+        StateHasChanged();
+        Snackbar.Add($"\"{tf.FamilyName}\" added", Severity.Success);
+    }
+}
