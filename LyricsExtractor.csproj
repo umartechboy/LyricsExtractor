@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="FFmpegBlazor" Version="1.0.0.7" />
+    <PackageReference Include="FFMpegCore" Version="5.1.0" />
     <PackageReference Include="MudBlazor" Version="6.19.1" />
     <PackageReference Include="SkiaSharp" Version="2.88.8" />
     <PackageReference Include="SkiaSharp.Views.Blazor" Version="2.88.8" />
@@ -38,6 +39,31 @@
     <EmbeddedResource Include="Properties\Resources\user_data\intro.webm" />
     <EmbeddedResource Include="Properties\Resources\user_data\karma.mp3" />
     <EmbeddedResource Include="Properties\Resources\user_data\outro.mov" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="FFMpeg\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="FFMpeg\bin\ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="FFMpeg\bin\ffplay.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="FFMpeg\bin\ffprobe.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="FFMpeg\ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="FFMpeg\ffplay.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="FFMpeg\ffprobe.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
