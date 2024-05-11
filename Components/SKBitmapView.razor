@@ -35,9 +35,26 @@
 
 	string imgId = Guid.NewGuid().ToString();
 	string imgSrc;
+	bool isInvalid = true;
 	protected override void OnInitialized()
 	{
-
+		new Thread(() =>
+		{
+			while (true)
+			{
+				Thread.Sleep(30);
+				if (Info.Bitmap == null)
+					continue;
+				if (isInvalid)
+					InvokeAsync(() =>
+					{
+						OnPaintBitmap.InvokeAsync(new SKBitmapViewPaintArgs(Info));
+						imgSrc = ConvertToBase64String(Info.Bitmap.Encode(SKEncodedImageFormat.Jpeg, RenderQuality).ToArray());
+						StateHasChanged();
+					});
+				isInvalid = false;
+			}
+		}).Start();
 	}
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -81,13 +98,7 @@
 	{
 		if (Info.Canvas == null)
 			return;
-
-		InvokeAsync(() =>
-		{
-			imgSrc = ConvertToBase64String(Info.Bitmap.Encode(SKEncodedImageFormat.Jpeg, RenderQuality).ToArray());
-			OnPaintBitmap.InvokeAsync(new SKBitmapViewPaintArgs(Info));
-			StateHasChanged();
-		});
+		isInvalid = true;
 	}
 	static string ConvertToBase64String(byte[] imageData)
 	{

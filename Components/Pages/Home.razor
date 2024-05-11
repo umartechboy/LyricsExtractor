@@ -382,11 +382,11 @@
         config = new RenderConfig()
             {
                 SubTitlesFont = new SkiaSharp.SKFont(SkiaSharp.SKTypeface.FromFamilyName("Roboto")) { Size = 10 },
-                SubtitleColor = SkiaSharp.SKColors.Black,
+                SubtitleColor = SkiaSharp.SKColors.White,
                 ShadowColor = SkiaSharp.SKColors.Blue,
                 AspectRatio = 16 / 9.0F,
                 ShadowSize = 3,
-                ShadowDistance = 4,
+                ShadowDistance = 2,
                 SubtitleLocation = new SkiaSharp.SKPoint(50, 50 * 9 / 16.0F)
             };
         SVA_Options = new List<AutomationOption>() { SVA_IntroOption, SVA_OutroOption, SVA_BackgroundOption, SVA_BurnOption, SVA_LogoOption, SVA_AudioOption };
@@ -404,7 +404,7 @@
         }
         config.SubTitlesFont = new SkiaSharp.SKFont(TypeFaces.First());
         SubtitleEditorFontFamily = config.SubTitlesFont.Typeface.FamilyName;
-        new Task(async () => { await Task.Delay(1000); await RenderPreview(); }).Start();
+        new Task(async () => { await Task.Delay(3000); await RenderPreview(); }).Start();
     }
     protected override void OnAfterRender(bool firstRender)
     {
@@ -449,53 +449,27 @@
     }
     async Task RenderPreview()
     {
-        await refreshDisplayBuffer();
-        renderPreview.Invalidate();
+        renderPreview.Invalidate(); // will call OnRenderPaint
     }
-    SkiaSharp.SKBitmap? outputBuffer;
-    SkiaSharp.SKCanvas? canvasBuffer;
-    int renderCanvasWidth = 0;
-    int renderCanvasHeight = 0;
+
     protected async Task OnRenderPaint(SKBitmapView.SKBitmapViewPaintArgs e)
     {
         var viewCanvas = e.Canvas;
 
         //cache the sizes
-        renderCanvasWidth = e.Info.Width;
-        renderCanvasHeight = e.Info.Height;
-
-        if (outputBuffer == null)
-            return;
-        // draw back
-        viewCanvas.Clear();
-        viewCanvas.DrawBitmap(outputBuffer, 0, 0);
-    }
-    async Task refreshDisplayBuffer()
-    {
-        var width = (float)renderCanvasWidth;
-        var height = (float)(renderCanvasWidth / config.AspectRatio);
-        if (height > renderCanvasHeight)
+        var width = (float)e.Info.Width;
+        var height = (float)(e.Info.Width / config.AspectRatio);
+        if (height > e.Info.Height)
         {
-            height = renderCanvasHeight;
+            height = e.Info.Height;
             width = (float)(height * config.AspectRatio);
         }
         if (width <= 0)
             return;
-        if (outputBuffer != null)
-        {
-            if (outputBuffer.Width != (int)width || outputBuffer.Height != (int)height)
-                outputBuffer.Dispose();
-            outputBuffer = null;
-        }
-        if (outputBuffer == null)
-        {
-            outputBuffer = new SkiaSharp.SKBitmap((int)width, (int)height);
-            canvasBuffer = new SkiaSharp.SKCanvas(outputBuffer);
-        }
-        var canvas = canvasBuffer;
+        var canvas = e.Canvas;
 
         canvas.Clear();
-        canvas.Translate((renderCanvasWidth - width) / 2, (renderCanvasHeight - height) / 2);
+        canvas.Translate((e.Info.Width - width) / 2, (e.Info.Height - height) / 2);
         canvas.DrawRect(0, 0, width, height, new SkiaSharp.SKPaint()
             {
                 IsStroke = true,
@@ -514,7 +488,7 @@
         }
         catch (Exception ex) { Console.WriteLine("Render Failed: " + ex); }
         canvas.Scale(1 / scale, 1 / scale);
-        canvas.Translate(-(renderCanvasWidth - width) / 2, -(renderCanvasHeight - height) / 2);
+        canvas.Translate(-(e.Info.Width - width) / 2, -(e.Info.Height - height) / 2);
         canvas.ResetMatrix();
     }
 
@@ -924,7 +898,7 @@
             var FFName = Path.GetFileName(option.LoadedDataLabel);
             VideoClipEditor.FFMpeg.WriteFile(FFName, option.Data);
             parsedVideoDuration = 0; parsedVideoFrames = 0;
-            await VideoClipEditor.ConvertFFMpegToPngs(videoFileSeed, FFName);
+            //await VideoClipEditor.ConvertFFMpegToPngs(videoFileSeed, FFName);
             if (parsedVideoFrames == 0)
                 return new List<SKBitmap>();
             var frames = new List<SKBitmap>();

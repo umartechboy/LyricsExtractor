@@ -163,8 +163,6 @@
     public static FFmpegBlazor.FFMPEG FFMpeg;
     bool converting { get; set; } = false;
     float conversionProgress { get; set; } = 0;
-    public int parsedVideoFrames = 0;
-    public double parsedVideoDuration = 0;
     string progressDescription = "";
     protected override async Task OnInitializedAsync()
     {
@@ -201,112 +199,19 @@
         Opacity = value;
         await OnAChange.InvokeAsync(this);
     }
-    bool hasInitFFMPEG = false;
-    async Task GetFFMpeg()
-    {
-        //if (FFmpegFactory.Runtime == null)
-        // In cas renderer has already called it.
-        if (!hasInitFFMPEG)
-        {
-            hasInitFFMPEG = true;
-            progressDescription = "Downloading FFMPEG...";
-            FFmpegFactory.Logger += l =>
-            {
-                if (!converting)
-                    return;
-                FFLog.AppendLine(l.Message);
-                if (l.Message.Trim().StartsWith("Duration:"))
-                {
-                    var d = l.Message.Trim().Substring(10).Split(',')[0];
-                    var parts = d.Split(':', '.').Select(p => int.Parse(p)).ToArray();
-                    var h = parts[0];
-                    var m = parts[1];
-                    var s = parts[2];
-                    var f = parts[3];
-                    parsedVideoDuration = h * 3600 + m * 60 + s;
-                }
-                if (l.Message.Trim().StartsWith("frame="))
-                {
-                    parsedVideoFrames = int.Parse(l.Message.Split("fps")[0].Trim().Substring(6).Trim());
-                    progressDescription = "Extracted " + parsedVideoFrames + " frames";
-                }
-
-                Console.WriteLine("ffmpeg: " + l.Message);
-            };
-            FFmpegFactory.Progress += ProgressChange;
-            //initialize Library
-            await FFmpegFactory.Init(Runtime);
-        }
-
-    }
-    void ProgressChange(Progress m)
-    {
-        if (!converting)
-            return;
-        conversionProgress = (int)(m.Ratio * 100.0f);
-        if (conversionProgress < 0)
-            conversionProgress = 0;
-        else if (conversionProgress > 100)
-            conversionProgress = 100;
-        // Console.WriteLine($"Progress {m.Ratio}");
-
-        if (m.Ratio >= 1)
-        {
-            StateHasChanged();
-        }
-        StateHasChanged();
-
-    }
-    string randomString()
-    {
-        string str = "";
-        var r = new Random();
-        for (int i = 0; i < 8; i++)
-            str += r.Next().ToString("x").PadLeft(2, '0').Substring(0, 2);
-        return str;
-    }
-    async Task LoadFileInFFMpeg(IBrowserFile file, string videoFileName)
-    {
-        progressDescription = "Reading file...";
-        StateHasChanged();
-        using var stream = file.OpenReadStream(1000000000); //Max size for file that can be read
-        var inputFileDataBuffer = new byte[file.Size];
-        //read all bytes
-        await stream.ReadAsync(inputFileDataBuffer);
-        if (FFMpeg == null)
-        {
-            //create an instance
-            FFMpeg = FFmpegFactory.CreateFFmpeg();
-            //download all dependencies from cdn
-            await FFMpeg.Load(); //parameter false means not to trigger events in ffmpeg Clase instance
-        }
-
-        FFMpeg.WriteFile(videoFileName, inputFileDataBuffer);
-        GC.Collect();
-        SelectedVideo = FFmpegFactory.CreateURLFromBuffer(inputFileDataBuffer, videoFileName, file.ContentType);
-    }
-    public static async Task ConvertFFMpegToPngs(string videoFileSeed, string videoFileName)
-    {
-        //Pass CLI argument here equivalent to ffmpeg -i myFile.mp4 output.mp3
-        await FFMpeg.Run("-i", videoFileName, "-vf", "fps=30", videoFileSeed + "_frames_%04d.png");
-
-        //delete in-memory file
-        FFMpeg.UnlinkFile(videoFileName);
-        GC.Collect();
-    }
-    protected async Task<List<SKBitmap>> ConvertPNGsToSKBitmaps(string videoFileSeed)
+    protected async Task<List<SKBitmap>> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
     {
         var frames = new List<SKBitmap>();
-        for (int i = 1; i <= parsedVideoFrames; i++)
+        for (int i = 1; i <= totalFrames; i++)
         {
-            progressDescription = "Converting frame " + i + " of " + parsedVideoFrames;
-            conversionProgress = (int)((i / (float)parsedVideoFrames) * 100);
-            StateHasChanged();
+            var f = Path.Combine(dir, frameSeed + i.ToString().PadLeft(indexChars, '0') + extension);
+            progressDescription = "Converting frame " + i + " of " + totalFrames;
+            conversionProgress = (int)((i / (float)totalFrames) * 100);
+            InvokeAsync(() => StateHasChanged());
+
             try
             {
-                var png = videoFileSeed + "_frames_" + i.ToString().PadLeft(4, '0') + ".png";
-                var frame = await FFMpeg?.ReadFile(png);
-                var bmp = SkiaSharp.SKBitmap.Decode(frame);
+                var bmp = SkiaSharp.SKBitmap.Decode(f);
                 frames.Add(bmp);
             }
             catch (Exception ex)
@@ -319,12 +224,17 @@
     protected async Task VideoUploaderFilesSelected(IBrowserFile file)
     {
         converting = true;
+
         InvokeAsync(() => { StateHasChanged(); });
         var ms = new MemoryStream();
+        int totalFrames = 0;
         var ffmpegTemp = "FFMpeg/temp";
         if (Directory.Exists(ffmpegTemp))
             Directory.CreateDirectory(ffmpegTemp);
-        var outputFiles = Path.Combine(ffmpegTemp, "img_%04d.png");
+        var framesIndexSize = 4;
+        var framesExtension = ".png";
+        var framesSeed = Path.GetFileNameWithoutExtension(file.Name) + "_frame_";
+        var outputFiles = Path.Combine(ffmpegTemp, $"{framesSeed}%0{framesIndexSize}d.png");
         var binInfo = new FFMpegCore.FFOptions()
             {
                 BinaryFolder = "FFMpeg/bin",
@@ -338,6 +248,10 @@
                 await file.OpenReadStream(200000000).CopyToAsync(stream);
                 stream.Seek(0, SeekOrigin.Begin);
                 var info = await FFProbe.AnalyseAsync(stream, binInfo);
+                totalFrames = (int)Math.Round(info.Duration.TotalSeconds * 30);
+
+                if (totalFrames < 1)
+                    throw new Exception("No frames found in the selected video");
                 stream.Seek(0, SeekOrigin.Begin);
                 var converted = await FFMpegArguments
                     .FromPipeInput(new StreamPipeSource(stream))
@@ -347,54 +261,35 @@
                 .NotifyOnProgress((p) =>
                 {
                     var fi = Math.Round((p / 100 * info.Duration).TotalSeconds * 30);
-                    var tfs = Math.Round(info.Duration.TotalSeconds * 30);
-                    progressDescription = $"Extracted frame {fi} of {tfs}";
+                    progressDescription = $"Extracted frame {fi} of {totalFrames}";
                     conversionProgress = (float)p;
-                    InvokeAsync(() => {StateHasChanged(); });
+                    InvokeAsync(() => { StateHasChanged(); });
 
                 }, info.Duration)
-            .ProcessAsynchronously(true, binInfo);
+                .ProcessAsynchronously(true, binInfo);
+                if (file.ContentType.Contains("video/"))
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+                    SelectedVideo = $"data:{file.ContentType};base64,{Convert.ToBase64String(stream.ToArray())}";
+                }
+
             }
-        }catch (Exception ex)
-        {
-
         }
-        converting = false;
-        InvokeAsync(() => { StateHasChanged(); });
-    return;
-        converting = true;
-        FFLog.Clear();
-
-        //create a video link from buffer to that video can be played
-        var videoFileSeed = randomString();
-        var videoFileName = videoFileSeed + file.Name.Substring(file.Name.LastIndexOf('.'));
-        // G
-        await GetFFMpeg();
-        await LoadFileInFFMpeg(file, videoFileName); // +100MB
-        await ConvertFFMpegToPngs(videoFileSeed, videoFileName); // +100
-
-        var frames = await ConvertPNGsToSKBitmaps(videoFileSeed); // +1800
-
-        progressDescription = "Preparing preview";
-        //reRender DOM
-        // Enable preview
-        if (frames.Count <= 0)
+        catch (Exception ex)
         {
-            Snackbar.Add("Failed to parse video. FFMpeg log: " + FFLog.ToString(), Severity.Error);
-            SelectedVideo = "";
+            Snackbar.Add("There was an error processing the video: " + ex, Severity.Error);
+            converting = false;
+            InvokeAsync(() => { StateHasChanged(); });
             return;
         }
-        SelectedVideoData = frames.ToArray();
+        InvokeAsync(() => { StateHasChanged(); });
 
-        var duration = SelectedVideoData.Length / 30.0F;
-        DurationHH = TimeSpan.FromSeconds(duration).Hours;
-        DurationMM = TimeSpan.FromSeconds(duration).Minutes;
-        DurationSS = TimeSpan.FromSeconds(duration).Seconds;
-        DurationFF = (int)(Math.Round((double)TimeSpan.FromSeconds(duration).Milliseconds / 30));
+        // We have our PNGs in the drive. We don't need to load all of them to memory. 
+        // But lets try loading them first as SKBitmaps.
 
-        converting = false;
-        StateHasChanged();
-        Snackbar.Add("Video successfully processed!", Severity.Success);
+        SelectedVideoData = (await ConvertPNGsToSKBitmaps(totalFrames, ffmpegTemp, framesSeed, framesIndexSize, framesExtension)).ToArray();
+
         await OnAChange.InvokeAsync(this);
+        converting = false;
     }
 }

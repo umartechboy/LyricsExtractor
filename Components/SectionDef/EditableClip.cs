@@ -688,7 +688,7 @@ namespace SubtitleEditor.SectionDef
                     IsAntialias = true // enable antialiasing if needed
                 })
                 {
-                    Console.WriteLine("Render VideoClip: " + Source+" " + Label + ": " + indexToRender);
+                    //Console.WriteLine("Render VideoClip: " + Source+" " + Label + ": " + indexToRender);
                     paint.Color = paint.Color.WithAlpha((byte)Opacity);
                     canvas.DrawBitmap(bmp, new SKRect(r.Left, r.Top, r.Right, r.Bottom), paint);
                 }
