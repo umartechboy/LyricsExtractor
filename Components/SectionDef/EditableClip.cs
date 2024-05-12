@@ -1,4 +1,5 @@
 ﻿using LyricsExtractor.Components.Editors;
+using LyricsExtractor.Services;
 using SkiaSharp;
 using System.Drawing;
 using Color = System.Drawing.Color;
@@ -619,7 +620,7 @@ namespace SubtitleEditor.SectionDef
 		{
 			this.Color = System.Drawing.Color.FromArgb(255, 113, 91);
 		}
-		public SKBitmap[]? Data { get; set; }
+		public CachedSKBitmap[]? Data { get; set; }
 		public float Size { get; set; } = 100;
         public SKBlendMode BlendMode { get; set; } = SKBlendMode.SrcOver;
         public VideoClipEditor.StretchingModes StretchingMode { get; set; } = VideoClipEditor.StretchingModes.Clip;
@@ -669,7 +670,7 @@ namespace SubtitleEditor.SectionDef
                 var indexToRender = getIndex(position);
                 if (indexToRender < 0) // cant render
                     return;
-                var bmp = Data[indexToRender];
+                var bmp = await Data[indexToRender].Get();
                 if (bmp == null)
                 {
                     Console.WriteLine("bmp null at: " + indexToRender);
@@ -712,15 +713,14 @@ namespace SubtitleEditor.SectionDef
         }
         public void FreeFrameCache(double position)
         {
-            // No need for this on the server
-            //if (Data != null && position >= Start && position <= End)
-            //{
-            //    var indexToRender = getIndex(position);
-            //    if (indexToRender >= 0)
-            //        Data[indexToRender].FreeALL();
-            //}
-            //else
-            //{ }
+            if (Data != null && position >= Start && position <= End)
+            {
+                var indexToRender = getIndex(position);
+                if (indexToRender >= 0)
+                    Data[indexToRender].FreeALL();
+            }
+            else
+            { }
         }
         //public override void OnPaintBefore(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
         //{

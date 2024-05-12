@@ -129,8 +129,8 @@ namespace SubtitleEditor.SectionDef
             var ll = new List<List<Clip>>();
             ll.AddRange(Layers);
             ll.Reverse();
-            foreach (var layer in ll)
-                foreach (var clip in layer)
+            for (int li = 0; li< ll.Count; li++)
+                foreach (var clip in ll[li])
                     await clip.RenderAsync(position, canvas, config);
         }
         public void ClearFrameCacheAt(double position)

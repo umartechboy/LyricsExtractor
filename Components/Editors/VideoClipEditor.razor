@@ -5,6 +5,8 @@
 @using MudBlazor.Utilities
 @using SkiaSharp
 @using SubtitleEditor.SectionDef
+@using LyricsExtractor.Services
+
 @inject IJSRuntime Runtime
 @inject ISnackbar Snackbar
 
@@ -106,7 +108,7 @@
     [Parameter]
     public string? SelectedVideo { get; set; }
     [Parameter]
-    public SKBitmap[]? SelectedVideoData { get; set; }
+    public CachedSKBitmap[]? SelectedVideoData { get; set; }
     [Parameter]
     public float Size { get; set; }
     [Parameter]
@@ -199,9 +201,9 @@
         Opacity = value;
         await OnAChange.InvokeAsync(this);
     }
-    protected async Task<List<SKBitmap>> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
+    protected async Task<List<CachedSKBitmap>> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
     {
-        var frames = new List<SKBitmap>();
+        var frames = new List<CachedSKBitmap>();
         for (int i = 1; i <= totalFrames; i++)
         {
             var f = Path.Combine(dir, frameSeed + i.ToString().PadLeft(indexChars, '0') + extension);
@@ -211,7 +213,7 @@
 
             try
             {
-                var bmp = SkiaSharp.SKBitmap.Decode(f);
+                var bmp = new CachedSKBitmap(f);
                 frames.Add(bmp);
             }
             catch (Exception ex)

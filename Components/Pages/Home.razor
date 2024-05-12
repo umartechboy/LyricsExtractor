@@ -4,6 +4,7 @@
 @using System.Net.Http.Headers
 @using System.Text.Json
 @using FFMpegCore
+@using FFMpegCore.Arguments
 @using FFMpegCore.Pipes
 @using LyricsExtractor.Components.Editors
 @using LyricsExtractor.Services
@@ -545,35 +546,37 @@
 	async Task RenderAll()
 	{
 		processIsRender = true;
-		processProgressTitle = "Creating your video";
 		// Prepare UI
 		renderMenuOpen = false;
 		processProgressOpen = true;
 		processProgress = 0;
-		StateHasChanged();
-		await GetFFMpeg();
-		void durationExtracter(Logs l)
-		{
-			FFLog.AppendLine(l.Message);
-			if (l.Message.Trim().StartsWith("frame="))
-			{
-				var fNum = int.Parse(l.Message.Split("fps")[0].Trim().Substring(6).Trim());
-				processProgressText = "Extracted " + fNum + " frames";
-				var total = sectionBarControl.sectionBar.Maximum * 30;
-				processProgressText = "Encoded frame " + fNum + " of " + total;
-				processProgress = fNum / (double)total * 100;
-				StateHasChanged();
-			}
+		processProgressTitle = "Creating your video";
+		processProgressText = "Please wait...";
+		InvokeAsync(StateHasChanged);
 
-			Console.WriteLine("ffmpeg: " + l.Message);
-		};
-		FFmpegFactory.Logger += durationExtracter;
-
-		processProgressText = "Creating Frames";
 		renderAbort = false;
 
+		var binInfo = new FFMpegCore.FFOptions()
+			{
+				BinaryFolder = "FFMpeg/bin",
+				TemporaryFilesFolder = "FFMpeg/temp"
+			};
+		var renderFileSeed = "render_";
+		var renderFrameExtension = ".jpg";
+		var renderFrameFileNumberSize = 4;
+		foreach (var f in Directory.GetFiles(binInfo.TemporaryFilesFolder, renderFileSeed + "*"))
+		{
+			try
+			{
+				//				File.Delete(f);
+			}
+			catch (Exception ex)
+			{ }
+		}
 		//Render Frames
 		config.TargetSize = new SkiaSharp.SKSize() { Width = renderRes, Height = renderRes / config.AspectRatio };
+		var framesFileNames = new List<string>();
+		var duration = sectionBarControl.sectionBar.Maximum;
 		for (int fi = 0; fi < sectionBarControl.sectionBar.Maximum * 30; fi++)
 		{
 			var t = fi / 30.0D;
@@ -586,15 +589,19 @@
 					var s = skBitmap.Width / 100;
 					canvas.Scale(s, s);
 					await sectionBarControl.RenderCurrentFrameAtT(canvas, t, config);
-					sectionBarControl.sectionBar.ClearFrameCacheAt(t);
-					skBitmap.Encode(ms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
+					//sectionBarControl.sectionBar.ClearFrameCacheAt(t);
+					//skBitmap.Encode(ms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
 					var buffer = ms.ToArray();
-					var jpgName = "FR" + (fi + 1).ToString().PadLeft(4, '0') + ".jpg";
-					VideoClipEditor.FFMpeg.WriteFile(jpgName, buffer);
-					//var readOut = await VideoClipEditor.FFMpeg.ReadFile(jpgName);
-					//VideoClipEditor.FFMpeg.WriteFile("FR%04d.jpg", buffer);
+
+					var jpgFile = Path.Combine(
+						//Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), 
+						binInfo.TemporaryFilesFolder, renderFileSeed + (fi + 1).ToString().PadLeft(renderFrameFileNumberSize, '0') + renderFrameExtension);
+					framesFileNames.Add(jpgFile);
+					ms.Seek(0, SeekOrigin.Begin);
+					//await File.WriteAllBytesAsync(jpgFile, ms.ToArray());
 					processProgress = t / sectionBarControl.sectionBar.Maximum * 100;
-					await Task.Delay(1);
+					processProgressText = $"Please wait while your video is created... ({fi + 1}/{Math.Round(duration * 30, 0)})";
+					InvokeAsync(StateHasChanged);
 				}
 			}
 			GC.Collect();
@@ -602,30 +609,86 @@
 		}
 		processProgress = 0;
 		processProgressText = "Encoding video";
-		StateHasChanged();
-		var fName = "renderOutput.mp4";
+		InvokeAsync(StateHasChanged);
 		// Add audio if we have it
 		var audioClipLayer = sectionBarControl.sectionBar.Layers.Find(l => l.Any(c => c is AudioClip));
 		var audioClip = audioClipLayer?.Find(c => c is AudioClip);
+
 		var args = new List<string>();
 
-		if (audioClip != null){
+		if (audioClip != null)
+		{
 			if (audioClip.Source != "")
 			{
 				VideoClipEditor.FFMpeg.WriteFile(audioClip.Source, ((AudioClip)audioClip).Data);
 				args.Add("-i"); args.Add(audioClip.Source);
-				var duration = (TimeSpan.FromSeconds(audioClip.End) - TimeSpan.FromSeconds(audioClip.Start)).ToString(@"hh\:mm\:ss");
-				args.Add("-itsoffset"); args.Add(duration);
+				var durationStr = (TimeSpan.FromSeconds(audioClip.End) - TimeSpan.FromSeconds(audioClip.Start)).ToString(@"hh\:mm\:ss");
+				args.Add("-itsoffset"); args.Add(durationStr);
 				args.Add("-c:a"); args.Add("libfdk_aac");
 				args.Add("-b:a"); args.Add(renderQuality == "medium" ? "160k" : (renderQuality == "ultrafast" ? "96k" : "192k"));
 			}
 		}
-		args.AddRange(new List<string>(new string[] { "-framerate", "30", "-r", "30", "-i", "FR%04d.jpg", "-c:v", "libx264", "-crf", "18", "-preset", renderQuality, fName }));
 
-		await VideoClipEditor.FFMpeg.Run(args.ToArray());
-		renderOutputFile = fName;
+		var fName = Path.Combine(
+			Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+			binInfo.TemporaryFilesFolder, "renderOutput.mp4");
+		var jpgFilePattern = Path.Combine(
+			Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+			binInfo.TemporaryFilesFolder, renderFileSeed + "%0" + renderFrameFileNumberSize + "d" + renderFrameExtension);
+		args.AddRange(new List<string>(new string[] { 
+			"-y",
+			"-i", jpgFilePattern, 
+			"-pix_fmt", "yuv420p", 
+			"-r", "30", 
+			"-c:v", "libx264", 
+			"-framerate", "30",
+			"-r", "30", 
+			"-crf", "18",
+			"-preset", renderQuality,
+			fName }));
+		var argsAll = string.Join(' ', args);
+		//var p = new Instances.ProcessArguments(Path.Combine(binInfo.BinaryFolder, "ffmpeg"), argsAll);
+		// p.OutputDataReceived+=(s, e)=>
+		// {
 
-		FFmpegFactory.Logger -= durationExtracter;
+		// };
+		// var sb = new StringBuilder();
+		// p.ErrorDataReceived += (s, e) => 
+		// {
+		// 	sb.AppendLine(e);
+		// };
+		// var outputStr = sb.ToString();
+		var outStream = new MemoryStream();
+		// framesFileNames.RemoveAt(framesFileNames.Count - 1);
+		
+		//FFMpeg.JoinImageSequence(Path.Join(binInfo.TemporaryFilesFolder, renderFileSeed + "out.mp4"), 30, framesFileNames.ToArray());
+
+		var converted = await FFMpegArguments
+					.FromFileInput(jpgFilePattern, verifyExists: false)
+					.OutputToFile(
+						//new StreamPipeSink(outStream),
+						fName, true,
+						options => options
+							// .WithArgument(new FrameRateArgument(30))
+							// .WithArgument(new VideoCodecArgument("libx264"))
+							// .ForcePixelFormat("yuv420p")
+							//.ForceFormat("mp4")
+							.WithArgument(new FFMpegCore.Arguments.CustomArgument(argsAll))
+							)
+							.NotifyOnProgress((p) =>
+							{
+								var fi = Math.Round((p / 100 * duration).TotalSeconds * 30);
+								processProgressText = $"Encoded frame {fi} of {duration * 30}";
+								processProgress = (float)(p.TotalSeconds / duration) * 100;
+								InvokeAsync(StateHasChanged);
+
+							})
+							.NotifyOnError((err)=>
+							{
+
+							})
+				.ProcessAsynchronously(true, binInfo);
+		var outData = outStream.ToArray();
 		processProgressText = "Your file is ready to be downloaded";
 		processProgress = -1;
 		Snackbar.Add("Video compiled successfully");
@@ -709,10 +772,10 @@
 		if (wave == null)
 			return 0;
 		var presetFile = @"C:\Users\techboy\Documents\GitHub\SubtitleEditor_WASM\LyricsExtractor\LyricsExtractor\Properties\Resources\user_data\converted.bin";
-		var playbackFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),binInfo.TemporaryFilesFolder, "playBackAudio.mp3");
-		await File.WriteAllBytesAsync(
-			 playbackFile,
-			mp3);
+		//var playbackFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),binInfo.TemporaryFilesFolder, "playBackAudio.mp3");
+		// await File.WriteAllBytesAsync(
+		// 	 playbackFile,
+		// 	mp3);
 		var base64Data = Convert.ToBase64String(mp3);
 		audioSrc = $"data:audio/mp3;base64,{base64Data}";
 		//audioSrc = playbackFile.Replace("\\","/");
@@ -864,9 +927,9 @@
 			processProgressTitle = "Preparing to render";
 			processProgressText = "Creating the canvas";
 			InvokeAsync(StateHasChanged);
-			List<SKBitmap> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
+			List<CachedSKBitmap> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
 			{
-				var frames = new List<SKBitmap>();
+				var frames = new List<CachedSKBitmap>();
 				for (int i = 1; i <= totalFrames; i++)
 				{
 					var f = Path.Combine(dir, frameSeed + i.ToString().PadLeft(indexChars, '0') + extension);
@@ -876,7 +939,7 @@
 
 					try
 					{
-						var bmp = SkiaSharp.SKBitmap.Decode(f);
+						var bmp = new CachedSKBitmap(f);
 						frames.Add(bmp);
 					}
 					catch (Exception ex)
@@ -886,7 +949,7 @@
 				}
 				return frames;
 			}
-			async Task<List<SKBitmap>> getVideoFrames(string videoFileSeed, AutomationOption option)
+			async Task<List<CachedSKBitmap>> getVideoFrames(string videoFileSeed, AutomationOption option)
 			{
 				InvokeAsync(StateHasChanged);
 				var ms = new MemoryStream();
@@ -945,7 +1008,7 @@
 
 				return ConvertPNGsToSKBitmaps(totalFrames, ffmpegTemp, framesSeed, framesIndexSize, framesExtension);
 			}
-			List<SKBitmap> frames;
+			List<CachedSKBitmap> frames;
 			double introDuration = 3;
 			double outroDuration = 3;
 			// Process Intro
@@ -1002,6 +1065,7 @@
 			sectionBarControl.Invalidate();
 			await RenderPreview();
 			processProgressOpen = false;
+			progressDiscrete = false;
 			InvokeAsync(StateHasChanged);
 		}).Start();
 	}
@@ -1229,7 +1293,7 @@
 
 	// Video Clip Editor
 	protected VideoClipEditor.StretchingModes VideoEditorStretchingMode { get; set; }
-	protected SKBitmap[]? VideoEditorData { get; set; }
+	protected CachedSKBitmap[]? VideoEditorData { get; set; }
 	public async Task VideoEditorOnAChange(VideoClipEditor videoEditor)
 	{
 		if (ClipUnderEditing == null)
