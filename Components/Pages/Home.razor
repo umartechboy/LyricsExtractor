@@ -270,13 +270,13 @@
                 <MudItem Class="pa-2 px-8 align-start d-flex" Style="width: 100%;" >
                     <MudText Class="pa-2 px-8">@option.Label</MudText>
                     <MudSpacer />
-                        @if (!option.HasData)
+                        @if (option.Data == null)
                         {
                             @if (option.HasDefault)
                             {
                                 <MudButton Style="margin-top: 5px; margin-right: 10px;" Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick=@(async ()=> await option.DefaultSelected())>Load Default</MudButton>
                             }
-                            <MudFileUpload T="IBrowserFile" Accept=@option.AcceptedFormats FilesChanged="async (file) =>{ await option.FileSelected(file); await InvokeAsync(() => StateHasChanged()); }" MaximumFileCount="100">
+                            <MudFileUpload T="IBrowserFile" Accept=@option.AcceptedFormats FilesChanged="async (file) =>{ await option.FileSelected(file, await UploadFileWithProgress(file)); await InvokeAsync(() => StateHasChanged()); }" MaximumFileCount="100">
                                 <ButtonTemplate>
                                     <MudButton HtmlTag="label"
                                                Variant="Variant.Filled"
@@ -291,7 +291,7 @@
                         else
                         {
                             <MudText Class="pa-2 px-8" Typo="Typo.subtitle2">@option.LoadedDataLabel</MudText>
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear" OnClick="()=> {option.ClearData(); InvokeAsync(()=> StateHasChanged());}" Variant="Variant.Filled" Color="Color.Transparent"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear" OnClick="()=> {option.Data = null; InvokeAsync(()=> StateHasChanged());}" Variant="Variant.Filled" Color="Color.Transparent"></MudIconButton>
                         }
                 </MudItem>
             }
@@ -438,14 +438,20 @@
     }
     async Task onAudioTimeUpdate()
     {
-        var time = await Runtime.InvokeAsync<double>("window.getAudioTime", audioElementID);
-        await sectionBarControl.SetSeek(time);
-        await RenderPreview();
+        var playing = await Runtime.InvokeAsync<bool>("window.getAudioPlaying", audioElementID);
+        if(playing) // update only if being played.
+        {
+            var time = await Runtime.InvokeAsync<double>("window.getAudioTime", audioElementID);
+            await sectionBarControl.SetSeek(time);
+            await RenderPreview();
+        }
     }
     public async Task SeekUpdate(double t){
         if (ComponentHasRendered)
         {
-            await Runtime.InvokeVoidAsync("window.updateAudioTime", audioElementID, t);
+            var playing = await Runtime.InvokeAsync<bool>("window.getAudioPlaying", audioElementID);
+            if (!playing)
+                await Runtime.InvokeVoidAsync("window.updateAudioTime", audioElementID, t);
             CurrentTime = common.timeToString(t);
             await RenderPreview();
         }
@@ -702,9 +708,16 @@
         //MudDialog.StateHasChanged();
         if (wave == null)
             return 0;
+        var presetFile = @"C:\Users\techboy\Documents\GitHub\SubtitleEditor_WASM\LyricsExtractor\LyricsExtractor\Properties\Resources\user_data\converted.bin";
+        var playbackFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),binInfo.TemporaryFilesFolder, "playBackAudio.mp3");
+        await File.WriteAllBytesAsync(
+             playbackFile,
+            mp3);
+        var base64Data = Convert.ToBase64String(mp3);
+        audioSrc = $"data:audio/mp3;base64,{base64Data}";
+        //audioSrc = playbackFile.Replace("\\","/");
+        //audioSrc = await File.ReadAllTextAsync(presetFile);
 
-        var base64Data = Convert.ToBase64String(wave);
-        audioSrc = $"data:audio/wav;base64,{base64Data}";
         sectionBarControl.sectionBar.Layers.Last().Clear();
         sectionBarControl.sectionBar.Layers[1].Clear();
         sectionBarControl.sectionBar.Layers.Last().Add(new AudioClip(0, duration, mp3, fileName, wave));
@@ -748,11 +761,11 @@
                 InvokeAsync(StateHasChanged);
             };
             using iAudioReader reader = mf.openAudioFile(audioFile);
-            context.runFull(reader, whisperReader, null, null);
+            //context.runFull(reader, whisperReader, null, null);
 
         }
         // whisperProcessor[modelToUse]!.Process(new MemoryStream(wave));
-        confidance /= totalSubs;
+        //confidance /= totalSubs;
         processProgressText = "All done!";
         processProgress = -1;
         processProgressOpen = false;
@@ -761,13 +774,29 @@
         Snackbar.Add($"Audio was processed successfully and lyrics where added to the timeline. Total {totalSubs} lyrics containing {totalWords} words exracted.");
         return duration;
     }
+    async Task<byte[]> UploadFileWithProgress(IBrowserFile file)
+    {
+        processProgressOpen = true;
+        processProgressTitle = "Uploading data";
+        processProgressTitle = "Please wait while " + file.Name + " is uploaded to the cloud";
+        var stream = file.OpenReadStream(file.Size);
+        InvokeAsync(StateHasChanged);
+
+        var data = new byte[file.Size];
+        int total = 0;
+        while(total < file.Size){
+            total += await stream.ReadAsync(data, total, (int)file.Size - total);
+            processProgress = total / (double)file.Size * 100.0D;
+            InvokeAsync(StateHasChanged);
+        }
+        stream.Close();
+        processProgressOpen = false;
+        InvokeAsync(StateHasChanged);
+        return data;
+    }
     protected async Task UploadAudioForWhisper(IBrowserFile file)
     {
-
-        var stream = file.OpenReadStream(10000000);
-        var mp3 = new byte[file.Size];
-        await stream.ReadAsync(mp3);
-        stream.Close();
+        var mp3 = await UploadFileWithProgress(file);
 
         new Thread(async () =>
         {
@@ -817,7 +846,7 @@
     AutomationOption SVA_LogoOption = new AutomationOption(){ Label = "Logo", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/concatenated.webm"};
     AutomationOption SVA_AudioOption = new AutomationOption() { Label = "Audio", HasDefault = false, AcceptedFormats = ".mp3, .wav, .ogg"};
     List<AutomationOption> SVA_Options = new List<AutomationOption>();
-    bool SVA_OptionsIncomplete { get => SVA_Options.Any(o => !o.HasData); }
+    bool SVA_OptionsIncomplete { get => SVA_Options.Any(o => o.Data == null); }
     async Task SVA_Process()
     {
         SVA_MenuOpen = false;
@@ -825,14 +854,12 @@
         processProgressTitle = "Processing Data";
         processProgressText = "Uploading Data";
 
-        foreach(var option in SVA_Options)
-            await option.GetData(); // cache
         var Layers = sectionBarControl.sectionBar.Layers;
         foreach (var layer in Layers)
             layer.Clear();
 
         // Process Audio first
-        var totalDuration = await ExtractLyricsAndFill(await SVA_AudioOption.GetData(), "music", false);
+        var totalDuration = await ExtractLyricsAndFill(SVA_AudioOption.Data, "music", false);
         processProgressTitle = "Preparing to render";
         processProgressText = "Creating the canvas";
         InvokeAsync(StateHasChanged);
@@ -877,7 +904,7 @@
                 };
             try
             {
-                using (var stream = new MemoryStream(await option.GetData()))
+                using (var stream = new MemoryStream(option.Data))
                 {
                     stream.Seek(0, SeekOrigin.Begin);
                     var info = await FFProbe.AnalyseAsync(stream, binInfo);

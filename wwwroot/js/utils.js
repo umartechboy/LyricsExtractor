@@ -29,6 +29,12 @@ window.getAudioTime = (audioID) => {
         return elem.currentTime;
     return 0;
 };
+window.getAudioPlaying = (audioID) => {
+    var elem = document.getElementById(audioID);
+    if (elem)
+        return !elem.paused;
+    return false;
+};
 window.getDimensions = function (elementId) {
     const element = document.getElementById(elementId);
     if (element) {
