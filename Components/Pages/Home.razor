@@ -10,20 +10,18 @@
 @using SkiaSharp
 @using SubtitleEditor.Automation
 @using System.Reflection
-@using Whisper.net
-@using Whisper.net.Ggml
 @using FFmpegBlazor
 @using MudBlazor
 @using MudBlazor.Utilities
 @using SkiaSharp.Views.Blazor
 @using SubtitleEditor.SectionDef
 @using Editors
+@using Whisper
 
 @inject IDialogService DialogService
 @inject IJSRuntime Runtime
 @inject ISnackbar Snackbar
 
-<MudDialogProvider />
 
 <PageTitle>Home</PageTitle>
 
@@ -231,12 +229,6 @@
             <MudAppBar Color="Color.Transparent" Fixed="false" Elevation="0" Class="py-4">
                 <MudText Typo="Typo.subtitle2">GGML Model</MudText>
                 <MudSpacer />
-                <MudSelect @bind-Value="@modelToUse" Variant="Variant.Outlined">
-                    @foreach(var ggmlOption in ggmlOptions)
-                    {
-                        <MudSelectItem Value="@ggmlOption">@ggmlOption.Description</MudSelectItem>
-                    }
-                </MudSelect>
             </MudAppBar>
         </MudGrid>
 
@@ -245,7 +237,7 @@
         <MudCheckBox @bind-Value="@useCloudWhisper" Label="Use Cloud" Disabled="true"></MudCheckBox>
         <MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> whisperMenuOpen = false">Close</MudButton>        
         
-        <MudFileUpload T="IBrowserFile" Accept=".mp3, .wav, .ogg" FilesChanged="(Func<IBrowserFile, Task>)UploadAudioForWhisper" MaximumFileCount="100">
+        <MudFileUpload T="IBrowserFile" Accept=".mp3, .wav, .ogg" FilesChanged=@(async (file) =>{whisperMenuOpen = false;  processProgressOpen = true; processProgressText = "test"; StateHasChanged(); await UploadAudioForWhisper(file); await InvokeAsync(() => StateHasChanged()); }) MaximumFileCount="100">
             <ButtonTemplate>
                 <MudButton HtmlTag="label"
                            Variant="Variant.Filled"
@@ -372,6 +364,8 @@
 
 @code{
     // Must be same as hardcoded width in sectionBar untill the resizing glitch is found and resolved.
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     int layersLabelSectionWidth = 200;
     SectionBarWebControl sectionBarControl { get; set; }
     string audioSrc = "";
@@ -644,8 +638,6 @@
     GgmlModel modelToUse;
     bool whisperMenuOpen = false;
     bool useCloudWhisper = false;
-    Dictionary<GgmlModel, WhisperFactory> whisperFactory = new Dictionary<GgmlModel, WhisperFactory>();
-    Dictionary<GgmlModel, WhisperProcessor> whisperProcessor = new Dictionary<GgmlModel, WhisperProcessor>();
     async Task<double> ExtractLyricsAndFill(byte[] mp3, string fileName, bool useCloudWhisper)
     {
         processProgressTitle = "Extract Lyrics";
@@ -655,7 +647,8 @@
         progressDiscrete = true;
         processProgressOpen = true;
         double duration = 0;
-        InvokeAsync(() => StateHasChanged());
+        StateHasChanged();
+        //MudDialog.StateHasChanged();
         processIsRender = false;
         var binInfo = new FFMpegCore.FFOptions()
             {
@@ -683,10 +676,10 @@
                      .WithAudioSamplingRate(16000))
                     .NotifyOnProgress((p) =>
                     {
-                        processProgressText = $"Preparing audio for Whisper";
+                        processProgressText = $"Preparing audio for preview";
                         processProgress = (float)p;
                         InvokeAsync(() => { StateHasChanged(); });
-
+                        
                     }, info.Duration)
                     .NotifyOnError((e) =>
                     {
@@ -702,6 +695,7 @@
             }
         }
         StateHasChanged();
+        //MudDialog.StateHasChanged();
         if (wave == null)
             return 0;
 
@@ -761,48 +755,73 @@
         }
         else
         {
-            Console.WriteLine("Downloading Ggml");
-            if (!whisperFactory.ContainsKey(modelToUse))
-            {
-                processProgressText = "Loading GGML model";
-                StateHasChanged();
-                var modelData = FileManager.GetBytes(Path.Combine("ggml", modelToUse.Bin));
-                whisperFactory[modelToUse] = WhisperFactory.FromBuffer(modelData);
-            }
-            return 0;
-            processProgressText = "Extracting Lyrics";
-            StateHasChanged();
-            await Task.Delay(100);
-            processProgress = 0;
-            Console.WriteLine("Begin whisper");
-            if (!whisperProcessor.ContainsKey(modelToUse))
-            {
-                whisperProcessor[modelToUse] = whisperFactory[modelToUse].CreateBuilder()
-                .WithPrintProgress()
-                .WithPrintResults()
-                .WithSegmentEventHandler(async (result) =>
-                {
-                    totalWords += result.Text.Split(' ').Length;
-                    // Add a new clip for this
-                    var subClip = new SubtitleClip(result.Start.TotalSeconds, result.End.TotalSeconds, result.Text);
-                    sectionBarControl.sectionBar.Layers[1].Add(subClip);
-                    sectionBarControl.ResetMaxTime();
 
-                    processProgressText = (++totalSubs) + ": " + result.Text;
-                    confidance += result.Probability;
-                    //Console.WriteLine($"{result.Start}->{result.End}: {processProgressText}");
-                    sectionBarControl.Invalidate();
-                    processProgress = (result.End.TotalSeconds / duration) * 100;
-                    StateHasChanged();
-                    await Task.Delay(200);
-                })
-                .WithLanguage("en")
-                .Build();
+            //     return 0;
+            //     processProgressText = "Extracting Lyrics";
+            //     StateHasChanged();
+            //     await Task.Delay(100);
+            //     processProgress = 0;
+            //     Console.WriteLine("Begin whisper");
+            //     if (!whisperProcessor.ContainsKey(modelToUse))
+            //     {
+            //         whisperProcessor[modelToUse] = whisperFactory[modelToUse].CreateBuilder()
+            //         .WithPrintProgress()
+            //         .WithPrintResults()
+            //         .WithSegmentEventHandler(async (result) =>
+            //         {
+            //             totalWords += result.Text.Split(' ').Length;
+            //             // Add a new clip for this
+            //             var subClip = new SubtitleClip(result.Start.TotalSeconds, result.End.TotalSeconds, result.Text);
+            //             sectionBarControl.sectionBar.Layers[1].Add(subClip);
+            //             sectionBarControl.ResetMaxTime();
+
+            //             processProgressText = (++totalSubs) + ": " + result.Text;
+            //             confidance += result.Probability;
+            //             //Console.WriteLine($"{result.Start}->{result.End}: {processProgressText}");
+            //             sectionBarControl.Invalidate();
+            //             processProgress = (result.End.TotalSeconds / duration) * 100;
+            //             StateHasChanged();
+            //             await Task.Delay(200);
+            //         })
+            //         .WithLanguage("en")
+            //         .Build();
+            //         StateHasChanged();
+            //         await Task.Delay(100);
+            //     }
+
+            const eLoggerFlags loggerFlags = eLoggerFlags.UseStandardError | eLoggerFlags.SkipFormatMessage;
+            Library.setLogSink(eLogLevel.Debug, loggerFlags);
+
+            var audioFile = "C:\\Users\\techboy\\Downloads\\karma.mp3";
+            var model = Library.loadModel("C:\\Users\\techboy\\Documents\\GitHub\\SubtitleEditor_WASM\\LyricsExtractor\\LyricsExtractor\\Properties\\Resources\\ggml\\ggml-base.en.bin");
+            using Context context = model.createContext();
+            context.parameters.setFlag(eFullParamsFlags.NoContext, true);
+            new CommandLineArgs().apply(ref context.parameters);
+            using iMediaFoundation mf = Library.initMediaFoundation();
+            var whisperReader = new WhisperReader();
+            whisperReader.OnSegment += (seg, probability) =>
+            {
+                totalWords += seg.text.Split(' ').Length;
+                // Add a new clip for this
+                var subClip = new SubtitleClip(seg.time.begin.TotalSeconds, seg.time.end.TotalSeconds, seg.text);
+                sectionBarControl.sectionBar.Layers[1].Add(subClip);
+                sectionBarControl.ResetMaxTime();
+
+                processProgressText = (++totalSubs) + ": " + seg.text;
+
+                confidance += probability;
+                //Console.WriteLine($"{result.Start}->{result.End}: {processProgressText}");
+                sectionBarControl.Invalidate();
+                processProgress = (seg.time.end.TotalSeconds / duration) * 100;
+
                 StateHasChanged();
-                await Task.Delay(100);
-            }
+                MudDialog.StateHasChanged();
+            };
+            using iAudioReader reader = mf.openAudioFile(audioFile);
+            context.runFull(reader, whisperReader, null, null);
+
         }
-        whisperProcessor[modelToUse]!.Process(new MemoryStream(wave));
+        // whisperProcessor[modelToUse]!.Process(new MemoryStream(wave));
         confidance /= totalSubs;
         processProgressText = "All done!";
         processProgress = -1;

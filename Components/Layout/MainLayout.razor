@@ -1,9 +1,11 @@
 ﻿@using MudBlazor
+@inject IDialogService DialogService
 @inherits LayoutComponentBase
 <div class="page">
     <main>
         <MudThemeProvider />
         <MudSnackbarProvider />
+        <MudDialogProvider />
         <article class="content px-4" style="padding: 0px 0px 0px 0px;">
             @Body
         </article>
