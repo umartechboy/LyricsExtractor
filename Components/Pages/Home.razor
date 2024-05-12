@@ -450,7 +450,7 @@
         if (ComponentHasRendered)
         {
             var playing = await Runtime.InvokeAsync<bool>("window.getAudioPlaying", audioElementID);
-            if (!playing)
+            //if (!playing)
                 await Runtime.InvokeVoidAsync("window.updateAudioTime", audioElementID, t);
             CurrentTime = common.timeToString(t);
             await RenderPreview();
