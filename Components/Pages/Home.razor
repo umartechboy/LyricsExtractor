@@ -757,7 +757,7 @@
         processProgress = -1;
         processProgressOpen = false;
         // Layer Last and 1 are for audio and subs
-
+        InvokeAsync(StateHasChanged);
         Snackbar.Add($"Audio was processed successfully and lyrics where added to the timeline. Total {totalSubs} lyrics containing {totalWords} words exracted.");
         return duration;
     }
@@ -801,6 +801,9 @@
             // Layer Last -- Audio
             // Already Done
             sectionBarControl.sectionBar.ResetMaxTime();
+            sectionBarControl.Invalidate();
+            await RenderPreview();
+            await InvokeAsync(StateHasChanged);
         }).Start();
     }
 
