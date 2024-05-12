@@ -29,230 +29,230 @@
 <PageTitle>Home</PageTitle>
 
 <MudGrid>
-    <MudItem xs="8">
-        <MudItem xs="12" Class="my-2">
-            <MudPaper Class="d-flex object-center mud-width-full">
-                <div style="width: 100%; height: 70vh; position: relative; left: 0px; top: 0px;">
-                    <SKBitmapView @ref=renderPreview
-                        OnPaintBitmap="async (e) => await OnRenderPaint(e)"
-                    ></SKBitmapView>
-                    <audio @ontimeupdate="onAudioTimeUpdate" id="@audioElementID" src=@audioSrc controls style="position: absolute; width: 100%; height: 20px; top: calc(100% - 20px); left: 0px;">
-                        Your browser does not support the audio element.
-                    </audio>
-                </div>
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12">
-            
-		    <MudPaper Class="d-flex object-center mud-width-full">
-                <div style="width: 100%; height: 25vh; position: relative; left: 0px; top: 0px;">
-                    <SectionBarWebControl @ref=sectionBarControl
-                                          SeekUpdate="SeekUpdate"
-                                          LabelsSectionWidth= "@layersLabelSectionWidth"
-                                          RenderPreview="@RenderPreview"
-                                          EditClip="EditClipRequest"></SectionBarWebControl>
-                    <div style="position: absolute; width: @(layersLabelSectionWidth)px; height: 100%; left: 0px; top: 0px; border: 1px solid red;"></div>
-                </div>
-            </MudPaper>
-        </MudItem>
+	<MudItem xs="8">
+		<MudItem xs="12" Class="my-2">
+			<MudPaper Class="d-flex object-center mud-width-full">
+				<div style="width: 100%; height: 70vh; position: relative; left: 0px; top: 0px;">
+					<SKBitmapView @ref=renderPreview
+						OnPaintBitmap="async (e) => await OnRenderPaint(e)"
+					></SKBitmapView>
+					<audio @ontimeupdate="onAudioTimeUpdate" id="@audioElementID" src=@audioSrc controls style="position: absolute; width: 100%; height: 20px; top: calc(100% - 20px); left: 0px;">
+						Your browser does not support the audio element.
+					</audio>
+				</div>
+			</MudPaper>
+		</MudItem>
+		<MudItem xs="12">
+			
+			<MudPaper Class="d-flex object-center mud-width-full">
+				<div style="width: 100%; height: 25vh; position: relative; left: 0px; top: 0px;">
+					<SectionBarWebControl @ref=sectionBarControl
+										  SeekUpdate="SeekUpdate"
+										  LabelsSectionWidth= "@layersLabelSectionWidth"
+										  RenderPreview="@RenderPreview"
+										  EditClip="EditClipRequest"></SectionBarWebControl>
+					<div style="position: absolute; width: @(layersLabelSectionWidth)px; height: 100%; left: 0px; top: 0px; border: 1px solid red;"></div>
+				</div>
+			</MudPaper>
+		</MudItem>
 	</MudItem>
 
-    <MudItem md="4">
-        <MudAppBar Color="Color.Transparent" Fixed="false" Elevation="0">
-            <MudText Typo="Typo.h3">@CurrentTime</MudText>
-            <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Outlined.MenuOpen" Color="Color.Inherit" OnClick="() => menuOpen = true"/>
-        </MudAppBar>
-        <MudItem md="12">
-            <MudPaper Class="d-flex align-center justify-center mud-width-full py-8 px-2">
-                @if (ClipUnderEditing is SubtitleClip)
-                {
-                    <SubtitleClipEditor 
-                    OnAChange="SubtitleEditorOnAChange"
-                    Text="@ClipEditorSource"
-                    FontFamily="@SubtitleEditorFontFamily"
-                    TypeFaces="@TypeFaces"
-                    FontSize="@SubtitleEditorFontSize"
-                    BlendMode="ClipEditorBlendMode"
-                    Opacity="ClipEditorOpacity"
-                    YPosition="@SubtitleEditorYPosition"
-                    ShadowSize="@SubtitleEditorShadowSize"
-                    ShadowDistance="@SubtitleEditorShadowDistance"
-                    TextColor="@SubtitleEditorTextColor"
-                    ShadowColor="@SubtitleEditorShadowColor"
-                    Overlap="@SubtitleEditorOverlap"
-                    StartingHH="@ClipEditorStartingHH"
-                    StartingMM="@ClipEditorStartingMM"
-                    StartingSS="@ClipEditorStartingSS"
-                    StartingFF="@ClipEditorStartingFF"
-                    DurationHH="@ClipEditorDurationHH"
-                    DurationMM="@ClipEditorDurationMM"
-                    DurationSS="@ClipEditorDurationSS"
-                    DurationFF="@ClipEditorDurationFF"></SubtitleClipEditor>
-                }
-                @if (ClipUnderEditing is PhotoClip)
-                {
-                    
-                    <PhotoClipEditor 
-                    OnAChange="PhotoEditorOnAChange"
-                    SelectedImage="@ClipEditorSource"
-                    SelectedImageData="@PhotoEditorData"
-                    Size="GraphicEditorSize"
-                    BlendMode="ClipEditorBlendMode"
-                    Opacity="ClipEditorOpacity"
-                    XPosition="GraphicEditorXPosition"
-                    YPosition="GraphicEditorYPosition"
-                    StartingHH="@ClipEditorStartingHH"
-                    StartingMM="@ClipEditorStartingMM"
-                    StartingSS="@ClipEditorStartingSS"
-                    StartingFF="@ClipEditorStartingFF"
-                    DurationHH="@ClipEditorDurationHH"
-                    DurationMM="@ClipEditorDurationMM"
-                    DurationSS="@ClipEditorDurationSS"
-                    DurationFF="@ClipEditorDurationFF"></PhotoClipEditor>
-                }
-                @if (ClipUnderEditing is VideoClip)
-                {
+	<MudItem md="4">
+		<MudAppBar Color="Color.Transparent" Fixed="false" Elevation="0">
+			<MudText Typo="Typo.h3">@CurrentTime</MudText>
+			<MudSpacer />
+			<MudIconButton Icon="@Icons.Material.Outlined.MenuOpen" Color="Color.Inherit" OnClick="() => menuOpen = true"/>
+		</MudAppBar>
+		<MudItem md="12">
+			<MudPaper Class="d-flex align-center justify-center mud-width-full py-8 px-2">
+				@if (ClipUnderEditing is SubtitleClip)
+				{
+					<SubtitleClipEditor 
+					OnAChange="SubtitleEditorOnAChange"
+					Text="@ClipEditorSource"
+					FontFamily="@SubtitleEditorFontFamily"
+					TypeFaces="@TypeFaces"
+					FontSize="@SubtitleEditorFontSize"
+					BlendMode="ClipEditorBlendMode"
+					Opacity="ClipEditorOpacity"
+					YPosition="@SubtitleEditorYPosition"
+					ShadowSize="@SubtitleEditorShadowSize"
+					ShadowDistance="@SubtitleEditorShadowDistance"
+					TextColor="@SubtitleEditorTextColor"
+					ShadowColor="@SubtitleEditorShadowColor"
+					Overlap="@SubtitleEditorOverlap"
+					StartingHH="@ClipEditorStartingHH"
+					StartingMM="@ClipEditorStartingMM"
+					StartingSS="@ClipEditorStartingSS"
+					StartingFF="@ClipEditorStartingFF"
+					DurationHH="@ClipEditorDurationHH"
+					DurationMM="@ClipEditorDurationMM"
+					DurationSS="@ClipEditorDurationSS"
+					DurationFF="@ClipEditorDurationFF"></SubtitleClipEditor>
+				}
+				@if (ClipUnderEditing is PhotoClip)
+				{
+					
+					<PhotoClipEditor 
+					OnAChange="PhotoEditorOnAChange"
+					SelectedImage="@ClipEditorSource"
+					SelectedImageData="@PhotoEditorData"
+					Size="GraphicEditorSize"
+					BlendMode="ClipEditorBlendMode"
+					Opacity="ClipEditorOpacity"
+					XPosition="GraphicEditorXPosition"
+					YPosition="GraphicEditorYPosition"
+					StartingHH="@ClipEditorStartingHH"
+					StartingMM="@ClipEditorStartingMM"
+					StartingSS="@ClipEditorStartingSS"
+					StartingFF="@ClipEditorStartingFF"
+					DurationHH="@ClipEditorDurationHH"
+					DurationMM="@ClipEditorDurationMM"
+					DurationSS="@ClipEditorDurationSS"
+					DurationFF="@ClipEditorDurationFF"></PhotoClipEditor>
+				}
+				@if (ClipUnderEditing is VideoClip)
+				{
 
-                    <VideoClipEditor 
-                    OnAChange="VideoEditorOnAChange"
-                    SelectedVideo="@ClipEditorSource"
-                    SelectedVideoData="@VideoEditorData"
-                    Size="GraphicEditorSize"
-                    BlendMode="ClipEditorBlendMode"
-                    StretchingMode="VideoEditorStretchingMode"
-                    Opacity="ClipEditorOpacity"
-                    XPosition="GraphicEditorXPosition"
-                    YPosition="GraphicEditorYPosition"
-                    StartingHH="@ClipEditorStartingHH"
-                    StartingMM="@ClipEditorStartingMM"
-                    StartingSS="@ClipEditorStartingSS"
-                    StartingFF="@ClipEditorStartingFF"
-                    DurationHH="@ClipEditorDurationHH"
-                    DurationMM="@ClipEditorDurationMM"
-                    DurationSS="@ClipEditorDurationSS"
-                    DurationFF="@ClipEditorDurationFF"></VideoClipEditor>
-                }
-                @if(ClipUnderEditing == null)
-                {
-                    <MudText Typo="Typo.body2" Align="Align.Center">No clips are selected</MudText>
-                }
-            </MudPaper>
-        </MudItem>
+					<VideoClipEditor 
+					OnAChange="VideoEditorOnAChange"
+					SelectedVideo="@ClipEditorSource"
+					SelectedVideoData="@VideoEditorData"
+					Size="GraphicEditorSize"
+					BlendMode="ClipEditorBlendMode"
+					StretchingMode="VideoEditorStretchingMode"
+					Opacity="ClipEditorOpacity"
+					XPosition="GraphicEditorXPosition"
+					YPosition="GraphicEditorYPosition"
+					StartingHH="@ClipEditorStartingHH"
+					StartingMM="@ClipEditorStartingMM"
+					StartingSS="@ClipEditorStartingSS"
+					StartingFF="@ClipEditorStartingFF"
+					DurationHH="@ClipEditorDurationHH"
+					DurationMM="@ClipEditorDurationMM"
+					DurationSS="@ClipEditorDurationSS"
+					DurationFF="@ClipEditorDurationFF"></VideoClipEditor>
+				}
+				@if(ClipUnderEditing == null)
+				{
+					<MudText Typo="Typo.body2" Align="Align.Center">No clips are selected</MudText>
+				}
+			</MudPaper>
+		</MudItem>
 	</MudItem>
 </MudGrid>
 
 @* Main Menu *@
 <MudDrawer @bind-Open="@menuOpen" Anchor="Anchor.End" Elevation="1" Variant="@DrawerVariant.Temporary">
-    <MudDrawerHeader>
-        <MudText Typo="Typo.h6">The Lyrics App</MudText>
-    </MudDrawerHeader>
-    <MudNavMenu>
-        <MudNavMenu>
-            <MudText Typo="Typo.h6" Class="px-4">Options</MudText>
-            <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Choose an option</MudText>
-            <MudDivider Class="my-2" />
-            <MudNavGroup Title="Settings" Expanded="true">
-                <MudNavLink OnClick="() => {renderMenuOpen = true; menuOpen = false; }">Render</MudNavLink>
-                @if (renderOutputFile != "")
-                {
-                    <MudNavLink OnClick="() => TriggerDownload(renderOutputFile)">Download rendered file</MudNavLink>
-                }
-            </MudNavGroup>
-            <MudNavGroup Title="Lyrics" Expanded="true">
-                <MudNavLink OnClick="() => whisperMenuOpen = true">Extract Lyrics</MudNavLink>
-                @if (progressDiscrete)
-                {
-                    <MudItem Class="px-2">
-                        <MudText Typo="Typo.body1">@processProgressText</MudText>     
-                        @if (processProgress >= 0)
-                        {            
-                            <MudProgressLinear Color="Color.Error" Indeterminate="processProgress == 0 || processProgress >= 100" Value="@processProgress" Class="my-7" />
-                        }
-                    </MudItem>
-                }
-            </MudNavGroup>
-            <MudNavGroup Title="Automation" Expanded="true">
-                <MudNavLink OnClick="() => {SVA_MenuOpen = true; menuOpen = false; }">Single video</MudNavLink>
-            </MudNavGroup>
-        </MudNavMenu>
-    </MudNavMenu>
+	<MudDrawerHeader>
+		<MudText Typo="Typo.h6">The Lyrics App</MudText>
+	</MudDrawerHeader>
+	<MudNavMenu>
+		<MudNavMenu>
+			<MudText Typo="Typo.h6" Class="px-4">Options</MudText>
+			<MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Choose an option</MudText>
+			<MudDivider Class="my-2" />
+			<MudNavGroup Title="Settings" Expanded="true">
+				<MudNavLink OnClick="() => {renderMenuOpen = true; menuOpen = false; }">Render</MudNavLink>
+				@if (renderOutputFile != "")
+				{
+					<MudNavLink OnClick="() => TriggerDownload(renderOutputFile)">Download rendered file</MudNavLink>
+				}
+			</MudNavGroup>
+			<MudNavGroup Title="Lyrics" Expanded="true">
+				<MudNavLink OnClick="() => whisperMenuOpen = true">Extract Lyrics</MudNavLink>
+				@if (progressDiscrete)
+				{
+					<MudItem Class="px-2">
+						<MudText Typo="Typo.body1">@processProgressText</MudText>     
+						@if (processProgress >= 0)
+						{            
+							<MudProgressLinear Color="Color.Error" Indeterminate="processProgress == 0 || processProgress >= 100" Value="@processProgress" Class="my-7" />
+						}
+					</MudItem>
+				}
+			</MudNavGroup>
+			<MudNavGroup Title="Automation" Expanded="true">
+				<MudNavLink OnClick="() => {SVA_MenuOpen = true; menuOpen = false; }">Single video</MudNavLink>
+			</MudNavGroup>
+		</MudNavMenu>
+	</MudNavMenu>
 </MudDrawer>
 
 @* Render Menu *@
 <MudDialog @bind-IsVisible="renderMenuOpen" Options="new DialogOptions() { FullWidth = true }">
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.AutoFixHigh" Class="mr-3" /> Render
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        
-        <MudGrid>
-            <MudItem md="6">
-                <MudText Typo="Typo.body1">Resolution</MudText>
-            </MudItem>
-            <MudItem md="6">
-                <MudSelect @bind-Value="@renderRes" Variant="Variant.Outlined">
-                    <MudSelectItem Value="1920">FHD 1920x1080</MudSelectItem>
-                    <MudSelectItem Value="1080">HD 1080x720</MudSelectItem>
-                    <MudSelectItem Value="320">Draft 320x180</MudSelectItem>
-                </MudSelect>
-            </MudItem>
-            <MudItem md="6">
-                <MudText Typo="Typo.body1">Compression</MudText>
-            </MudItem>
-            <MudItem md="6">
-                <MudSelect @bind-Value="@renderQuality" Variant="Variant.Outlined">
-                    @foreach (var option in renderQualityOptions)
-                    {
-                        <MudSelectItem Value="@option.Key">@option.Value</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudItem>
-        </MudGrid>
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			<MudIcon Icon="@Icons.Material.Filled.AutoFixHigh" Class="mr-3" /> Render
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+		
+		<MudGrid>
+			<MudItem md="6">
+				<MudText Typo="Typo.body1">Resolution</MudText>
+			</MudItem>
+			<MudItem md="6">
+				<MudSelect @bind-Value="@renderRes" Variant="Variant.Outlined">
+					<MudSelectItem Value="1920">FHD 1920x1080</MudSelectItem>
+					<MudSelectItem Value="1080">HD 1080x720</MudSelectItem>
+					<MudSelectItem Value="320">Draft 320x180</MudSelectItem>
+				</MudSelect>
+			</MudItem>
+			<MudItem md="6">
+				<MudText Typo="Typo.body1">Compression</MudText>
+			</MudItem>
+			<MudItem md="6">
+				<MudSelect @bind-Value="@renderQuality" Variant="Variant.Outlined">
+					@foreach (var option in renderQualityOptions)
+					{
+						<MudSelectItem Value="@option.Key">@option.Value</MudSelectItem>
+					}
+				</MudSelect>
+			</MudItem>
+		</MudGrid>
 
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=>renderMenuOpen = false">Close</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="px-10" OnClick="@RenderAll">Render</MudButton>
-    </DialogActions>
+	</DialogContent>
+	<DialogActions>
+		<MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=>renderMenuOpen = false">Close</MudButton>
+		<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="px-10" OnClick="@RenderAll">Render</MudButton>
+	</DialogActions>
 </MudDialog>
 
 @* Whisper Menu *@
 <MudDialog @bind-IsVisible="whisperMenuOpen" Options="new DialogOptions() { FullWidth = true }">
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.AutoFixHigh" Class="mr-3" /> Extract Lyrics
-        </MudText>
-    </TitleContent>
-    <DialogContent>
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			<MudIcon Icon="@Icons.Material.Filled.AutoFixHigh" Class="mr-3" /> Extract Lyrics
+		</MudText>
+	</TitleContent>
+	<DialogContent>
 
-        <MudGrid>
-            <MudAppBar Color="Color.Transparent" Fixed="false" Elevation="0" Class="py-4">
-                <MudText Typo="Typo.subtitle2">GGML Model</MudText>
-                <MudSpacer />
-            </MudAppBar>
-        </MudGrid>
+		<MudGrid>
+			<MudAppBar Color="Color.Transparent" Fixed="false" Elevation="0" Class="py-4">
+				<MudText Typo="Typo.subtitle2">GGML Model</MudText>
+				<MudSpacer />
+			</MudAppBar>
+		</MudGrid>
 
-    </DialogContent>
-    <DialogActions>
-        <MudCheckBox @bind-Value="@useCloudWhisper" Label="Use Cloud" Disabled="true"></MudCheckBox>
-        <MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> whisperMenuOpen = false">Close</MudButton>        
-        
-        <MudFileUpload T="IBrowserFile" Accept=".mp3, .wav, .ogg" FilesChanged=@(async (file) =>{whisperMenuOpen = false;  processProgressOpen = true; StateHasChanged(); await UploadAudioForWhisper(file); }) MaximumFileCount="100">
-            <ButtonTemplate>
-                <MudButton HtmlTag="label"
-                           Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           for="@context.Id">
-                    Upload Audio
-                    <MudIcon Icon="@Icons.Material.Filled.FileUpload" Title="Upload Audio" />
-                </MudButton>
-            </ButtonTemplate>
-        </MudFileUpload>
+	</DialogContent>
+	<DialogActions>
+		<MudCheckBox @bind-Value="@useCloudWhisper" Label="Use Cloud" Disabled="true"></MudCheckBox>
+		<MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> whisperMenuOpen = false">Close</MudButton>        
+		
+		<MudFileUpload T="IBrowserFile" Accept=".mp3, .wav, .ogg" FilesChanged=@(async (file) =>{whisperMenuOpen = false;  processProgressOpen = true; StateHasChanged(); await UploadAudioForWhisper(file); }) MaximumFileCount="100">
+			<ButtonTemplate>
+				<MudButton HtmlTag="label"
+						   Variant="Variant.Filled"
+						   Color="Color.Primary"
+						   for="@context.Id">
+					Upload Audio
+					<MudIcon Icon="@Icons.Material.Filled.FileUpload" Title="Upload Audio" />
+				</MudButton>
+			</ButtonTemplate>
+		</MudFileUpload>
 
-    </DialogActions>
+	</DialogActions>
 </MudDialog>
 
 @* Single Automation Menu *@
@@ -264,1019 +264,1023 @@
 	</TitleContent>
 	<DialogContent>
 
-        <MudGrid>
-            @foreach(var option in SVA_Options)
-            {
-                <MudItem Class="pa-2 px-8 align-start d-flex" Style="width: 100%;" >
-                    <MudText Class="pa-2 px-8">@option.Label</MudText>
-                    <MudSpacer />
-                        @if (option.Data == null)
-                        {
-                            @if (option.HasDefault)
-                            {
-                                <MudButton Style="margin-top: 5px; margin-right: 10px;" Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick=@(async ()=> await option.DefaultSelected())>Load Default</MudButton>
-                            }
-                            <MudFileUpload T="IBrowserFile" Accept=@option.AcceptedFormats FilesChanged="async (file) =>{ await option.FileSelected(file, await UploadFileWithProgress(file)); await InvokeAsync(() => StateHasChanged()); }" MaximumFileCount="100">
-                                <ButtonTemplate>
-                                    <MudButton HtmlTag="label"
-                                               Variant="Variant.Filled"
-                                               Color="Color.Primary"
-                                               for="@context.Id">
-                                        Upload
-                                        <MudIcon Icon="@Icons.Material.Filled.FileUpload" Title="Upload" />
-                                    </MudButton>
-                                </ButtonTemplate>
-                            </MudFileUpload>
-                        }
-                        else
-                        {
-                            <MudText Class="pa-2 px-8" Typo="Typo.subtitle2">@option.LoadedDataLabel</MudText>
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear" OnClick="()=> {option.Data = null; InvokeAsync(()=> StateHasChanged());}" Variant="Variant.Filled" Color="Color.Transparent"></MudIconButton>
-                        }
-                </MudItem>
-            }
+		<MudGrid>
+			@foreach(var option in SVA_Options)
+			{
+				<MudItem Class="pa-2 px-8 align-start d-flex" Style="width: 100%;" >
+					<MudText Class="pa-2 px-8">@option.Label</MudText>
+					<MudSpacer />
+						@if (option.Data == null)
+						{
+							@if (option.HasDefault)
+							{
+								<MudButton Style="margin-top: 5px; margin-right: 10px;" Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick=@(async ()=> await option.DefaultSelected())>Load Default</MudButton>
+							}
+							<MudFileUpload T="IBrowserFile" Accept=@option.AcceptedFormats FilesChanged="async (file) =>{ await option.FileSelected(file, await UploadFileWithProgress(file)); await InvokeAsync(() => StateHasChanged()); }" MaximumFileCount="100">
+								<ButtonTemplate>
+									<MudButton HtmlTag="label"
+											   Variant="Variant.Filled"
+											   Color="Color.Primary"
+											   for="@context.Id">
+										Upload
+										<MudIcon Icon="@Icons.Material.Filled.FileUpload" Title="Upload" />
+									</MudButton>
+								</ButtonTemplate>
+							</MudFileUpload>
+						}
+						else
+						{
+							<MudText Class="pa-2 px-8" Typo="Typo.subtitle2">@option.LoadedDataLabel</MudText>
+							<MudIconButton Icon="@Icons.Material.Filled.Clear" OnClick="()=> {option.Data = null; InvokeAsync(()=> StateHasChanged());}" Variant="Variant.Filled" Color="Color.Transparent"></MudIconButton>
+						}
+				</MudItem>
+			}
 		</MudGrid>
 
 	</DialogContent>
 	<DialogActions>
 		<MudButton Variant="Variant.Filled" Style="margin-top: 5px; margin-right: 10px;" Color="Color.Transparent" Class="px-10" OnClick="()=> SVA_MenuOpen = false">Cancel</MudButton>
-        <MudIconButton Disabled="@SVA_OptionsIncomplete" Variant="Variant.Filled" Style="margin-top: 5px; margin-right: 10px;" Icon="@Icons.Material.Filled.AutoFixHigh" Color="Color.Success" Class="px-10" OnClick="()=> SVA_Process()"></MudIconButton>
+		<MudIconButton Disabled="@SVA_OptionsIncomplete" Variant="Variant.Filled" Style="margin-top: 5px; margin-right: 10px;" Icon="@Icons.Material.Filled.AutoFixHigh" Color="Color.Success" Class="px-10" OnClick="()=> SVA_Process()"></MudIconButton>
 
 	</DialogActions>
 </MudDialog>
 <MudDialog @bind-IsVisible="downloadingFileProgressOpen">
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.Downloading" Class="mr-3" />
-            Downloading...
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudGrid>
-            <MudText Typo="Typo.body1">@processProgressText</MudText>
-            <MudProgressLinear Color="Color.Surface" Indeterminate="true" Class="my-7" />
-        </MudGrid>
-    </DialogContent>
-    <DialogActions>
-        @* Make sure the button is only active in render part *@
-        @if (processIsRender)
-        {
-            @if (renderOutputFile != "")
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Success" Class="px-10" OnClick="()=> TriggerDownload(renderOutputFile)">Download</MudButton>
-            }
-            <MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> renderAbort = true">Abort</MudButton>
-        }
-    </DialogActions>
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			<MudIcon Icon="@Icons.Material.Filled.Downloading" Class="mr-3" />
+			Downloading...
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+		<MudGrid>
+			<MudText Typo="Typo.body1">@processProgressText</MudText>
+			<MudProgressLinear Color="Color.Surface" Indeterminate="true" Class="my-7" />
+		</MudGrid>
+	</DialogContent>
+	<DialogActions>
+		@* Make sure the button is only active in render part *@
+		@if (processIsRender)
+		{
+			@if (renderOutputFile != "")
+			{
+				<MudButton Variant="Variant.Filled" Color="Color.Success" Class="px-10" OnClick="()=> TriggerDownload(renderOutputFile)">Download</MudButton>
+			}
+			<MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> renderAbort = true">Abort</MudButton>
+		}
+	</DialogActions>
 </MudDialog>
 
 @* Process Progress Dialog *@
 <MudDialog @bind-IsVisible="processProgressOpen" Options="new DialogOptions() { FullWidth = true }">
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.AutoFixHigh" Class="mr-3" />@processProgressTitle
-        </MudText>
-    </TitleContent>
-    <DialogContent>
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			<MudIcon Icon="@Icons.Material.Filled.AutoFixHigh" Class="mr-3" />@processProgressTitle
+		</MudText>
+	</TitleContent>
+	<DialogContent>
 
-        <MudGrid>
-            <MudText Typo="Typo.body1">@processProgressText</MudText> 
-                @if (processProgress >= 0)
-            {
-                <MudProgressLinear Color
-                ="Color.Error"  Indeterminate
-                ="processProgress == 0 || processProgress >= 100" Value
-                ="@processProgress" Class
-                ="my-7" />
-            }
-        </MudGrid>
+		<MudGrid>
+			<MudText Typo="Typo.body1">@processProgressText</MudText> 
+				@if (processProgress >= 0)
+			{
+				<MudProgressLinear Color
+				="Color.Error"  Indeterminate
+				="processProgress == 0 || processProgress >= 100" Value
+				="@processProgress" Class
+				="my-7" />
+			}
+		</MudGrid>
 
-    </DialogContent>
+	</DialogContent>
 		<DialogActions>
-            @* Make sure the button is only active in render part *@
-        @if (processIsRender)
-        {
-            @if (renderOutputFile != "")
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Success" Class="px-10" OnClick="()=> TriggerDownload(renderOutputFile)">Download</MudButton>
-            }
-            <MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> renderAbort = true">Abort</MudButton>
-        }
-    </DialogActions>
+			@* Make sure the button is only active in render part *@
+		@if (processIsRender)
+		{
+			@if (renderOutputFile != "")
+			{
+				<MudButton Variant="Variant.Filled" Color="Color.Success" Class="px-10" OnClick="()=> TriggerDownload(renderOutputFile)">Download</MudButton>
+			}
+			<MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> renderAbort = true">Abort</MudButton>
+		}
+	</DialogActions>
 </MudDialog>
 
 @code{
-    // Must be same as hardcoded width in sectionBar untill the resizing glitch is found and resolved.
+	// Must be same as hardcoded width in sectionBar untill the resizing glitch is found and resolved.
 
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    int layersLabelSectionWidth = 200;
-    SectionBarWebControl sectionBarControl { get; set; }
-    string audioSrc = "";
-    string audioElementID = "mainAudioElem";
-    public SKBitmapView renderPreview { get; set; }
-    public string CurrentTime {get;set;} = "";
-    static RenderConfig config;
-    bool ComponentHasRendered = false;
-    public List<SkiaSharp.SKTypeface> TypeFaces { get; set; }
-    protected override void OnInitialized()
-    {
-        config = new RenderConfig()
-            {
-                SubTitlesFont = new SkiaSharp.SKFont(SkiaSharp.SKTypeface.FromFamilyName("Roboto")) { Size = 10 },
-                SubtitleColor = SkiaSharp.SKColors.White,
-                ShadowColor = SkiaSharp.SKColors.Blue,
-                AspectRatio = 16 / 9.0F,
-                ShadowSize = 3,
-                ShadowDistance = 2,
-                SubtitleLocation = new SkiaSharp.SKPoint(50, 50 * 9 / 16.0F)
-            };
-        SVA_Options = new List<AutomationOption>() { SVA_IntroOption, SVA_OutroOption, SVA_BackgroundOption, SVA_BurnOption, SVA_LogoOption, SVA_AudioOption };
-        ggmlOptions = new List<GgmlModel>() {ggmlTiny,  ggmlBaseQ5,  ggmlBase,  ggmlMedium,      };
-        modelToUse = ggmlMedium;
-    }
-    protected override async Task OnInitializedAsync()
-    {
-        TypeFaces = new List<SkiaSharp.SKTypeface>();
-        var availableFont = new string[] {
+	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
+	int layersLabelSectionWidth = 200;
+	SectionBarWebControl sectionBarControl { get; set; }
+	string audioSrc = "";
+	string audioElementID = "mainAudioElem";
+	public SKBitmapView renderPreview { get; set; }
+	public string CurrentTime {get;set;} = "";
+	static RenderConfig config;
+	bool ComponentHasRendered = false;
+	public List<SkiaSharp.SKTypeface> TypeFaces { get; set; }
+	protected override void OnInitialized()
+	{
+		config = new RenderConfig()
+			{
+				SubTitlesFont = new SkiaSharp.SKFont(SkiaSharp.SKTypeface.FromFamilyName("Roboto")) { Size = 10 },
+				SubtitleColor = SkiaSharp.SKColors.White,
+				ShadowColor = SkiaSharp.SKColors.Blue,
+				AspectRatio = 16 / 9.0F,
+				ShadowSize = 3,
+				ShadowDistance = 2,
+				SubtitleLocation = new SkiaSharp.SKPoint(50, 50 * 9 / 16.0F)
+			};
+		SVA_Options = new List<AutomationOption>() { SVA_IntroOption, SVA_OutroOption, SVA_BackgroundOption, SVA_BurnOption, SVA_LogoOption, SVA_AudioOption };
+		ggmlOptions = new List<GgmlModel>() {ggmlTiny,  ggmlBaseQ5,  ggmlBase,  ggmlMedium,      };
+		modelToUse = ggmlMedium;
+	}
+	protected override async Task OnInitializedAsync()
+	{
+		TypeFaces = new List<SkiaSharp.SKTypeface>();
+		var availableFont = new string[] {
 		"fonts/Jersey15-Regular.ttf",
 		"fonts/Anton-Regular.ttf"
 	};
-        foreach (var font in availableFont)
-        {
-            TypeFaces.Add(SkiaSharp.SKFontManager.Default.CreateTypeface(FileManager.GetStream(font)));
-        }
-        config.SubTitlesFont = new SkiaSharp.SKFont(TypeFaces.First());
-        SubtitleEditorFontFamily = config.SubTitlesFont.Typeface.FamilyName;
-        new Task(async () => { await Task.Delay(3000); await RenderPreview(); }).Start();
-    }
-    protected override void OnAfterRender(bool firstRender)
-    {
-        ComponentHasRendered = true;
-    }
-    bool menuOpen;
-    int renderRes = 1920;
-    bool renderAbort = false;
-    string renderQuality = "medium";
-    string renderOutputFile = "";
-    bool renderMenuOpen;
-
-    bool processIsRender = true;
-    bool progressDiscrete;
-    bool processProgressOpen;
-    double processProgress = 0;
-    string processProgressText = "Working";
-    string processProgressTitle = "";
-    Dictionary<string, string> renderQualityOptions = new Dictionary<string, string>
-        {
-    { "ultrafast","Fastest (Lowest quality)"},
-    { "medium", "Normal"},
-    { "ultraslow", "Slowest (Lossless Quality)" }
-        };
-    void OpenDrawer()
-    {
-        menuOpen = true;
-    }
-    async Task onAudioTimeUpdate()
-    {
-        var playing = await Runtime.InvokeAsync<bool>("window.getAudioPlaying", audioElementID);
-        if(playing) // update only if being played.
-        {
-            var time = await Runtime.InvokeAsync<double>("window.getAudioTime", audioElementID);
-            await sectionBarControl.SetSeek(time);
-            await RenderPreview();
-        }
-    }
-    public async Task SeekUpdate(double t){
-        if (ComponentHasRendered)
-        {
-            var playing = await Runtime.InvokeAsync<bool>("window.getAudioPlaying", audioElementID);
-            //if (!playing)
-                await Runtime.InvokeVoidAsync("window.updateAudioTime", audioElementID, t);
-            CurrentTime = common.timeToString(t);
-            await RenderPreview();
-        }
-    }
-    async Task RenderPreview()
-    {
-        renderPreview.Invalidate(); // will call OnRenderPaint
-    }
-
-    protected async Task OnRenderPaint(SKBitmapView.SKBitmapViewPaintArgs e)
-    {
-        var viewCanvas = e.Canvas;
-
-        //cache the sizes
-        var width = (float)e.Info.Width;
-        var height = (float)(e.Info.Width / config.AspectRatio);
-        if (height > e.Info.Height)
-        {
-            height = e.Info.Height;
-            width = (float)(height * config.AspectRatio);
-        }
-        if (width <= 0)
-            return;
-        var canvas = e.Canvas;
-
-        canvas.Clear(SKColors.White);
-        canvas.Translate((e.Info.Width - width) / 2, (e.Info.Height - height) / 2);
-        canvas.DrawRect(0, 0, width, height, new SkiaSharp.SKPaint()
-            {
-                IsStroke = true,
-                StrokeWidth = 2,
-                Color = SkiaSharp.SKColors.Gray
-            }); 
-        canvas.DrawRect(0, 0, width, height, new SkiaSharp.SKPaint()
-        {
-            Color = SkiaSharp.SKColors.Black
-        });
-        float scale = width / 100;
-        canvas.Scale(scale, scale);
-        try
-        {
-
-            config.TargetSize = new SkiaSharp.SKSize() { Width = width, Height = height };
-
-            await sectionBarControl.RenderCurrentFrame(
-                canvas, config);
-        }
-        catch (Exception ex) { Console.WriteLine("Render Failed: " + ex); }
-        canvas.Scale(1 / scale, 1 / scale);
-        canvas.Translate(-(e.Info.Width - width) / 2, -(e.Info.Height - height) / 2);
-        canvas.ResetMatrix();
-    }
-
-    // Common Helpers
-    bool hasInitFFMPEG = false;
-    System.Text.StringBuilder FFLog = new System.Text.StringBuilder();
-    async Task GetFFMpeg()
-    {
-        FFLog.Clear();
-        if (FFmpegFactory.Runtime == null)
-        {
-            Console.WriteLine("Get FFMpeg");
-            processProgressText = "Downloading FFmpeg";
-            await FFmpegFactory.Init(Runtime);
-            StateHasChanged();
-            //create an instance
-            Editors.VideoClipEditor.FFMpeg = FFmpegFactory.CreateFFmpeg();
-            //download all dependencies from cdn
-            await VideoClipEditor.FFMpeg.Load(); //parameter false means not to trigger events in ffmpeg Clase instance
-
-        }
-        //if (FFmpegFactory.Runtime == null)
-        // In cas renderer has already called it.
-        if (!hasInitFFMPEG)
-        {
-            hasInitFFMPEG = true;
-            processProgressText = "Downloading FFMPEG...";
-            StateHasChanged();
-            //initialize Library
-            await FFmpegFactory.Init(Runtime);
-        }
-
-    }
-
-    // Render Output
-    async Task TriggerDownload(string fName)
-    {
-        var outBuffer = await VideoClipEditor.FFMpeg.ReadFile(fName);
-        await Runtime.InvokeVoidAsync("downloadFile", "Render Output" + Path.GetExtension(fName), outBuffer);
-    }
-    async Task RenderAll()
-    {
-        processIsRender = true;
-        processProgressTitle = "Creating your video";
-        // Prepare UI
-        renderMenuOpen = false;
-        processProgressOpen = true;
-        processProgress = 0;
-        StateHasChanged();
-        await GetFFMpeg();
-        void durationExtracter(Logs l)
-        {
-            FFLog.AppendLine(l.Message);
-            if (l.Message.Trim().StartsWith("frame="))
-            {
-                var fNum = int.Parse(l.Message.Split("fps")[0].Trim().Substring(6).Trim());
-                processProgressText = "Extracted " + fNum + " frames";
-                var total = sectionBarControl.sectionBar.Maximum * 30;
-                processProgressText = "Encoded frame " + fNum + " of " + total;
-                processProgress = fNum / (double)total * 100;
-                StateHasChanged();
-            }
-
-            Console.WriteLine("ffmpeg: " + l.Message);
-        };
-        FFmpegFactory.Logger += durationExtracter;
-
-        processProgressText = "Creating Frames";
-        renderAbort = false;
-
-        //Render Frames
-        config.TargetSize = new SkiaSharp.SKSize() { Width = renderRes, Height = renderRes / config.AspectRatio };
-        for (int fi = 0; fi < sectionBarControl.sectionBar.Maximum * 30; fi++)
-        {
-            var t = fi / 30.0D;
-            using (var skBitmap = new SkiaSharp.SKBitmap((int)config.TargetSize.Width, (int)config.TargetSize.Height))
-            {
-                using (var ms = new MemoryStream())
-                {
-                    Console.WriteLine($"Render @{fi} ({t}s)");
-                    var canvas = new SkiaSharp.SKCanvas(skBitmap);
-                    var s = skBitmap.Width / 100;
-                    canvas.Scale(s, s);
-                    await sectionBarControl.RenderCurrentFrameAtT(canvas, t, config);
-                    sectionBarControl.sectionBar.ClearFrameCacheAt(t);
-                    skBitmap.Encode(ms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
-                    var buffer = ms.ToArray();
-                    var jpgName = "FR" + (fi + 1).ToString().PadLeft(4, '0') + ".jpg";
-                    VideoClipEditor.FFMpeg.WriteFile(jpgName, buffer);
-                    //var readOut = await VideoClipEditor.FFMpeg.ReadFile(jpgName);
-                    //VideoClipEditor.FFMpeg.WriteFile("FR%04d.jpg", buffer);
-                    processProgress = t / sectionBarControl.sectionBar.Maximum * 100;
-                    await Task.Delay(1);
-                }
-            }
-            GC.Collect();
-            StateHasChanged();
-        }
-        processProgress = 0;
-        processProgressText = "Encoding video";
-        StateHasChanged();
-        var fName = "renderOutput.mp4";
-        // Add audio if we have it
-        var audioClipLayer = sectionBarControl.sectionBar.Layers.Find(l => l.Any(c => c is AudioClip));
-        var audioClip = audioClipLayer?.Find(c => c is AudioClip);
-        var args = new List<string>();
-
-        if (audioClip != null){
-            if (audioClip.Source != "")
-            {
-                VideoClipEditor.FFMpeg.WriteFile(audioClip.Source, ((AudioClip)audioClip).Data);
-                args.Add("-i"); args.Add(audioClip.Source);
-                var duration = (TimeSpan.FromSeconds(audioClip.End) - TimeSpan.FromSeconds(audioClip.Start)).ToString(@"hh\:mm\:ss");
-                args.Add("-itsoffset"); args.Add(duration);
-                args.Add("-c:a"); args.Add("libfdk_aac");
-                args.Add("-b:a"); args.Add(renderQuality == "medium" ? "160k" : (renderQuality == "ultrafast" ? "96k" : "192k"));
-            }
-        }
-        args.AddRange(new List<string>(new string[] { "-framerate", "30", "-r", "30", "-i", "FR%04d.jpg", "-c:v", "libx264", "-crf", "18", "-preset", renderQuality, fName }));
-
-        await VideoClipEditor.FFMpeg.Run(args.ToArray());
-        renderOutputFile = fName;
-
-        FFmpegFactory.Logger -= durationExtracter;
-        processProgressText = "Your file is ready to be downloaded";
-        processProgress = -1;
-        Snackbar.Add("Video compiled successfully");
-    }
-
-    //Whisper
-    bool firstRender = true;
-
-    class GgmlModel{
-        public string Bin { get;set;}
-        public string Description { get;set;}
-    }
-
-    GgmlModel ggmlTiny = new GgmlModel() { Bin = "ggml-tiny.en-q5_1.bin", Description = "Tiny.en Q5.1 (Fastest, least accurate)" };
-    GgmlModel ggmlBaseQ5 = new GgmlModel() {Bin = "ggml-base.en-q5_1", Description = "Base.en Q5.1 (Faster, less accurate)" };
-    GgmlModel ggmlBase = new GgmlModel() {Bin = "ggml-base.en.bin", Description = "Base.en (Balanced)" };
-    GgmlModel ggmlMedium = new GgmlModel() { Bin = "ggml-medium.en-q5_0.bin", Description = "Medium.en Q5.0 (Slower, accurate)" };
-    List<GgmlModel> ggmlOptions;
-    GgmlModel modelToUse;
-    bool whisperMenuOpen = false;
-    bool useCloudWhisper = false;
-    async Task<double> ExtractLyricsAndFill(byte[] mp3, string fileName, bool useCloudWhisper)
-    {
-        processProgressTitle = "Extract Lyrics";
-        processProgressTitle = "Busy...";
-        //read all bytes
-
-        whisperMenuOpen = false;
-        progressDiscrete = true;
-        processProgressOpen = true;
-        double duration = 0;
-        InvokeAsync(StateHasChanged);
-        //MudDialog.StateHasChanged();
-        processIsRender = false;
-        var binInfo = new FFMpegCore.FFOptions()
-            {
-                BinaryFolder = "FFMpeg/bin",
-                TemporaryFilesFolder = "FFMpeg/temp"
-            };
-        byte[] wave;
-        using (var stream = new MemoryStream(mp3))
-        {
-            using (var outStream = new MemoryStream())
-            {
-                stream.Seek(0, SeekOrigin.Begin);
-                var info = await FFProbe.AnalyseAsync(stream, binInfo);
-                duration = info.Duration.TotalSeconds;
-                if (duration < 1)
-                    throw new Exception("No audio found in the selected file");
-                stream.Seek(0, SeekOrigin.Begin);
-                try
-                {
-                    var converted = await FFMpegArguments
-                        .FromPipeInput(new StreamPipeSource(stream))
-                        .OutputToPipe(new StreamPipeSink(outStream),
-                    options => options
-                     .ForceFormat("wav")
-                     .WithAudioSamplingRate(16000))
-                    .NotifyOnProgress((p) =>
-                    {
-                        processProgressText = $"Preparing audio for preview";
-                        processProgress = (float)p;
-                        InvokeAsync(StateHasChanged);
-
-                    }, info.Duration)
-                    .NotifyOnError((e) =>
-                    {
-
-                    })
-                    .ProcessAsynchronously(true, binInfo);
-                }
-                catch (Exception ex)
-                {
-
-                }
-                wave = outStream.ToArray();
-            }
-        }
-        InvokeAsync(StateHasChanged);
-        //MudDialog.StateHasChanged();
-        if (wave == null)
-            return 0;
-        var presetFile = @"C:\Users\techboy\Documents\GitHub\SubtitleEditor_WASM\LyricsExtractor\LyricsExtractor\Properties\Resources\user_data\converted.bin";
-        var playbackFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),binInfo.TemporaryFilesFolder, "playBackAudio.mp3");
-        await File.WriteAllBytesAsync(
-             playbackFile,
-            mp3);
-        var base64Data = Convert.ToBase64String(mp3);
-        audioSrc = $"data:audio/mp3;base64,{base64Data}";
-        //audioSrc = playbackFile.Replace("\\","/");
-        //audioSrc = await File.ReadAllTextAsync(presetFile);
-
-        sectionBarControl.sectionBar.Layers.Last().Clear();
-        sectionBarControl.sectionBar.Layers[1].Clear();
-        sectionBarControl.sectionBar.Layers.Last().Add(new AudioClip(0, duration, mp3, fileName, wave));
-        sectionBarControl.sectionBar.ResetMaxTime();
-        int totalWords = 0;
-        int totalSubs = 0;
-        double confidance = 0;
-        processProgressText = "Preparing Whisper";
-        InvokeAsync(StateHasChanged);
-        if (useCloudWhisper)
-        {
-
-        }
-        else
-        {
-            const eLoggerFlags loggerFlags = eLoggerFlags.UseStandardError | eLoggerFlags.SkipFormatMessage;
-            Library.setLogSink(eLogLevel.Debug, loggerFlags);
-
-            var audioFile = "C:\\Users\\techboy\\Downloads\\karma.mp3";
-            var model = Library.loadModel("C:\\Users\\techboy\\Documents\\GitHub\\SubtitleEditor_WASM\\LyricsExtractor\\LyricsExtractor\\Properties\\Resources\\ggml\\ggml-base.en.bin");
-            using Context context = model.createContext();
-            context.parameters.setFlag(eFullParamsFlags.NoContext, true);
-            new CommandLineArgs().apply(ref context.parameters);
-            using iMediaFoundation mf = Library.initMediaFoundation();
-            var whisperReader = new WhisperReader();
-            whisperReader.OnSegment += (seg, probability) =>
-            {
-                totalWords += seg.text.Split(' ').Length;
-                // Add a new clip for this
-                var subClip = new SubtitleClip(seg.time.begin.TotalSeconds, seg.time.end.TotalSeconds, seg.text);
-                sectionBarControl.sectionBar.Layers[1].Add(subClip);
-                sectionBarControl.ResetMaxTime();
-
-                processProgressText = (++totalSubs) + ": " + seg.text;
-
-                confidance += probability;
-                //Console.WriteLine($"{result.Start}->{result.End}: {processProgressText}");
-                sectionBarControl.Invalidate();
-                processProgress = (seg.time.end.TotalSeconds / duration) * 100;
-
-                InvokeAsync(StateHasChanged);
-            };
-            using iAudioReader reader = mf.openAudioFile(audioFile);
-            //context.runFull(reader, whisperReader, null, null);
-
-        }
-        // whisperProcessor[modelToUse]!.Process(new MemoryStream(wave));
-        //confidance /= totalSubs;
-        processProgressText = "All done!";
-        processProgress = -1;
-        processProgressOpen = false;
-        // Layer Last and 1 are for audio and subs
-        InvokeAsync(StateHasChanged);
-        Snackbar.Add($"Audio was processed successfully and lyrics where added to the timeline. Total {totalSubs} lyrics containing {totalWords} words exracted.");
-        return duration;
-    }
-    async Task<byte[]> UploadFileWithProgress(IBrowserFile file)
-    {
-        processProgressOpen = true;
-        processProgressTitle = "Uploading data";
-        processProgressTitle = "Please wait while " + file.Name + " is uploaded to the cloud";
-        var stream = file.OpenReadStream(file.Size);
-        InvokeAsync(StateHasChanged);
-
-        var data = new byte[file.Size];
-        int total = 0;
-        while(total < file.Size){
-            total += await stream.ReadAsync(data, total, (int)file.Size - total);
-            processProgress = total / (double)file.Size * 100.0D;
-            InvokeAsync(StateHasChanged);
-        }
-        stream.Close();
-        processProgressOpen = false;
-        InvokeAsync(StateHasChanged);
-        return data;
-    }
-    protected async Task UploadAudioForWhisper(IBrowserFile file)
-    {
-        var mp3 = await UploadFileWithProgress(file);
-
-        new Thread(async () =>
-        {
-            var duration = await ExtractLyricsAndFill(mp3, file.Name, useCloudWhisper);
-
-            // Layer 0 -- Intro, Outro, Logo
-            if (sectionBarControl.sectionBar.Layers[0].Count <= 1) // Intro/Outro/Logo
-            {
-                sectionBarControl.sectionBar.Layers[0].Clear();
-                sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(0, 20)); // intro
-                sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(duration - 20, duration)); // Outro
-                sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(20, duration - 20)); // Logo
-            }
-            // Layer 1 -- Subs
-            // Already Done
-
-            // Layer 2 -- Burn
-            if (sectionBarControl.sectionBar.Layers[2].Count <= 1) // 
-            {
-                sectionBarControl.sectionBar.Layers[2].Clear();
-                sectionBarControl.sectionBar.Layers[2].Add(new VideoClip(20, duration - 20)); // Burn
-            }
-
-            // Layer 3 -- Background
-            if (sectionBarControl.sectionBar.Layers[3].Count <= 1) // Background 1
-            {
-                sectionBarControl.sectionBar.Layers[3].Clear();
-                sectionBarControl.sectionBar.Layers[3].Add(new PhotoClip(0, duration)); // Background
-            }
-
-            // Layer Last -- Audio
-            // Already Done
-            sectionBarControl.sectionBar.ResetMaxTime();
-            sectionBarControl.Invalidate();
-            await RenderPreview();
-            await InvokeAsync(StateHasChanged);
-        }).Start();
-    }
-
-    // Automation -- Single File
-    bool SVA_MenuOpen = false;
-    bool downloadingFileProgressOpen { get; set; }
-    AutomationOption SVA_IntroOption = new AutomationOption(){ Label = "Intro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/intro.webm"};
-    AutomationOption SVA_OutroOption = new AutomationOption(){ Label = "Outro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/outro.mov"};
-    AutomationOption SVA_BackgroundOption = new AutomationOption(){ Label = "Background", AcceptedFormats = ".jpg, .png, .bmp", DefaultDataSource = "/user_data/background.jpg"};
-    AutomationOption SVA_BurnOption = new AutomationOption(){ Label = "Burn Effect", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/cool_burn.mp4"};
-    AutomationOption SVA_LogoOption = new AutomationOption(){ Label = "Logo", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/concatenated.webm"};
-    AutomationOption SVA_AudioOption = new AutomationOption() { Label = "Audio", HasDefault = false, AcceptedFormats = ".mp3, .wav, .ogg"};
-    List<AutomationOption> SVA_Options = new List<AutomationOption>();
-    bool SVA_OptionsIncomplete { get => SVA_Options.Any(o => o.Data == null); }
-    async Task SVA_Process()
-    {
-        SVA_MenuOpen = false;
-        processProgressOpen = true;
-        processProgressTitle = "Processing Data";
-        processProgressText = "Uploading Data";
-
-        var Layers = sectionBarControl.sectionBar.Layers;
-        foreach (var layer in Layers)
-            layer.Clear();
-
-        // Process Audio first
-        var totalDuration = await ExtractLyricsAndFill(SVA_AudioOption.Data, "music", false);
-        processProgressTitle = "Preparing to render";
-        processProgressText = "Creating the canvas";
-        InvokeAsync(StateHasChanged);
-        List<SKBitmap> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
-        {
-            var frames = new List<SKBitmap>();
-            for (int i = 1; i <= totalFrames; i++)
-            {
-                var f = Path.Combine(dir, frameSeed + i.ToString().PadLeft(indexChars, '0') + extension);
-                processProgressText = "Converting frame " + i + " of " + totalFrames;
-                processProgress = (int)((i / (float)totalFrames) * 100);
-                InvokeAsync(() => StateHasChanged());
-
-                try
-                {
-                    var bmp = SkiaSharp.SKBitmap.Decode(f);
-                    frames.Add(bmp);
-                }
-                catch (Exception ex)
-                {
-                    break;
-                }
-            }
-            return frames;
-        }
-        async Task<List<SKBitmap>> getVideoFrames(string videoFileSeed, AutomationOption option)
-        {
-            InvokeAsync(() => { StateHasChanged(); });
-            var ms = new MemoryStream();
-            int totalFrames = 0;
-            var ffmpegTemp = "FFMpeg/temp";
-            if (Directory.Exists(ffmpegTemp))
-                Directory.CreateDirectory(ffmpegTemp);
-            var framesIndexSize = 4;
-            var framesExtension = ".png";
-            var framesSeed =  videoFileSeed + "_frame_";
-            var outputFiles = Path.Combine(ffmpegTemp, $"{framesSeed}%0{framesIndexSize}d.png");
-            var binInfo = new FFMpegCore.FFOptions()
-                {
-                    BinaryFolder = "FFMpeg/bin",
-                    TemporaryFilesFolder = ffmpegTemp
-                };
-            try
-            {
-                using (var stream = new MemoryStream(option.Data))
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
-                    var info = await FFProbe.AnalyseAsync(stream, binInfo);
-                    totalFrames = (int)Math.Round(info.Duration.TotalSeconds * 30);
-
-                    if (totalFrames < 1)
-                        throw new Exception("No frames found in the selected video");
-                    stream.Seek(0, SeekOrigin.Begin);
-                    var converted = await FFMpegArguments
-                        .FromPipeInput(new StreamPipeSource(stream))
-                        .OutputToFile(outputFiles, true,
-                    options => options
-                    .WithArgument(new FFMpegCore.Arguments.CustomArgument(@"-vf fps=30")))
-                    .NotifyOnProgress((p) =>
-                    {
-                        var fi = Math.Round((p / 100 * info.Duration).TotalSeconds * 30);
-                        processProgressText = $"Extracted frame {fi} of {totalFrames}";
-                        processProgress = (float)p;
-                        InvokeAsync(() => { StateHasChanged(); });
-
-                    }, info.Duration)
-                    .ProcessAsynchronously(true, binInfo);
-
-                }
-            }
-            catch (Exception ex)
-            {
-                Snackbar.Add("There was an error processing the video: " + ex, Severity.Error);
-                processProgressOpen = false;
-                InvokeAsync(() => { StateHasChanged(); });
-                return null;
-            }
-            InvokeAsync(() => { StateHasChanged(); });
-
-            // We have our PNGs in the drive. We don't need to load all of them to memory.
-            // But lets try loading them first as SKBitmaps.
-
-            return ConvertPNGsToSKBitmaps(totalFrames, ffmpegTemp, framesSeed, framesIndexSize, framesExtension);
-        }
-        List<SKBitmap> frames;
-        double introDuration = 3;
-        double outroDuration = 3;
-        // Process Intro
-        processProgressTitle = "Processing Intro";
-        StateHasChanged();
-        frames = await getVideoFrames("intro", SVA_IntroOption);
-        if (frames.Count == 0)
-            return;
-        introDuration = frames.Count / 30.0F;
-        Layers[0].Add(new VideoClip(0, introDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Stretch });
-
-        // Process Outro
-        processProgressTitle = "Processing Outro";
-        StateHasChanged();
-        frames = await getVideoFrames("intro", SVA_OutroOption);
-        if (frames.Count == 0)
-            return;
-        outroDuration = frames.Count / 30.0F;
-        Layers[0].Add(new VideoClip(totalDuration - outroDuration, totalDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Stretch });
-
-        // Process Logo
-        processProgressTitle = "Processing Logo";
-        StateHasChanged();
-        frames = await getVideoFrames("logo", SVA_LogoOption);
-        if (frames.Count == 0)
-            return;
-        Layers[0].Add(new VideoClip(introDuration, totalDuration - outroDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Loop });
-
-
-        // Lets add the burn
-        processProgressTitle = "Processing burn effect";
-        StateHasChanged();
-        frames = await getVideoFrames("burn", SVA_BurnOption);
-        if (frames.Count == 0)
-            return;
-        Layers[2].Add(new VideoClip(introDuration, totalDuration - outroDuration) 
-        { 
-            Label = "burn",
-            Data = frames.ToArray(), 
-            StretchingMode = VideoClipEditor.StretchingModes.Loop, 
-            Opacity = 100,
-            BlendMode = SkiaSharp.SKBlendMode.ColorDodge
-        });
-
-        // Lets add the Background
-        Layers[3].Add(new PhotoClip(introDuration, totalDuration - outroDuration) { 
-            Label = "background",
-            //Data = SkiaSharp.SKBitmap.Decode(SVA_BackgroundOption.Data) 
-        });
-
-        // All Done!
-        sectionBarControl.ResetMaxTime();
-        sectionBarControl.Invalidate();
-        await RenderPreview();
-        processProgressOpen = false;
-    }
-
-
-    //Common Clip Editing
-    Clip ClipUnderEditing;
-
-    public void EditClipRequest(Clip clip)
-    {
-        ClipUnderEditing = clip;
-        if (clip == null)
-            return;
-        if (clip is SubtitleClip)
-        {
-            ClipEditorSource = ClipUnderEditing.Source;
-            ClipEditorBlendMode = ((SubtitleClip)ClipUnderEditing).BlendMode;
-            ClipEditorOpacity = ((SubtitleClip)ClipUnderEditing).Opacity;
-            SubtitleEditorFontFamily = config.SubTitlesFont.Typeface.FamilyName;
-            SubtitleEditorFontSize = config.SubTitlesFont.Size;
-            SubtitleEditorYPosition = (float)(config.SubtitleLocation.Y * config.AspectRatio);
-            SubtitleEditorShadowSize = config.ShadowSize;
-            SubtitleEditorShadowDistance = config.ShadowDistance;
-            SubtitleEditorTextColor = SKColorToMud(config.SubtitleColor);
-            SubtitleEditorShadowColor = SKColorToMud(config.ShadowColor);
-            SubtitleEditorOverlap = config.SubtitleOverlap;
-            ClipEditorStartingHH = TimeSpan.FromSeconds(ClipUnderEditing.Start).Hours;
-            ClipEditorStartingMM = TimeSpan.FromSeconds(ClipUnderEditing.Start).Minutes;
-            ClipEditorStartingSS = TimeSpan.FromSeconds(ClipUnderEditing.Start).Seconds;
-            ClipEditorStartingFF = (int)(TimeSpan.FromSeconds(ClipUnderEditing.Start).Milliseconds * 30 / 1000);
-            var duration = ClipUnderEditing.End - ClipUnderEditing.Start;
-            ClipEditorDurationHH = TimeSpan.FromSeconds(duration).Hours;
-            ClipEditorDurationMM = TimeSpan.FromSeconds(duration).Minutes;
-            ClipEditorDurationSS = TimeSpan.FromSeconds(duration).Seconds;
-            ClipEditorDurationFF = (int)(TimeSpan.FromSeconds(duration).Milliseconds * 30 / 1000);
-        }
-        else if(clip is PhotoClip)
-        {
-            var photoClip = (PhotoClip)ClipUnderEditing;
-            ClipEditorSource = photoClip.Source;
-            PhotoEditorData = photoClip.Data;
-            GraphicEditorSize = photoClip.Size;
-            ClipEditorBlendMode = photoClip.BlendMode;
-            ClipEditorOpacity = photoClip.Opacity;
-            GraphicEditorXPosition = photoClip.X;
-            GraphicEditorYPosition = photoClip.Y;
-            ClipEditorStartingHH = TimeSpan.FromSeconds(ClipUnderEditing.Start).Hours;
-            ClipEditorStartingMM = TimeSpan.FromSeconds(ClipUnderEditing.Start).Minutes;
-            ClipEditorStartingSS = TimeSpan.FromSeconds(ClipUnderEditing.Start).Seconds;
-            ClipEditorStartingFF = (int)(TimeSpan.FromSeconds(ClipUnderEditing.Start).Milliseconds * 30 / 1000);
-            var duration = ClipUnderEditing.End - ClipUnderEditing.Start;
-            ClipEditorDurationHH = TimeSpan.FromSeconds(duration).Hours;
-            ClipEditorDurationMM = TimeSpan.FromSeconds(duration).Minutes;
-            ClipEditorDurationSS = TimeSpan.FromSeconds(duration).Seconds;
-            ClipEditorDurationFF = (int)(TimeSpan.FromSeconds(duration).Milliseconds * 30 / 1000);
-        }
-        else if (clip is VideoClip)
-        {
-            var videoClip = (VideoClip)ClipUnderEditing;
-            ClipEditorSource = videoClip.Source;
-            VideoEditorData = videoClip.Data;
-            GraphicEditorSize = videoClip.Size;
-            ClipEditorBlendMode = videoClip.BlendMode;
-            VideoEditorStretchingMode = videoClip.StretchingMode;
-            ClipEditorOpacity = videoClip.Opacity;
-            GraphicEditorXPosition = videoClip.X;
-            GraphicEditorYPosition = videoClip.Y;
-            ClipEditorStartingHH = TimeSpan.FromSeconds(ClipUnderEditing.Start).Hours;
-            ClipEditorStartingMM = TimeSpan.FromSeconds(ClipUnderEditing.Start).Minutes;
-            ClipEditorStartingSS = TimeSpan.FromSeconds(ClipUnderEditing.Start).Seconds;
-            ClipEditorStartingFF = (int)(TimeSpan.FromSeconds(ClipUnderEditing.Start).Milliseconds * 30 / 1000);
-            var duration = ClipUnderEditing.End - ClipUnderEditing.Start;
-            ClipEditorDurationHH = TimeSpan.FromSeconds(duration).Hours;
-            ClipEditorDurationMM = TimeSpan.FromSeconds(duration).Minutes;
-            ClipEditorDurationSS = TimeSpan.FromSeconds(duration).Seconds;
-            ClipEditorDurationFF = (int)(TimeSpan.FromSeconds(duration).Milliseconds * 30 / 1000);
-        }
-        StateHasChanged();
-    }
-
-    // Subtitle Clip Editor
-
-    string ClipEditorSource { get; set; }
-    string SubtitleEditorFontFamily { get; set; }
-    float SubtitleEditorFontSize { get; set; }
-    float SubtitleEditorYPosition { get; set; }
-    float SubtitleEditorShadowSize { get; set; }
-    float SubtitleEditorShadowDistance { get; set; }
-    MudColor SubtitleEditorTextColor { get; set; }
-    MudColor SubtitleEditorShadowColor { get; set; }
-    double SubtitleEditorOverlap { get; set; }
-    double ClipEditorStartingHH {get;set;}
-    double ClipEditorStartingMM {get;set;}
-    double ClipEditorStartingSS {get;set;}
-    double ClipEditorStartingFF {get;set;}
-    double ClipEditorDurationHH {get;set;}
-    double ClipEditorDurationMM {get;set;}
-    double ClipEditorDurationSS {get;set;}
-    double ClipEditorDurationFF { get; set; }
-    protected SkiaSharp.SKBlendMode ClipEditorBlendMode { get; set; }
-    
-    protected int ClipEditorOpacity { get; set; }
-
-    SkiaSharp.SKColor MudColorToSK(MudColor mud)
-    {
-        return new SkiaSharp.SKColor(mud.R, mud.G, mud.B, mud.A);
-    }
-    MudColor SKColorToMud(SkiaSharp.SKColor sk)
-    {
-        return new MudColor(sk.Red, sk.Green, sk.Blue, sk.Alpha);
-    }
-    public async Task SubtitleEditorOnAChange(SubtitleClipEditor subtitleEditor)
-    {
-
-        if (ClipUnderEditing == null)
-            return;
-        if (ClipUnderEditing is SubtitleClip)
-        {
-            ClipUnderEditing.Source = subtitleEditor.Text;
-            ((SubtitleClip)ClipUnderEditing).BlendMode = subtitleEditor.BlendMode;
-            ((SubtitleClip)ClipUnderEditing).Opacity = subtitleEditor.Opacity;
-            config.SubTitlesFont = new SkiaSharp.SKFont(TypeFaces.Find(tf => tf.FamilyName == subtitleEditor.FontFamily), subtitleEditor.FontSize);
-            config.SubtitleLocation = new SkiaSharp.SKPoint(config.SubtitleLocation.X, subtitleEditor.YPosition / config.AspectRatio);
-            config.ShadowSize = subtitleEditor.ShadowSize;
-            config.ShadowDistance = subtitleEditor.ShadowDistance;
-            config.SubtitleOverlap = (float)subtitleEditor.Overlap;
-            config.SubtitleColor = MudColorToSK(subtitleEditor.TextColor);
-            config.ShadowColor = MudColorToSK(subtitleEditor.ShadowColor);
-            double duration(double h, double m, double s, double f)
-            {
-                return h * 3600 + m * 60 + s + f / 30;
-            }
-            ClipUnderEditing.Start = duration(
-                subtitleEditor.StartingHH,
-                subtitleEditor.StartingMM,
-                subtitleEditor.StartingSS,
-                subtitleEditor.StartingFF);
-            ClipUnderEditing.End = ClipUnderEditing.Start + duration(
-                subtitleEditor.DurationHH,
-                subtitleEditor.DurationMM,
-                subtitleEditor.DurationSS,
-                subtitleEditor.DurationFF);
-            ClipEditorSource = subtitleEditor.Text;
-
-            // Round 2
-            SubtitleEditorFontFamily = config.SubTitlesFont.Typeface.FamilyName;
-            SubtitleEditorFontSize = config.SubTitlesFont.Size;
-            ClipEditorBlendMode = subtitleEditor.BlendMode;
-            ClipEditorOpacity = subtitleEditor.Opacity;
-            SubtitleEditorYPosition = config.SubtitleLocation.Y * config.AspectRatio;
-            SubtitleEditorShadowSize = config.ShadowSize;
-            SubtitleEditorShadowDistance = config.ShadowDistance;
-            SubtitleEditorTextColor = SKColorToMud(config.SubtitleColor);
-            SubtitleEditorShadowColor = SKColorToMud(config.ShadowColor);
-            SubtitleEditorOverlap = config.SubtitleOverlap;
-            ClipEditorStartingHH = subtitleEditor.StartingHH;
-            ClipEditorStartingMM = subtitleEditor.StartingMM;
-            ClipEditorStartingSS = subtitleEditor.StartingSS;
-            ClipEditorStartingFF = subtitleEditor.StartingFF;
-            ClipEditorDurationHH = subtitleEditor.DurationHH;
-            ClipEditorDurationMM = subtitleEditor.DurationMM;
-            ClipEditorDurationSS = subtitleEditor.DurationSS;
-            ClipEditorDurationFF = subtitleEditor.DurationFF;
-            sectionBarControl.Invalidate(); 
-            await RenderPreview();
-        }
-    }
-
-    // Photo Clip Editor
-
-    protected SkiaSharp.SKBitmap PhotoEditorData { get; set; }
-    protected float GraphicEditorSize { get; set; }
-    protected float GraphicEditorXPosition {get; set; }
-    protected float GraphicEditorYPosition { get; set; }
-    public async Task PhotoEditorOnAChange(PhotoClipEditor photoEditor)
-    {
-        if (ClipUnderEditing == null)
-            return;
-        if (ClipUnderEditing is PhotoClip)
-        {
-            var photoClip = (PhotoClip)ClipUnderEditing;
-            photoClip.Source = photoEditor.SelectedImage;
-            photoClip.Data = photoEditor.SelectedImageData;
-            photoClip.Size = photoEditor.Size;
-            photoClip.BlendMode = photoEditor.BlendMode;
-            photoClip.Opacity = photoEditor.Opacity;
-            photoClip.X = photoEditor.XPosition;
-            photoClip.Y = photoEditor.YPosition;
-            double duration(double h, double m, double s, double f)
-            {
-                return h * 3600 + m * 60 + s + f / 30;
-            }
-            ClipUnderEditing.Start = duration(
-                photoEditor.StartingHH,
-                photoEditor.StartingMM,
-                photoEditor.StartingSS,
-                photoEditor.StartingFF);
-            ClipUnderEditing.End = ClipUnderEditing.Start + duration(
-                photoEditor.DurationHH,
-                photoEditor.DurationMM,
-                photoEditor.DurationSS,
-                photoEditor.DurationFF);
-
-            // Round 2
-            ClipEditorSource = photoEditor.SelectedImage;
-            PhotoEditorData = photoEditor.SelectedImageData;
-            GraphicEditorSize = photoEditor.Size;
-            ClipEditorBlendMode = photoEditor.BlendMode;
-            ClipEditorOpacity = photoEditor.Opacity;
-            GraphicEditorXPosition = photoEditor.XPosition;
-            GraphicEditorYPosition = photoEditor.YPosition;
-            ClipEditorStartingHH = photoEditor.StartingHH;
-            ClipEditorStartingMM = photoEditor.StartingMM;
-            ClipEditorStartingSS = photoEditor.StartingSS;
-            ClipEditorStartingFF = photoEditor.StartingFF;
-            ClipEditorDurationHH = photoEditor.DurationHH;
-            ClipEditorDurationMM = photoEditor.DurationMM;
-            ClipEditorDurationSS = photoEditor.DurationSS;
-            ClipEditorDurationFF = photoEditor.DurationFF;
-            sectionBarControl.Invalidate();
-            await RenderPreview();
-        }
-    }
-
-
-    // Video Clip Editor
-    protected VideoClipEditor.StretchingModes VideoEditorStretchingMode { get; set; }
-    protected SKBitmap[]? VideoEditorData { get; set; }
-    public async Task VideoEditorOnAChange(VideoClipEditor videoEditor)
-    {
-        if (ClipUnderEditing == null)
-            return;
-        if (ClipUnderEditing is VideoClip)
-        {
-            var videoClip = (VideoClip)ClipUnderEditing;
-            videoClip.Source = videoEditor.SelectedVideo;
-            videoClip.Data = videoEditor.SelectedVideoData; 
-            sectionBarControl.ResetMaxTime();
-            videoClip.Size = videoEditor.Size;
-            videoClip.BlendMode = videoEditor.BlendMode;
-            videoClip.StretchingMode = videoEditor.StretchingMode;
-            videoClip.Opacity = videoEditor.Opacity;
-            videoClip.X = videoEditor.XPosition;
-            videoClip.Y = videoEditor.YPosition;
-            double duration(double h, double m, double s, double f)
-            {
-                return h * 3600 + m * 60 + s + f / 30;
-            }
-            ClipUnderEditing.Start = duration(
-                videoEditor.StartingHH,
-                videoEditor.StartingMM,
-                videoEditor.StartingSS,
-                videoEditor.StartingFF);
-            ClipUnderEditing.End = ClipUnderEditing.Start + duration(
-                videoEditor.DurationHH,
-                videoEditor.DurationMM,
-                videoEditor.DurationSS,
-                videoEditor.DurationFF);
-
-            // Round 2
-            ClipEditorSource = videoEditor.SelectedVideo;
-            VideoEditorData = videoEditor.SelectedVideoData;
-            GraphicEditorSize = videoEditor.Size;
-            ClipEditorBlendMode = videoEditor.BlendMode;
-            VideoEditorStretchingMode = videoEditor.StretchingMode;
-            ClipEditorOpacity = videoEditor.Opacity;
-            GraphicEditorXPosition = videoEditor.XPosition;
-            GraphicEditorYPosition = videoEditor.YPosition;
-            ClipEditorStartingHH = videoEditor.StartingHH;
-            ClipEditorStartingMM = videoEditor.StartingMM;
-            ClipEditorStartingSS = videoEditor.StartingSS;
-            ClipEditorStartingFF = videoEditor.StartingFF;
-            ClipEditorDurationHH = videoEditor.DurationHH;
-            ClipEditorDurationMM = videoEditor.DurationMM;
-            ClipEditorDurationSS = videoEditor.DurationSS;
-            ClipEditorDurationFF = videoEditor.DurationFF;
-            sectionBarControl.Invalidate();
-            await RenderPreview();
-        }
-    }
+		foreach (var font in availableFont)
+		{
+			TypeFaces.Add(SkiaSharp.SKFontManager.Default.CreateTypeface(FileManager.GetStream(font)));
+		}
+		config.SubTitlesFont = new SkiaSharp.SKFont(TypeFaces.First());
+		SubtitleEditorFontFamily = config.SubTitlesFont.Typeface.FamilyName;
+		new Task(async () => { await Task.Delay(3000); await RenderPreview(); }).Start();
+	}
+	protected override void OnAfterRender(bool firstRender)
+	{
+		ComponentHasRendered = true;
+	}
+	bool menuOpen;
+	int renderRes = 1920;
+	bool renderAbort = false;
+	string renderQuality = "medium";
+	string renderOutputFile = "";
+	bool renderMenuOpen;
+
+	bool processIsRender = true;
+	bool progressDiscrete;
+	bool processProgressOpen;
+	double processProgress = 0;
+	string processProgressText = "Working";
+	string processProgressTitle = "";
+	Dictionary<string, string> renderQualityOptions = new Dictionary<string, string>
+		{
+	{ "ultrafast","Fastest (Lowest quality)"},
+	{ "medium", "Normal"},
+	{ "ultraslow", "Slowest (Lossless Quality)" }
+		};
+	void OpenDrawer()
+	{
+		menuOpen = true;
+	}
+	async Task onAudioTimeUpdate()
+	{
+		var playing = await Runtime.InvokeAsync<bool>("window.getAudioPlaying", audioElementID);
+		if(playing) // update only if being played.
+		{
+			var time = await Runtime.InvokeAsync<double>("window.getAudioTime", audioElementID);
+			await sectionBarControl.SetSeek(time);
+			await RenderPreview();
+		}
+	}
+	public async Task SeekUpdate(double t){
+		if (ComponentHasRendered)
+		{
+			var playing = await Runtime.InvokeAsync<bool>("window.getAudioPlaying", audioElementID);
+			//if (!playing)
+			await Runtime.InvokeVoidAsync("window.updateAudioTime", audioElementID, t);
+			CurrentTime = common.timeToString(t);
+			await RenderPreview();
+		}
+	}
+	async Task RenderPreview()
+	{
+		renderPreview.Invalidate(); // will call OnRenderPaint
+	}
+
+	protected async Task OnRenderPaint(SKBitmapView.SKBitmapViewPaintArgs e)
+	{
+		var viewCanvas = e.Canvas;
+
+		//cache the sizes
+		var width = (float)e.Info.Width;
+		var height = (float)(e.Info.Width / config.AspectRatio);
+		if (height > e.Info.Height)
+		{
+			height = e.Info.Height;
+			width = (float)(height * config.AspectRatio);
+		}
+		if (width <= 0)
+			return;
+		var canvas = e.Canvas;
+
+		canvas.Clear(SKColors.White);
+		canvas.Translate((e.Info.Width - width) / 2, (e.Info.Height - height) / 2);
+		canvas.DrawRect(0, 0, width, height, new SkiaSharp.SKPaint()
+			{
+				IsStroke = true,
+				StrokeWidth = 2,
+				Color = SkiaSharp.SKColors.Gray
+			}); 
+		canvas.DrawRect(0, 0, width, height, new SkiaSharp.SKPaint()
+		{
+			Color = SkiaSharp.SKColors.Black
+		});
+		float scale = width / 100;
+		canvas.Scale(scale, scale);
+		try
+		{
+
+			config.TargetSize = new SkiaSharp.SKSize() { Width = width, Height = height };
+
+			await sectionBarControl.RenderCurrentFrame(
+				canvas, config);
+		}
+		catch (Exception ex) { Console.WriteLine("Render Failed: " + ex); }
+		canvas.Scale(1 / scale, 1 / scale);
+		canvas.Translate(-(e.Info.Width - width) / 2, -(e.Info.Height - height) / 2);
+		canvas.ResetMatrix();
+	}
+
+	// Common Helpers
+	bool hasInitFFMPEG = false;
+	System.Text.StringBuilder FFLog = new System.Text.StringBuilder();
+	async Task GetFFMpeg()
+	{
+		FFLog.Clear();
+		if (FFmpegFactory.Runtime == null)
+		{
+			Console.WriteLine("Get FFMpeg");
+			processProgressText = "Downloading FFmpeg";
+			await FFmpegFactory.Init(Runtime);
+			StateHasChanged();
+			//create an instance
+			Editors.VideoClipEditor.FFMpeg = FFmpegFactory.CreateFFmpeg();
+			//download all dependencies from cdn
+			await VideoClipEditor.FFMpeg.Load(); //parameter false means not to trigger events in ffmpeg Clase instance
+
+		}
+		//if (FFmpegFactory.Runtime == null)
+		// In cas renderer has already called it.
+		if (!hasInitFFMPEG)
+		{
+			hasInitFFMPEG = true;
+			processProgressText = "Downloading FFMPEG...";
+			StateHasChanged();
+			//initialize Library
+			await FFmpegFactory.Init(Runtime);
+		}
+
+	}
+
+	// Render Output
+	async Task TriggerDownload(string fName)
+	{
+		var outBuffer = await VideoClipEditor.FFMpeg.ReadFile(fName);
+		await Runtime.InvokeVoidAsync("downloadFile", "Render Output" + Path.GetExtension(fName), outBuffer);
+	}
+	async Task RenderAll()
+	{
+		processIsRender = true;
+		processProgressTitle = "Creating your video";
+		// Prepare UI
+		renderMenuOpen = false;
+		processProgressOpen = true;
+		processProgress = 0;
+		StateHasChanged();
+		await GetFFMpeg();
+		void durationExtracter(Logs l)
+		{
+			FFLog.AppendLine(l.Message);
+			if (l.Message.Trim().StartsWith("frame="))
+			{
+				var fNum = int.Parse(l.Message.Split("fps")[0].Trim().Substring(6).Trim());
+				processProgressText = "Extracted " + fNum + " frames";
+				var total = sectionBarControl.sectionBar.Maximum * 30;
+				processProgressText = "Encoded frame " + fNum + " of " + total;
+				processProgress = fNum / (double)total * 100;
+				StateHasChanged();
+			}
+
+			Console.WriteLine("ffmpeg: " + l.Message);
+		};
+		FFmpegFactory.Logger += durationExtracter;
+
+		processProgressText = "Creating Frames";
+		renderAbort = false;
+
+		//Render Frames
+		config.TargetSize = new SkiaSharp.SKSize() { Width = renderRes, Height = renderRes / config.AspectRatio };
+		for (int fi = 0; fi < sectionBarControl.sectionBar.Maximum * 30; fi++)
+		{
+			var t = fi / 30.0D;
+			using (var skBitmap = new SkiaSharp.SKBitmap((int)config.TargetSize.Width, (int)config.TargetSize.Height))
+			{
+				using (var ms = new MemoryStream())
+				{
+					Console.WriteLine($"Render @{fi} ({t}s)");
+					var canvas = new SkiaSharp.SKCanvas(skBitmap);
+					var s = skBitmap.Width / 100;
+					canvas.Scale(s, s);
+					await sectionBarControl.RenderCurrentFrameAtT(canvas, t, config);
+					sectionBarControl.sectionBar.ClearFrameCacheAt(t);
+					skBitmap.Encode(ms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
+					var buffer = ms.ToArray();
+					var jpgName = "FR" + (fi + 1).ToString().PadLeft(4, '0') + ".jpg";
+					VideoClipEditor.FFMpeg.WriteFile(jpgName, buffer);
+					//var readOut = await VideoClipEditor.FFMpeg.ReadFile(jpgName);
+					//VideoClipEditor.FFMpeg.WriteFile("FR%04d.jpg", buffer);
+					processProgress = t / sectionBarControl.sectionBar.Maximum * 100;
+					await Task.Delay(1);
+				}
+			}
+			GC.Collect();
+			StateHasChanged();
+		}
+		processProgress = 0;
+		processProgressText = "Encoding video";
+		StateHasChanged();
+		var fName = "renderOutput.mp4";
+		// Add audio if we have it
+		var audioClipLayer = sectionBarControl.sectionBar.Layers.Find(l => l.Any(c => c is AudioClip));
+		var audioClip = audioClipLayer?.Find(c => c is AudioClip);
+		var args = new List<string>();
+
+		if (audioClip != null){
+			if (audioClip.Source != "")
+			{
+				VideoClipEditor.FFMpeg.WriteFile(audioClip.Source, ((AudioClip)audioClip).Data);
+				args.Add("-i"); args.Add(audioClip.Source);
+				var duration = (TimeSpan.FromSeconds(audioClip.End) - TimeSpan.FromSeconds(audioClip.Start)).ToString(@"hh\:mm\:ss");
+				args.Add("-itsoffset"); args.Add(duration);
+				args.Add("-c:a"); args.Add("libfdk_aac");
+				args.Add("-b:a"); args.Add(renderQuality == "medium" ? "160k" : (renderQuality == "ultrafast" ? "96k" : "192k"));
+			}
+		}
+		args.AddRange(new List<string>(new string[] { "-framerate", "30", "-r", "30", "-i", "FR%04d.jpg", "-c:v", "libx264", "-crf", "18", "-preset", renderQuality, fName }));
+
+		await VideoClipEditor.FFMpeg.Run(args.ToArray());
+		renderOutputFile = fName;
+
+		FFmpegFactory.Logger -= durationExtracter;
+		processProgressText = "Your file is ready to be downloaded";
+		processProgress = -1;
+		Snackbar.Add("Video compiled successfully");
+	}
+
+	//Whisper
+	bool firstRender = true;
+
+	class GgmlModel{
+		public string Bin { get;set;}
+		public string Description { get;set;}
+	}
+
+	GgmlModel ggmlTiny = new GgmlModel() { Bin = "ggml-tiny.en-q5_1.bin", Description = "Tiny.en Q5.1 (Fastest, least accurate)" };
+	GgmlModel ggmlBaseQ5 = new GgmlModel() {Bin = "ggml-base.en-q5_1", Description = "Base.en Q5.1 (Faster, less accurate)" };
+	GgmlModel ggmlBase = new GgmlModel() {Bin = "ggml-base.en.bin", Description = "Base.en (Balanced)" };
+	GgmlModel ggmlMedium = new GgmlModel() { Bin = "ggml-medium.en-q5_0.bin", Description = "Medium.en Q5.0 (Slower, accurate)" };
+	List<GgmlModel> ggmlOptions;
+	GgmlModel modelToUse;
+	bool whisperMenuOpen = false;
+	bool useCloudWhisper = false;
+	async Task<double> ExtractLyricsAndFill(byte[] mp3, string fileName, bool useCloudWhisper)
+	{
+		processProgressTitle = "Extract Lyrics";
+		processProgressTitle = "Busy...";
+		//read all bytes
+
+		whisperMenuOpen = false;
+		progressDiscrete = true;
+		processProgressOpen = true;
+		double duration = 0;
+		InvokeAsync(StateHasChanged);
+		//MudDialog.StateHasChanged();
+		processIsRender = false;
+		var binInfo = new FFMpegCore.FFOptions()
+			{
+				BinaryFolder = "FFMpeg/bin",
+				TemporaryFilesFolder = "FFMpeg/temp"
+			};
+		byte[] wave;
+		using (var stream = new MemoryStream(mp3))
+		{
+			using (var outStream = new MemoryStream())
+			{
+				stream.Seek(0, SeekOrigin.Begin);
+				var info = await FFProbe.AnalyseAsync(stream, binInfo);
+				duration = info.Duration.TotalSeconds;
+				if (duration < 1)
+					throw new Exception("No audio found in the selected file");
+				stream.Seek(0, SeekOrigin.Begin);
+				try
+				{
+					var converted = await FFMpegArguments
+						.FromPipeInput(new StreamPipeSource(stream))
+						.OutputToPipe(new StreamPipeSink(outStream),
+					options => options
+					 .ForceFormat("wav")
+					 .WithAudioSamplingRate(16000))
+					.NotifyOnProgress((p) =>
+					{
+						processProgressText = $"Preparing audio for preview";
+						processProgress = (float)p;
+						InvokeAsync(StateHasChanged);
+
+					}, info.Duration)
+					.NotifyOnError((e) =>
+					{
+
+					})
+					.ProcessAsynchronously(true, binInfo);
+				}
+				catch (Exception ex)
+				{
+
+				}
+				wave = outStream.ToArray();
+			}
+		}
+		InvokeAsync(StateHasChanged);
+		//MudDialog.StateHasChanged();
+		if (wave == null)
+			return 0;
+		var presetFile = @"C:\Users\techboy\Documents\GitHub\SubtitleEditor_WASM\LyricsExtractor\LyricsExtractor\Properties\Resources\user_data\converted.bin";
+		var playbackFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),binInfo.TemporaryFilesFolder, "playBackAudio.mp3");
+		await File.WriteAllBytesAsync(
+			 playbackFile,
+			mp3);
+		var base64Data = Convert.ToBase64String(mp3);
+		audioSrc = $"data:audio/mp3;base64,{base64Data}";
+		//audioSrc = playbackFile.Replace("\\","/");
+		//audioSrc = await File.ReadAllTextAsync(presetFile);
+
+		sectionBarControl.sectionBar.Layers.Last().Clear();
+		sectionBarControl.sectionBar.Layers[1].Clear();
+		sectionBarControl.sectionBar.Layers.Last().Add(new AudioClip(0, duration, mp3, fileName, wave));
+		sectionBarControl.sectionBar.ResetMaxTime();
+		int totalWords = 0;
+		int totalSubs = 0;
+		double confidance = 0;
+		processProgressText = "Preparing Whisper";
+		InvokeAsync(StateHasChanged);
+		if (useCloudWhisper)
+		{
+
+		}
+		else
+		{
+			const eLoggerFlags loggerFlags = eLoggerFlags.UseStandardError | eLoggerFlags.SkipFormatMessage;
+			Library.setLogSink(eLogLevel.Debug, loggerFlags);
+
+			var audioFile = "C:\\Users\\techboy\\Downloads\\karma.mp3";
+			var model = Library.loadModel("C:\\Users\\techboy\\Documents\\GitHub\\SubtitleEditor_WASM\\LyricsExtractor\\LyricsExtractor\\Properties\\Resources\\ggml\\ggml-base.en.bin");
+			using Context context = model.createContext();
+			context.parameters.setFlag(eFullParamsFlags.NoContext, true);
+			new CommandLineArgs().apply(ref context.parameters);
+			using iMediaFoundation mf = Library.initMediaFoundation();
+			var whisperReader = new WhisperReader();
+			whisperReader.OnSegment += (seg, probability) =>
+			{
+				totalWords += seg.text.Split(' ').Length;
+				// Add a new clip for this
+				var subClip = new SubtitleClip(seg.time.begin.TotalSeconds, seg.time.end.TotalSeconds, seg.text);
+				sectionBarControl.sectionBar.Layers[1].Add(subClip);
+				sectionBarControl.ResetMaxTime();
+
+				processProgressText = (++totalSubs) + ": " + seg.text;
+
+				confidance += probability;
+				//Console.WriteLine($"{result.Start}->{result.End}: {processProgressText}");
+				sectionBarControl.Invalidate();
+				processProgress = (seg.time.end.TotalSeconds / duration) * 100;
+
+				InvokeAsync(StateHasChanged);
+			};
+			using iAudioReader reader = mf.loadAudioFileData(mp3);
+			context.runFull(reader, whisperReader, null, null);
+		}
+		//confidance /= totalSubs;
+		processProgressText = "All done!";
+		processProgress = -1;
+		processProgressOpen = false;
+		// Layer Last and 1 are for audio and subs
+		InvokeAsync(StateHasChanged);
+		Snackbar.Add($"Audio was processed successfully and lyrics where added to the timeline. Total {totalSubs} lyrics containing {totalWords} words exracted.");
+		return duration;
+	}
+	async Task<byte[]> UploadFileWithProgress(IBrowserFile file)
+	{
+		processProgressOpen = true;
+		processProgressTitle = "Uploading data";
+		processProgressTitle = "Please wait while " + file.Name + " is uploaded to the cloud";
+		var stream = file.OpenReadStream(file.Size);
+		InvokeAsync(StateHasChanged);
+
+		var data = new byte[file.Size];
+		int total = 0;
+		while(total < file.Size){
+			total += await stream.ReadAsync(data, total, (int)file.Size - total);
+			processProgress = total / (double)file.Size * 100.0D;
+			InvokeAsync(StateHasChanged);
+		}
+		stream.Close();
+		processProgressOpen = false;
+		InvokeAsync(StateHasChanged);
+		return data;
+	}
+	protected async Task UploadAudioForWhisper(IBrowserFile file)
+	{
+		var mp3 = await UploadFileWithProgress(file);
+
+		new Thread(async () =>
+		{
+			var duration = await ExtractLyricsAndFill(mp3, file.Name, useCloudWhisper);
+
+			// Layer 0 -- Intro, Outro, Logo
+			if (sectionBarControl.sectionBar.Layers[0].Count <= 1) // Intro/Outro/Logo
+			{
+				sectionBarControl.sectionBar.Layers[0].Clear();
+				sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(0, 20)); // intro
+				sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(duration - 20, duration)); // Outro
+				sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(20, duration - 20)); // Logo
+			}
+			// Layer 1 -- Subs
+			// Already Done
+
+			// Layer 2 -- Burn
+			if (sectionBarControl.sectionBar.Layers[2].Count <= 1) // 
+			{
+				sectionBarControl.sectionBar.Layers[2].Clear();
+				sectionBarControl.sectionBar.Layers[2].Add(new VideoClip(20, duration - 20)); // Burn
+			}
+
+			// Layer 3 -- Background
+			if (sectionBarControl.sectionBar.Layers[3].Count <= 1) // Background 1
+			{
+				sectionBarControl.sectionBar.Layers[3].Clear();
+				sectionBarControl.sectionBar.Layers[3].Add(new PhotoClip(0, duration)); // Background
+			}
+
+			// Layer Last -- Audio
+			// Already Done
+			sectionBarControl.sectionBar.ResetMaxTime();
+			sectionBarControl.Invalidate();
+			await RenderPreview();
+			await InvokeAsync(StateHasChanged);
+		}).Start();
+	}
+
+	// Automation -- Single File
+	bool SVA_MenuOpen = false;
+	bool downloadingFileProgressOpen { get; set; }
+	AutomationOption SVA_IntroOption = new AutomationOption(){ Label = "Intro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/intro.webm"};
+	AutomationOption SVA_OutroOption = new AutomationOption(){ Label = "Outro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/outro.mov"};
+	AutomationOption SVA_BackgroundOption = new AutomationOption(){ Label = "Background", AcceptedFormats = ".jpg, .png, .bmp", DefaultDataSource = "/user_data/background.jpg"};
+	AutomationOption SVA_BurnOption = new AutomationOption(){ Label = "Burn Effect", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/cool_burn.mp4"};
+	AutomationOption SVA_LogoOption = new AutomationOption(){ Label = "Logo", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/concatenated.webm"};
+	AutomationOption SVA_AudioOption = new AutomationOption() { Label = "Audio", HasDefault = false, AcceptedFormats = ".mp3, .wav, .ogg"};
+	List<AutomationOption> SVA_Options = new List<AutomationOption>();
+	bool SVA_OptionsIncomplete { get => SVA_Options.Any(o => o.Data == null); }
+	async Task SVA_Process()
+	{
+		new Thread(async () =>
+		{
+			SVA_MenuOpen = false;
+			processProgressOpen = true;
+			processProgressTitle = "Processing Data";
+			processProgressText = "Uploading Data";
+
+			var Layers = sectionBarControl.sectionBar.Layers;
+			foreach (var layer in Layers)
+				layer.Clear();
+
+			// Process Audio first
+			var totalDuration = await ExtractLyricsAndFill(SVA_AudioOption.Data, "music", false);
+			processProgressOpen = true;
+			processProgressTitle = "Preparing to render";
+			processProgressText = "Creating the canvas";
+			InvokeAsync(StateHasChanged);
+			List<SKBitmap> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
+			{
+				var frames = new List<SKBitmap>();
+				for (int i = 1; i <= totalFrames; i++)
+				{
+					var f = Path.Combine(dir, frameSeed + i.ToString().PadLeft(indexChars, '0') + extension);
+					processProgressText = "Converting frame " + i + " of " + totalFrames;
+					processProgress = (int)((i / (float)totalFrames) * 100);
+					InvokeAsync(StateHasChanged);
+
+					try
+					{
+						var bmp = SkiaSharp.SKBitmap.Decode(f);
+						frames.Add(bmp);
+					}
+					catch (Exception ex)
+					{
+						break;
+					}
+				}
+				return frames;
+			}
+			async Task<List<SKBitmap>> getVideoFrames(string videoFileSeed, AutomationOption option)
+			{
+				InvokeAsync(StateHasChanged);
+				var ms = new MemoryStream();
+				int totalFrames = 0;
+				var ffmpegTemp = "FFMpeg/temp";
+				if (Directory.Exists(ffmpegTemp))
+					Directory.CreateDirectory(ffmpegTemp);
+				var framesIndexSize = 4;
+				var framesExtension = ".png";
+				var framesSeed = videoFileSeed + "_frame_";
+				var outputFiles = Path.Combine(ffmpegTemp, $"{framesSeed}%0{framesIndexSize}d.png");
+				var binInfo = new FFMpegCore.FFOptions()
+					{
+						BinaryFolder = "FFMpeg/bin",
+						TemporaryFilesFolder = ffmpegTemp
+					};
+				try
+				{
+					using (var stream = new MemoryStream(option.Data))
+					{
+						stream.Seek(0, SeekOrigin.Begin);
+						var info = await FFProbe.AnalyseAsync(stream, binInfo);
+						totalFrames = (int)Math.Round(info.Duration.TotalSeconds * 30);
+
+						if (totalFrames < 1)
+							throw new Exception("No frames found in the selected video");
+						stream.Seek(0, SeekOrigin.Begin);
+						var converted = await FFMpegArguments
+						.FromPipeInput(new StreamPipeSource(stream))
+						.OutputToFile(outputFiles, true,
+					options => options
+					.WithArgument(new FFMpegCore.Arguments.CustomArgument(@"-vf fps=30")))
+					.NotifyOnProgress((p) =>
+					{
+						var fi = Math.Round((p / 100 * info.Duration).TotalSeconds * 30);
+						processProgressText = $"Extracted frame {fi} of {totalFrames}";
+						processProgress = (float)p;
+						InvokeAsync(StateHasChanged);
+
+					}, info.Duration)
+					.ProcessAsynchronously(true, binInfo);
+
+					}
+				}
+				catch (Exception ex)
+				{
+					Snackbar.Add("There was an error processing the video: " + ex, Severity.Error);
+					processProgressOpen = false;
+					InvokeAsync(StateHasChanged);
+					return null;
+				}
+				InvokeAsync(StateHasChanged);
+
+				// We have our PNGs in the drive. We don't need to load all of them to memory.
+				// But lets try loading them first as SKBitmaps.
+
+				return ConvertPNGsToSKBitmaps(totalFrames, ffmpegTemp, framesSeed, framesIndexSize, framesExtension);
+			}
+			List<SKBitmap> frames;
+			double introDuration = 3;
+			double outroDuration = 3;
+			// Process Intro
+			processProgressTitle = "Processing Intro";
+			InvokeAsync(StateHasChanged);
+			frames = await getVideoFrames("intro", SVA_IntroOption);
+			if (frames.Count == 0)
+				return;
+			introDuration = frames.Count / 30.0F;
+			Layers[0].Add(new VideoClip(0, introDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Stretch });
+
+			// Process Outro
+			processProgressTitle = "Processing Outro";
+			InvokeAsync(StateHasChanged);
+			frames = await getVideoFrames("intro", SVA_OutroOption);
+			if (frames.Count == 0)
+				return;
+			outroDuration = frames.Count / 30.0F;
+			Layers[0].Add(new VideoClip(totalDuration - outroDuration, totalDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Stretch });
+
+			// Process Logo
+			processProgressTitle = "Processing Logo";
+			InvokeAsync(StateHasChanged);
+			frames = await getVideoFrames("logo", SVA_LogoOption);
+			if (frames.Count == 0)
+				return;
+			Layers[0].Add(new VideoClip(introDuration, totalDuration - outroDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Loop });
+
+
+			// Lets add the burn
+			processProgressTitle = "Processing burn effect";
+			InvokeAsync(StateHasChanged);
+			frames = await getVideoFrames("burn", SVA_BurnOption);
+			if (frames.Count == 0)
+				return;
+			Layers[2].Add(new VideoClip(introDuration, totalDuration - outroDuration)
+				{
+					Label = "burn",
+					Data = frames.ToArray(),
+					StretchingMode = VideoClipEditor.StretchingModes.Loop,
+					Opacity = 100,
+					BlendMode = SkiaSharp.SKBlendMode.ColorDodge
+				});
+
+			// Lets add the Background
+			Layers[3].Add(new PhotoClip(introDuration, totalDuration - outroDuration)
+				{
+					Label = "background",
+					//Data = SkiaSharp.SKBitmap.Decode(SVA_BackgroundOption.Data) 
+				});
+
+			// All Done!
+			sectionBarControl.ResetMaxTime();
+			sectionBarControl.Invalidate();
+			await RenderPreview();
+			processProgressOpen = false;
+			InvokeAsync(StateHasChanged);
+		}).Start();
+	}
+
+
+	//Common Clip Editing
+	Clip ClipUnderEditing;
+
+	public void EditClipRequest(Clip clip)
+	{
+		ClipUnderEditing = clip;
+		if (clip == null)
+			return;
+		if (clip is SubtitleClip)
+		{
+			ClipEditorSource = ClipUnderEditing.Source;
+			ClipEditorBlendMode = ((SubtitleClip)ClipUnderEditing).BlendMode;
+			ClipEditorOpacity = ((SubtitleClip)ClipUnderEditing).Opacity;
+			SubtitleEditorFontFamily = config.SubTitlesFont.Typeface.FamilyName;
+			SubtitleEditorFontSize = config.SubTitlesFont.Size;
+			SubtitleEditorYPosition = (float)(config.SubtitleLocation.Y * config.AspectRatio);
+			SubtitleEditorShadowSize = config.ShadowSize;
+			SubtitleEditorShadowDistance = config.ShadowDistance;
+			SubtitleEditorTextColor = SKColorToMud(config.SubtitleColor);
+			SubtitleEditorShadowColor = SKColorToMud(config.ShadowColor);
+			SubtitleEditorOverlap = config.SubtitleOverlap;
+			ClipEditorStartingHH = TimeSpan.FromSeconds(ClipUnderEditing.Start).Hours;
+			ClipEditorStartingMM = TimeSpan.FromSeconds(ClipUnderEditing.Start).Minutes;
+			ClipEditorStartingSS = TimeSpan.FromSeconds(ClipUnderEditing.Start).Seconds;
+			ClipEditorStartingFF = (int)(TimeSpan.FromSeconds(ClipUnderEditing.Start).Milliseconds * 30 / 1000);
+			var duration = ClipUnderEditing.End - ClipUnderEditing.Start;
+			ClipEditorDurationHH = TimeSpan.FromSeconds(duration).Hours;
+			ClipEditorDurationMM = TimeSpan.FromSeconds(duration).Minutes;
+			ClipEditorDurationSS = TimeSpan.FromSeconds(duration).Seconds;
+			ClipEditorDurationFF = (int)(TimeSpan.FromSeconds(duration).Milliseconds * 30 / 1000);
+		}
+		else if(clip is PhotoClip)
+		{
+			var photoClip = (PhotoClip)ClipUnderEditing;
+			ClipEditorSource = photoClip.Source;
+			PhotoEditorData = photoClip.Data;
+			GraphicEditorSize = photoClip.Size;
+			ClipEditorBlendMode = photoClip.BlendMode;
+			ClipEditorOpacity = photoClip.Opacity;
+			GraphicEditorXPosition = photoClip.X;
+			GraphicEditorYPosition = photoClip.Y;
+			ClipEditorStartingHH = TimeSpan.FromSeconds(ClipUnderEditing.Start).Hours;
+			ClipEditorStartingMM = TimeSpan.FromSeconds(ClipUnderEditing.Start).Minutes;
+			ClipEditorStartingSS = TimeSpan.FromSeconds(ClipUnderEditing.Start).Seconds;
+			ClipEditorStartingFF = (int)(TimeSpan.FromSeconds(ClipUnderEditing.Start).Milliseconds * 30 / 1000);
+			var duration = ClipUnderEditing.End - ClipUnderEditing.Start;
+			ClipEditorDurationHH = TimeSpan.FromSeconds(duration).Hours;
+			ClipEditorDurationMM = TimeSpan.FromSeconds(duration).Minutes;
+			ClipEditorDurationSS = TimeSpan.FromSeconds(duration).Seconds;
+			ClipEditorDurationFF = (int)(TimeSpan.FromSeconds(duration).Milliseconds * 30 / 1000);
+		}
+		else if (clip is VideoClip)
+		{
+			var videoClip = (VideoClip)ClipUnderEditing;
+			ClipEditorSource = videoClip.Source;
+			VideoEditorData = videoClip.Data;
+			GraphicEditorSize = videoClip.Size;
+			ClipEditorBlendMode = videoClip.BlendMode;
+			VideoEditorStretchingMode = videoClip.StretchingMode;
+			ClipEditorOpacity = videoClip.Opacity;
+			GraphicEditorXPosition = videoClip.X;
+			GraphicEditorYPosition = videoClip.Y;
+			ClipEditorStartingHH = TimeSpan.FromSeconds(ClipUnderEditing.Start).Hours;
+			ClipEditorStartingMM = TimeSpan.FromSeconds(ClipUnderEditing.Start).Minutes;
+			ClipEditorStartingSS = TimeSpan.FromSeconds(ClipUnderEditing.Start).Seconds;
+			ClipEditorStartingFF = (int)(TimeSpan.FromSeconds(ClipUnderEditing.Start).Milliseconds * 30 / 1000);
+			var duration = ClipUnderEditing.End - ClipUnderEditing.Start;
+			ClipEditorDurationHH = TimeSpan.FromSeconds(duration).Hours;
+			ClipEditorDurationMM = TimeSpan.FromSeconds(duration).Minutes;
+			ClipEditorDurationSS = TimeSpan.FromSeconds(duration).Seconds;
+			ClipEditorDurationFF = (int)(TimeSpan.FromSeconds(duration).Milliseconds * 30 / 1000);
+		}
+		StateHasChanged();
+	}
+
+	// Subtitle Clip Editor
+
+	string ClipEditorSource { get; set; }
+	string SubtitleEditorFontFamily { get; set; }
+	float SubtitleEditorFontSize { get; set; }
+	float SubtitleEditorYPosition { get; set; }
+	float SubtitleEditorShadowSize { get; set; }
+	float SubtitleEditorShadowDistance { get; set; }
+	MudColor SubtitleEditorTextColor { get; set; }
+	MudColor SubtitleEditorShadowColor { get; set; }
+	double SubtitleEditorOverlap { get; set; }
+	double ClipEditorStartingHH {get;set;}
+	double ClipEditorStartingMM {get;set;}
+	double ClipEditorStartingSS {get;set;}
+	double ClipEditorStartingFF {get;set;}
+	double ClipEditorDurationHH {get;set;}
+	double ClipEditorDurationMM {get;set;}
+	double ClipEditorDurationSS {get;set;}
+	double ClipEditorDurationFF { get; set; }
+	protected SkiaSharp.SKBlendMode ClipEditorBlendMode { get; set; }
+	
+	protected int ClipEditorOpacity { get; set; }
+
+	SkiaSharp.SKColor MudColorToSK(MudColor mud)
+	{
+		return new SkiaSharp.SKColor(mud.R, mud.G, mud.B, mud.A);
+	}
+	MudColor SKColorToMud(SkiaSharp.SKColor sk)
+	{
+		return new MudColor(sk.Red, sk.Green, sk.Blue, sk.Alpha);
+	}
+	public async Task SubtitleEditorOnAChange(SubtitleClipEditor subtitleEditor)
+	{
+
+		if (ClipUnderEditing == null)
+			return;
+		if (ClipUnderEditing is SubtitleClip)
+		{
+			ClipUnderEditing.Source = subtitleEditor.Text;
+			((SubtitleClip)ClipUnderEditing).BlendMode = subtitleEditor.BlendMode;
+			((SubtitleClip)ClipUnderEditing).Opacity = subtitleEditor.Opacity;
+			config.SubTitlesFont = new SkiaSharp.SKFont(TypeFaces.Find(tf => tf.FamilyName == subtitleEditor.FontFamily), subtitleEditor.FontSize);
+			config.SubtitleLocation = new SkiaSharp.SKPoint(config.SubtitleLocation.X, subtitleEditor.YPosition / config.AspectRatio);
+			config.ShadowSize = subtitleEditor.ShadowSize;
+			config.ShadowDistance = subtitleEditor.ShadowDistance;
+			config.SubtitleOverlap = (float)subtitleEditor.Overlap;
+			config.SubtitleColor = MudColorToSK(subtitleEditor.TextColor);
+			config.ShadowColor = MudColorToSK(subtitleEditor.ShadowColor);
+			double duration(double h, double m, double s, double f)
+			{
+				return h * 3600 + m * 60 + s + f / 30;
+			}
+			ClipUnderEditing.Start = duration(
+				subtitleEditor.StartingHH,
+				subtitleEditor.StartingMM,
+				subtitleEditor.StartingSS,
+				subtitleEditor.StartingFF);
+			ClipUnderEditing.End = ClipUnderEditing.Start + duration(
+				subtitleEditor.DurationHH,
+				subtitleEditor.DurationMM,
+				subtitleEditor.DurationSS,
+				subtitleEditor.DurationFF);
+			ClipEditorSource = subtitleEditor.Text;
+
+			// Round 2
+			SubtitleEditorFontFamily = config.SubTitlesFont.Typeface.FamilyName;
+			SubtitleEditorFontSize = config.SubTitlesFont.Size;
+			ClipEditorBlendMode = subtitleEditor.BlendMode;
+			ClipEditorOpacity = subtitleEditor.Opacity;
+			SubtitleEditorYPosition = config.SubtitleLocation.Y * config.AspectRatio;
+			SubtitleEditorShadowSize = config.ShadowSize;
+			SubtitleEditorShadowDistance = config.ShadowDistance;
+			SubtitleEditorTextColor = SKColorToMud(config.SubtitleColor);
+			SubtitleEditorShadowColor = SKColorToMud(config.ShadowColor);
+			SubtitleEditorOverlap = config.SubtitleOverlap;
+			ClipEditorStartingHH = subtitleEditor.StartingHH;
+			ClipEditorStartingMM = subtitleEditor.StartingMM;
+			ClipEditorStartingSS = subtitleEditor.StartingSS;
+			ClipEditorStartingFF = subtitleEditor.StartingFF;
+			ClipEditorDurationHH = subtitleEditor.DurationHH;
+			ClipEditorDurationMM = subtitleEditor.DurationMM;
+			ClipEditorDurationSS = subtitleEditor.DurationSS;
+			ClipEditorDurationFF = subtitleEditor.DurationFF;
+			sectionBarControl.Invalidate(); 
+			await RenderPreview();
+		}
+	}
+
+	// Photo Clip Editor
+
+	protected SkiaSharp.SKBitmap PhotoEditorData { get; set; }
+	protected float GraphicEditorSize { get; set; }
+	protected float GraphicEditorXPosition {get; set; }
+	protected float GraphicEditorYPosition { get; set; }
+	public async Task PhotoEditorOnAChange(PhotoClipEditor photoEditor)
+	{
+		if (ClipUnderEditing == null)
+			return;
+		if (ClipUnderEditing is PhotoClip)
+		{
+			var photoClip = (PhotoClip)ClipUnderEditing;
+			photoClip.Source = photoEditor.SelectedImage;
+			photoClip.Data = photoEditor.SelectedImageData;
+			photoClip.Size = photoEditor.Size;
+			photoClip.BlendMode = photoEditor.BlendMode;
+			photoClip.Opacity = photoEditor.Opacity;
+			photoClip.X = photoEditor.XPosition;
+			photoClip.Y = photoEditor.YPosition;
+			double duration(double h, double m, double s, double f)
+			{
+				return h * 3600 + m * 60 + s + f / 30;
+			}
+			ClipUnderEditing.Start = duration(
+				photoEditor.StartingHH,
+				photoEditor.StartingMM,
+				photoEditor.StartingSS,
+				photoEditor.StartingFF);
+			ClipUnderEditing.End = ClipUnderEditing.Start + duration(
+				photoEditor.DurationHH,
+				photoEditor.DurationMM,
+				photoEditor.DurationSS,
+				photoEditor.DurationFF);
+
+			// Round 2
+			ClipEditorSource = photoEditor.SelectedImage;
+			PhotoEditorData = photoEditor.SelectedImageData;
+			GraphicEditorSize = photoEditor.Size;
+			ClipEditorBlendMode = photoEditor.BlendMode;
+			ClipEditorOpacity = photoEditor.Opacity;
+			GraphicEditorXPosition = photoEditor.XPosition;
+			GraphicEditorYPosition = photoEditor.YPosition;
+			ClipEditorStartingHH = photoEditor.StartingHH;
+			ClipEditorStartingMM = photoEditor.StartingMM;
+			ClipEditorStartingSS = photoEditor.StartingSS;
+			ClipEditorStartingFF = photoEditor.StartingFF;
+			ClipEditorDurationHH = photoEditor.DurationHH;
+			ClipEditorDurationMM = photoEditor.DurationMM;
+			ClipEditorDurationSS = photoEditor.DurationSS;
+			ClipEditorDurationFF = photoEditor.DurationFF;
+			sectionBarControl.Invalidate();
+			await RenderPreview();
+		}
+	}
+
+
+	// Video Clip Editor
+	protected VideoClipEditor.StretchingModes VideoEditorStretchingMode { get; set; }
+	protected SKBitmap[]? VideoEditorData { get; set; }
+	public async Task VideoEditorOnAChange(VideoClipEditor videoEditor)
+	{
+		if (ClipUnderEditing == null)
+			return;
+		if (ClipUnderEditing is VideoClip)
+		{
+			var videoClip = (VideoClip)ClipUnderEditing;
+			videoClip.Source = videoEditor.SelectedVideo;
+			videoClip.Data = videoEditor.SelectedVideoData; 
+			sectionBarControl.ResetMaxTime();
+			videoClip.Size = videoEditor.Size;
+			videoClip.BlendMode = videoEditor.BlendMode;
+			videoClip.StretchingMode = videoEditor.StretchingMode;
+			videoClip.Opacity = videoEditor.Opacity;
+			videoClip.X = videoEditor.XPosition;
+			videoClip.Y = videoEditor.YPosition;
+			double duration(double h, double m, double s, double f)
+			{
+				return h * 3600 + m * 60 + s + f / 30;
+			}
+			ClipUnderEditing.Start = duration(
+				videoEditor.StartingHH,
+				videoEditor.StartingMM,
+				videoEditor.StartingSS,
+				videoEditor.StartingFF);
+			ClipUnderEditing.End = ClipUnderEditing.Start + duration(
+				videoEditor.DurationHH,
+				videoEditor.DurationMM,
+				videoEditor.DurationSS,
+				videoEditor.DurationFF);
+
+			// Round 2
+			ClipEditorSource = videoEditor.SelectedVideo;
+			VideoEditorData = videoEditor.SelectedVideoData;
+			GraphicEditorSize = videoEditor.Size;
+			ClipEditorBlendMode = videoEditor.BlendMode;
+			VideoEditorStretchingMode = videoEditor.StretchingMode;
+			ClipEditorOpacity = videoEditor.Opacity;
+			GraphicEditorXPosition = videoEditor.XPosition;
+			GraphicEditorYPosition = videoEditor.YPosition;
+			ClipEditorStartingHH = videoEditor.StartingHH;
+			ClipEditorStartingMM = videoEditor.StartingMM;
+			ClipEditorStartingSS = videoEditor.StartingSS;
+			ClipEditorStartingFF = videoEditor.StartingFF;
+			ClipEditorDurationHH = videoEditor.DurationHH;
+			ClipEditorDurationMM = videoEditor.DurationMM;
+			ClipEditorDurationSS = videoEditor.DurationSS;
+			ClipEditorDurationFF = videoEditor.DurationFF;
+			sectionBarControl.Invalidate();
+			await RenderPreview();
+		}
+	}
 
 }
