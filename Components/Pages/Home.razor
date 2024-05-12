@@ -232,9 +232,10 @@
                 <MudText Typo="Typo.subtitle2">GGML Model</MudText>
                 <MudSpacer />
                 <MudSelect @bind-Value="@modelToUse" Variant="Variant.Outlined">
-                    <MudSelectItem Value="GgmlType.TinyEn">Faster, least accurate</MudSelectItem>
-                    <MudSelectItem Value="GgmlType.BaseEn">Balanced</MudSelectItem>
-                    <MudSelectItem Value="GgmlType.SmallEn">Slower, more accurate</MudSelectItem>
+                    @foreach(var ggmlOption in ggmlOptions)
+                    {
+                        <MudSelectItem Value="@ggmlOption">@ggmlOption.Description</MudSelectItem>
+                    }
                 </MudSelect>
             </MudAppBar>
         </MudGrid>
@@ -393,6 +394,8 @@
                 SubtitleLocation = new SkiaSharp.SKPoint(50, 50 * 9 / 16.0F)
             };
         SVA_Options = new List<AutomationOption>() { SVA_IntroOption, SVA_OutroOption, SVA_BackgroundOption, SVA_BurnOption, SVA_LogoOption, SVA_AudioOption };
+        ggmlOptions = new List<GgmlModel>() {ggmlTiny,  ggmlBaseQ5,  ggmlBase,  ggmlMedium,      };
+        modelToUse = ggmlMedium;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -628,12 +631,21 @@
     //Whisper
     bool firstRender = true;
 
-    GgmlType modelToUse = GgmlType.BaseEn;
+    class GgmlModel{
+        public string Bin { get;set;}
+        public string Description { get;set;}
+    }
+
+    GgmlModel ggmlTiny = new GgmlModel() { Bin = "ggml-tiny.en-q5_1.bin", Description = "Tiny.en Q5.1 (Fastest, least accurate)" };
+    GgmlModel ggmlBaseQ5 = new GgmlModel() {Bin = "ggml-base.en-q5_1", Description = "Base.en Q5.1 (Faster, less accurate)" };
+    GgmlModel ggmlBase = new GgmlModel() {Bin = "ggml-base.en.bin", Description = "Base.en (Balanced)" };
+    GgmlModel ggmlMedium = new GgmlModel() { Bin = "ggml-medium.en-q5_0.bin", Description = "Medium.en Q5.0 (Slower, accurate)" };
+    List<GgmlModel> ggmlOptions;
+    GgmlModel modelToUse;
     bool whisperMenuOpen = false;
     bool useCloudWhisper = false;
-    Dictionary<GgmlType, WhisperFactory> whisperFactory = new Dictionary<GgmlType, WhisperFactory>();
-
-    Dictionary<GgmlType, WhisperProcessor> whisperProcessor = new Dictionary<GgmlType, WhisperProcessor>();
+    Dictionary<GgmlModel, WhisperFactory> whisperFactory = new Dictionary<GgmlModel, WhisperFactory>();
+    Dictionary<GgmlModel, WhisperProcessor> whisperProcessor = new Dictionary<GgmlModel, WhisperProcessor>();
     async Task<double> ExtractLyricsAndFill(byte[] mp3, string fileName, bool useCloudWhisper)
     {
         processProgressTitle = "Extract Lyrics";
@@ -678,7 +690,7 @@
                     }, info.Duration)
                     .NotifyOnError((e) =>
                     {
-                        
+
                     })
                     .ProcessAsynchronously(true, binInfo);
                 }
@@ -752,14 +764,12 @@
             Console.WriteLine("Downloading Ggml");
             if (!whisperFactory.ContainsKey(modelToUse))
             {
-                processProgressText = "Downloading GGML model";
+                processProgressText = "Loading GGML model";
                 StateHasChanged();
-                using var memoryStream = new MemoryStream();
-                var model = await WhisperGgmlDownloader.GetGgmlModelAsync(modelToUse, QuantizationType.Q5_1);
-                await model.CopyToAsync(memoryStream);
-                //await model.CopyToAsync(memoryStream);
-                whisperFactory[modelToUse] = WhisperFactory.FromBuffer(memoryStream.ToArray());
+                var modelData = FileManager.GetBytes(Path.Combine("ggml", modelToUse.Bin));
+                whisperFactory[modelToUse] = WhisperFactory.FromBuffer(modelData);
             }
+            return 0;
             processProgressText = "Extracting Lyrics";
             StateHasChanged();
             await Task.Delay(100);
