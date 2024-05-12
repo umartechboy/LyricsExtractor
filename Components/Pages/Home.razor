@@ -22,6 +22,9 @@
 @inject IJSRuntime Runtime
 @inject ISnackbar Snackbar
 
+<MudThemeProvider />
+<MudSnackbarProvider />
+<MudDialogProvider />
 
 <PageTitle>Home</PageTitle>
 
@@ -237,7 +240,7 @@
         <MudCheckBox @bind-Value="@useCloudWhisper" Label="Use Cloud" Disabled="true"></MudCheckBox>
         <MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> whisperMenuOpen = false">Close</MudButton>        
         
-        <MudFileUpload T="IBrowserFile" Accept=".mp3, .wav, .ogg" FilesChanged=@(async (file) =>{whisperMenuOpen = false;  processProgressOpen = true; processProgressText = "test"; StateHasChanged(); await UploadAudioForWhisper(file); await InvokeAsync(() => StateHasChanged()); }) MaximumFileCount="100">
+        <MudFileUpload T="IBrowserFile" Accept=".mp3, .wav, .ogg" FilesChanged=@(async (file) =>{whisperMenuOpen = false;  processProgressOpen = true; StateHasChanged(); await UploadAudioForWhisper(file); }) MaximumFileCount="100">
             <ButtonTemplate>
                 <MudButton HtmlTag="label"
                            Variant="Variant.Filled"
@@ -641,13 +644,14 @@
     async Task<double> ExtractLyricsAndFill(byte[] mp3, string fileName, bool useCloudWhisper)
     {
         processProgressTitle = "Extract Lyrics";
+        processProgressTitle = "Busy...";
         //read all bytes
 
         whisperMenuOpen = false;
         progressDiscrete = true;
         processProgressOpen = true;
         double duration = 0;
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
         //MudDialog.StateHasChanged();
         processIsRender = false;
         var binInfo = new FFMpegCore.FFOptions()
@@ -678,8 +682,8 @@
                     {
                         processProgressText = $"Preparing audio for preview";
                         processProgress = (float)p;
-                        InvokeAsync(() => { StateHasChanged(); });
-                        
+                        InvokeAsync(StateHasChanged);
+
                     }, info.Duration)
                     .NotifyOnError((e) =>
                     {
@@ -694,7 +698,7 @@
                 wave = outStream.ToArray();
             }
         }
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
         //MudDialog.StateHasChanged();
         if (wave == null)
             return 0;
@@ -708,87 +712,14 @@
         int totalWords = 0;
         int totalSubs = 0;
         double confidance = 0;
-
+        processProgressText = "Preparing Whisper";
+        InvokeAsync(StateHasChanged);
         if (useCloudWhisper)
         {
-            // //read all bytes
-            // await stream.ReadAsync(mp3);
 
-            // string base64EncodedData = Convert.ToBase64String(mp3);
-
-            // var audioData = new
-            // {
-            //     Name = "MyAudioFile.mp3", // Set your desired name
-            //     Data = base64EncodedData
-            // };
-            // string jsonData = JsonSerializer.Serialize(audioData);
-            // var jContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-            // var resp = await HTTP.PostAsync("https://localhost:7108/LyricsExtractor", jContent);
-
-
-            // // Define chunk size (adjust based on your needs)
-            // const int chunkSize = 65536; // 64KB
-
-            // // Slice the mp3 byte array into chunks
-            // var chunks = mp3.Chunk(chunkSize);
-
-            // // Loop through each chunk and send separate requests
-            // foreach (var chunk in chunks)
-            // {
-            //     var content = new ByteArrayContent(chunk);
-            //     content.Headers.ContentType = new MediaTypeHeaderValue("audio/mpeg"); // Set content type
-
-            //     var response = await HTTP.PostAsync("https://localhost:7108/LyricsExtractor/", content);
-
-            //     if (!response.IsSuccessStatusCode)
-            //     {
-            //         // Handle upload error (optional: show message to user)
-            //         Console.WriteLine("Error uploading chunk: " + response.StatusCode);
-            //         return 0;
-            //     }
-            //     else
-            //         Console.WriteLine("Uploaded " + chunk.Length + " bytes");
-            // }
-
-            // Console.WriteLine("MP3 uploaded successfully!");
         }
         else
         {
-
-            //     return 0;
-            //     processProgressText = "Extracting Lyrics";
-            //     StateHasChanged();
-            //     await Task.Delay(100);
-            //     processProgress = 0;
-            //     Console.WriteLine("Begin whisper");
-            //     if (!whisperProcessor.ContainsKey(modelToUse))
-            //     {
-            //         whisperProcessor[modelToUse] = whisperFactory[modelToUse].CreateBuilder()
-            //         .WithPrintProgress()
-            //         .WithPrintResults()
-            //         .WithSegmentEventHandler(async (result) =>
-            //         {
-            //             totalWords += result.Text.Split(' ').Length;
-            //             // Add a new clip for this
-            //             var subClip = new SubtitleClip(result.Start.TotalSeconds, result.End.TotalSeconds, result.Text);
-            //             sectionBarControl.sectionBar.Layers[1].Add(subClip);
-            //             sectionBarControl.ResetMaxTime();
-
-            //             processProgressText = (++totalSubs) + ": " + result.Text;
-            //             confidance += result.Probability;
-            //             //Console.WriteLine($"{result.Start}->{result.End}: {processProgressText}");
-            //             sectionBarControl.Invalidate();
-            //             processProgress = (result.End.TotalSeconds / duration) * 100;
-            //             StateHasChanged();
-            //             await Task.Delay(200);
-            //         })
-            //         .WithLanguage("en")
-            //         .Build();
-            //         StateHasChanged();
-            //         await Task.Delay(100);
-            //     }
-
             const eLoggerFlags loggerFlags = eLoggerFlags.UseStandardError | eLoggerFlags.SkipFormatMessage;
             Library.setLogSink(eLogLevel.Debug, loggerFlags);
 
@@ -814,8 +745,7 @@
                 sectionBarControl.Invalidate();
                 processProgress = (seg.time.end.TotalSeconds / duration) * 100;
 
-                StateHasChanged();
-                MudDialog.StateHasChanged();
+                InvokeAsync(StateHasChanged);
             };
             using iAudioReader reader = mf.openAudioFile(audioFile);
             context.runFull(reader, whisperReader, null, null);
@@ -825,6 +755,7 @@
         confidance /= totalSubs;
         processProgressText = "All done!";
         processProgress = -1;
+        processProgressOpen = false;
         // Layer Last and 1 are for audio and subs
 
         Snackbar.Add($"Audio was processed successfully and lyrics where added to the timeline. Total {totalSubs} lyrics containing {totalWords} words exracted.");
@@ -833,44 +764,44 @@
     protected async Task UploadAudioForWhisper(IBrowserFile file)
     {
 
-        // new Thread(async () =>
-        // {
-
         var stream = file.OpenReadStream(10000000);
         var mp3 = new byte[file.Size];
         await stream.ReadAsync(mp3);
-        var duration = await ExtractLyricsAndFill(mp3, file.Name, useCloudWhisper);
+        stream.Close();
 
-        // Layer 0 -- Intro, Outro, Logo
-        if (sectionBarControl.sectionBar.Layers[0].Count <= 1) // Intro/Outro/Logo
+        new Thread(async () =>
         {
-            sectionBarControl.sectionBar.Layers[0].Clear();
-            sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(0, 20)); // intro
-            sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(duration - 20, duration)); // Outro
-            sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(20, duration - 20)); // Logo
-        }
-        // Layer 1 -- Subs
-        // Already Done
+            var duration = await ExtractLyricsAndFill(mp3, file.Name, useCloudWhisper);
 
-        // Layer 2 -- Burn
-        if (sectionBarControl.sectionBar.Layers[2].Count <= 1) // 
-        {
-            sectionBarControl.sectionBar.Layers[2].Clear();
-            sectionBarControl.sectionBar.Layers[2].Add(new VideoClip(20, duration - 20)); // Burn
-        }
+            // Layer 0 -- Intro, Outro, Logo
+            if (sectionBarControl.sectionBar.Layers[0].Count <= 1) // Intro/Outro/Logo
+            {
+                sectionBarControl.sectionBar.Layers[0].Clear();
+                sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(0, 20)); // intro
+                sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(duration - 20, duration)); // Outro
+                sectionBarControl.sectionBar.Layers[0].Add(new VideoClip(20, duration - 20)); // Logo
+            }
+            // Layer 1 -- Subs
+            // Already Done
 
-        // Layer 3 -- Background
-        if (sectionBarControl.sectionBar.Layers[3].Count <= 1) // Background 1
-        {
-            sectionBarControl.sectionBar.Layers[3].Clear();
-            sectionBarControl.sectionBar.Layers[3].Add(new PhotoClip(0, duration)); // Background
-        }
+            // Layer 2 -- Burn
+            if (sectionBarControl.sectionBar.Layers[2].Count <= 1) // 
+            {
+                sectionBarControl.sectionBar.Layers[2].Clear();
+                sectionBarControl.sectionBar.Layers[2].Add(new VideoClip(20, duration - 20)); // Burn
+            }
 
-        // Layer Last -- Audio
-        // Already Done
-        sectionBarControl.sectionBar.ResetMaxTime();
-        StateHasChanged();
-        // }).Start();
+            // Layer 3 -- Background
+            if (sectionBarControl.sectionBar.Layers[3].Count <= 1) // Background 1
+            {
+                sectionBarControl.sectionBar.Layers[3].Clear();
+                sectionBarControl.sectionBar.Layers[3].Add(new PhotoClip(0, duration)); // Background
+            }
+
+            // Layer Last -- Audio
+            // Already Done
+            sectionBarControl.sectionBar.ResetMaxTime();
+        }).Start();
     }
 
     // Automation -- Single File
@@ -901,7 +832,7 @@
         var totalDuration = await ExtractLyricsAndFill(await SVA_AudioOption.GetData(), "music", false);
         processProgressTitle = "Preparing to render";
         processProgressText = "Creating the canvas";
-
+        InvokeAsync(StateHasChanged);
         List<SKBitmap> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
         {
             var frames = new List<SKBitmap>();
