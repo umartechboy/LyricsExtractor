@@ -412,7 +412,6 @@
 
 		void mkDir(string dir)
 		{
-			dir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), dir);
 			if (!Directory.Exists(dir))
 				Directory.CreateDirectory(dir);
 		}
@@ -423,7 +422,7 @@
 			try
 			{
 				var from = "/usr/bin/" + file;
-				var to = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Common.binInfo.BinaryFolder, file);
+				var to = Path.Combine(Common.binInfo.BinaryFolder, file);
 				if (File.Exists(to))
 					Console.WriteLine(file + " exists at " + to);
 				else
@@ -602,7 +601,7 @@
 			var renderFileSeed = "render_";
 			var renderFrameExtension = ".jpg";
 			var renderFrameFileNumberSize = 4;
-			foreach (var f in Directory.GetFiles(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Common.binInfo.TemporaryFilesFolder), renderFileSeed + "*"))
+			foreach (var f in Directory.GetFiles(Common.binInfo.TemporaryFilesFolder, renderFileSeed + "*"))
 			{
 				try
 				{
@@ -632,8 +631,8 @@
 						var buffer = ms.ToArray();
 
 						var jpgFile = Path.Combine(
-							Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), 
-							Common.binInfo.TemporaryFilesFolder, renderFileSeed + (fi + 1).ToString().PadLeft(renderFrameFileNumberSize, '0') + renderFrameExtension);
+							Common.binInfo.TemporaryFilesFolder, 
+							renderFileSeed + (fi + 1).ToString().PadLeft(renderFrameFileNumberSize, '0') + renderFrameExtension);
 						framesFileNames.Add(jpgFile);
 						ms.Seek(0, SeekOrigin.Begin);
 						await File.WriteAllBytesAsync(jpgFile, ms.ToArray());
@@ -666,11 +665,10 @@
 			}
 
 			var fName = Path.Combine(
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
 				Common.binInfo.TemporaryFilesFolder, "renderOutput.mp4");
 			var jpgFilePattern = Path.Combine(
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-				Common.binInfo.TemporaryFilesFolder, renderFileSeed + "%0" + renderFrameFileNumberSize + "d" + renderFrameExtension);
+				Common.binInfo.TemporaryFilesFolder,
+				renderFileSeed + "%0" + renderFrameFileNumberSize + "d" + renderFrameExtension);
 			args.AddRange(new List<string>(new string[] {
 			"-i", jpgFilePattern,
 			"-pix_fmt", "yuv420p",
@@ -749,9 +747,9 @@
 		double duration = 0;
 		processIsRender = false;
 		InvokeAsync(StateHasChanged);
-		var backgroundAudioFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Common.binInfo.TemporaryFilesFolder, $"backgroundAudio_{Common.shortCheckSum(mp3)}.mp3");
-		var backgroundAudioWaveFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Common.binInfo.TemporaryFilesFolder, $"backgroundAudio_{Common.shortCheckSum(mp3)}.wav");
-		string whisperOutputCacheFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Common.binInfo.TemporaryFilesFolder, $"whisperOutput_{Common.shortCheckSum(mp3)}.txt"); ;
+		var backgroundAudioFile = Path.Combine(Common.binInfo.TemporaryFilesFolder, $"backgroundAudio_{Common.shortCheckSum(mp3)}.mp3");
+		var backgroundAudioWaveFile = Path.Combine(Common.binInfo.TemporaryFilesFolder, $"backgroundAudio_{Common.shortCheckSum(mp3)}.wav");
+		string whisperOutputCacheFile = Path.Combine(Common.binInfo.TemporaryFilesFolder, $"whisperOutput_{Common.shortCheckSum(mp3)}.txt"); ;
 		byte[] wave;
 		if (!File.Exists(backgroundAudioFile) || !File.Exists(backgroundAudioWaveFile)) // File not saved yet
 		{
@@ -1043,20 +1041,17 @@
 				InvokeAsync(StateHasChanged);
 				var ms = new MemoryStream();
 				int totalFrames = 0;
-				var ffmpegTemp = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FFMpeg/temp");
-				if (Directory.Exists(ffmpegTemp))
-					Directory.CreateDirectory(ffmpegTemp);
 				var framesIndexSize = 4;
 				var framesExtension = ".png";
 				var framesSeed = videoFileSeed + "_frame_";
 				//var inputFile = Path.Combine(ffmpegTemp, $"{framesSeed}_fromData.video");
 				//await File.WriteAllBytesAsync(inputFile, option.Data);
-				var outputFiles = Path.Combine(ffmpegTemp, $"{framesSeed}%0{framesIndexSize}d.png");
+				var outputFiles = Path.Combine(Common.binInfo.TemporaryFilesFolder, $"{framesSeed}%0{framesIndexSize}d.png");
 				// check if even one frame is present, don't reprocess.
 				totalFrames = 0;
 				for (int i = 0; i < Math.Pow(10, framesIndexSize); i++)
 				{
-					var testFileName = Path.Combine(ffmpegTemp, $"{framesSeed}{(i + 1).ToString().PadLeft(framesIndexSize, '0')}.png");
+					var testFileName = Path.Combine(Common.binInfo.TemporaryFilesFolder, $"{framesSeed}{(i + 1).ToString().PadLeft(framesIndexSize, '0')}.png");
 					if (File.Exists(testFileName))
 						totalFrames++;
 					else break;
@@ -1104,7 +1099,7 @@
 				// We have our PNGs in the drive. We don't need to load all of them to memory.
 				// But lets try loading them first as SKBitmaps.
 
-				return ConvertPNGsToSKBitmaps(totalFrames, ffmpegTemp, framesSeed, framesIndexSize, framesExtension);
+				return ConvertPNGsToSKBitmaps(totalFrames, Common.binInfo.TemporaryFilesFolder, framesSeed, framesIndexSize, framesExtension);
 			}
 			List<CachedSKBitmap> frames;
 			double introDuration = 3;

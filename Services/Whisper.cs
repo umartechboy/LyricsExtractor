@@ -12,9 +12,9 @@ namespace LyricsExtractor.Services
         {
             get => new FFOptions()
             {
-                BinaryFolder = "FFMpeg/bin",
-                TemporaryFilesFolder = "FFMpeg/temp"
-            };
+                BinaryFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),"FFMpeg/bin"),
+                TemporaryFilesFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FFMpeg/temp")
+			};
         }
         public static string serializeSSegment(sSegment seg)
         {
