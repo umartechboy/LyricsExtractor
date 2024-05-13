@@ -418,10 +418,10 @@
 		}
 		mkDir(Common.binInfo.TemporaryFilesFolder);
 
-		Console.WriteLine("FFMPEG Bin: ", Common.binInfo.BinaryFolder);
-		Console.WriteLine("FFMPEG Temp: ", Common.binInfo.TemporaryFilesFolder);
-		Console.WriteLine("Executing from: ", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-		Console.WriteLine("ExecutingAssembly: ", Assembly.GetExecutingAssembly().Location);
+		Console.WriteLine("FFMPEG Bin: {0}", Common.binInfo.BinaryFolder);
+		Console.WriteLine("FFMPEG Temp: {0}", Common.binInfo.TemporaryFilesFolder);
+		Console.WriteLine("Executing from: {0}", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+		Console.WriteLine("ExecutingAssembly: {0}", Assembly.GetExecutingAssembly().Location);
 	}
 	protected override void OnAfterRender(bool firstRender)
 	{
