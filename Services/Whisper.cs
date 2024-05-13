@@ -1,11 +1,53 @@
-﻿using System.Globalization;
+﻿using FFMpegCore;
+using Microsoft.AspNetCore.SignalR;
+using System.Globalization;
 using System.Reflection;
 using Whisper;
 
 namespace LyricsExtractor.Services
 {
-    /// <summary>Implementation of Callbacks abstract class, to print these segments as soon as they’re produced by the library.</summary>
-    sealed class WhisperReader : Callbacks
+    public class Common
+	{
+		public static FFOptions binInfo 
+        {
+            get => new FFOptions()
+            {
+                BinaryFolder = "FFMpeg/bin",
+                TemporaryFilesFolder = "FFMpeg/temp"
+            };
+        }
+        public static string serializeSSegment(sSegment seg)
+        {
+            var line = 
+                seg.time.begin.ToString() + 
+                ">>" +
+				seg.time.end.ToString() +
+                ">>" +
+                seg.text;
+
+            return line;
+        }
+		public static void deserializeSSegment(string segStr, out TimeSpan begin, out TimeSpan end, out string text)
+		{
+            var parts = segStr.Split(">>");
+            begin = TimeSpan.Parse(parts[0]);
+			end = TimeSpan.Parse(parts[1]);
+			text = parts[2];
+		}
+		public static string shortCheckSum(byte[] data)
+		{
+			var cSum = new byte[16];
+			byte sum = 0;
+			for (int i = 0; i < data.Length; i++)
+			{
+				sum ^= data[i];
+				cSum[i % cSum.Length] ^= sum;
+			}
+			return Convert.ToBase64String(cSum).Replace("\\","-").Replace("/","-");
+		}
+	}
+/// <summary>Implementation of Callbacks abstract class, to print these segments as soon as they’re produced by the library.</summary>
+sealed class WhisperReader : Callbacks
     {
         public delegate void WhisperSegmentHandler(sSegment sm, float probability);
         public event WhisperSegmentHandler OnSegment;

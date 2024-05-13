@@ -674,7 +674,7 @@ namespace SubtitleEditor.SectionDef
                 if (bmp == null)
                 {
                     Console.WriteLine("bmp null at: " + indexToRender);
-                    await (RenderAsync(position, canvas, config));
+                    //await (RenderAsync(position, canvas, config));
                     return;
                 }
                 float aspect = bmp.Width / (float)bmp.Height;
