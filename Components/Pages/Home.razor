@@ -586,8 +586,7 @@
 						//Console.WriteLine($"Render @{fi} ({t}s)");
 						var canvas = new SkiaSharp.SKCanvas(skBitmap);
 						var sx = skBitmap.Width / 100;
-						var sy = skBitmap.Height / 100;
-						canvas.Scale(sx, sy); // fit the frame
+						canvas.Scale(sx, sx); // fit the frame
 						await sectionBarControl.RenderCurrentFrameAtT(canvas, t, config);
 						sectionBarControl.sectionBar.ClearFrameCacheAt(t);
 						skBitmap.Encode(ms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
@@ -598,7 +597,7 @@
 							Common.binInfo.TemporaryFilesFolder, renderFileSeed + (fi + 1).ToString().PadLeft(renderFrameFileNumberSize, '0') + renderFrameExtension);
 						framesFileNames.Add(jpgFile);
 						ms.Seek(0, SeekOrigin.Begin);
-						//await File.WriteAllBytesAsync(jpgFile, ms.ToArray());
+						await File.WriteAllBytesAsync(jpgFile, ms.ToArray());
 						processProgress = t / sectionBarControl.sectionBar.Maximum * 100;
 						processProgressText = $"Please wait while your video is created... ({fi + 1}/{Math.Round(duration * 30, 0)})";
 						InvokeAsync(StateHasChanged);
