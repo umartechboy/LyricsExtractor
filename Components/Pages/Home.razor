@@ -761,21 +761,22 @@
 					stream.Seek(0, SeekOrigin.Begin);
 					var info = await FFProbe.AnalyseAsync(stream, Common.binInfo);
 					duration = info.Duration.TotalSeconds;
-					if (duration < 1)
-					{
-						try { 
-							await File.WriteAllBytesAsync(Path.Combine(Common.binInfo.TemporaryFilesFolder, "test.mp3"), mp3);
-							Console.WriteLine("test.mp3 written");
-						}
-						catch 
-						{
-							Console.WriteLine("test.mp3 NOT written");
-						}
-						Console.WriteLine("mp3 size: " + mp3.Length);
-						Console.WriteLine("ffmpeg temp: " + Directory.Exists(Common.binInfo.TemporaryFilesFolder));
-						Console.WriteLine("ffprobe: " + File.Exists (Path.Combine(Common.binInfo.BinaryFolder, "ffprobe")));
-						throw new Exception("No audio found in the selected file");
-					}
+					// if (duration < 1)
+					// {
+					// 	Console.WriteLine(info);
+					// 	try { 
+					// 		await File.WriteAllBytesAsync(Path.Combine(Common.binInfo.TemporaryFilesFolder, "test.mp3"), mp3);
+					// 		Console.WriteLine("test.mp3 written");
+					// 	}
+					// 	catch 
+					// 	{
+					// 		Console.WriteLine("test.mp3 NOT written");
+					// 	}
+					// 	Console.WriteLine("mp3 size: " + mp3.Length);
+					// 	Console.WriteLine("ffmpeg temp: " + Directory.Exists(Common.binInfo.TemporaryFilesFolder));
+					// 	Console.WriteLine("ffprobe: " + File.Exists (Path.Combine(Common.binInfo.BinaryFolder, "ffprobe")));
+					// 	throw new Exception("No audio found in the selected file");
+					// }
 					stream.Seek(0, SeekOrigin.Begin);
 					try
 					{
