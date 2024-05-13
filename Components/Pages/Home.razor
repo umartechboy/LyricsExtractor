@@ -415,6 +415,7 @@
 			if (!Directory.Exists(dir))
 				Directory.CreateDirectory(dir);
 		}
+		FFMpegCore.GlobalFFOptions.Configure(Common.binInfo);
 		mkDir(Common.binInfo.TemporaryFilesFolder);
 		mkDir(Common.binInfo.BinaryFolder);
 		void copyFFMPEGFile(string file)
