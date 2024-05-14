@@ -313,6 +313,11 @@
 						}
 				</MudItem>
 			}
+			<MudItem Class="pa-2 px-8 align-start d-flex" md="12" >
+				<MudText Class="pa-2 px-8" Typo="Typo.subtitle2">@whisperMaxWords</MudText>
+				<MudSpacer />
+				<MudSlider T="int" @bind-Value="@whisperMaxWords" Immediate=true Min="5" Max="60">Maximum characters per line</MudSlider>
+			</MudItem>
 		</MudGrid>
 
 	</DialogContent>
@@ -486,6 +491,7 @@
 	{
 		ComponentHasRendered = true;
 	}
+	int whisperMaxWords { get; set; } = 10;
 	bool clearCacheConfirmation = false;
 	bool menuOpen;
 	int renderFrameHeight = 1080;
@@ -623,7 +629,7 @@
 		{
 			processIsRender = true;
 			double outputFPS = 25; // FFMPEG expects 25
-			// Prepare UI
+											// Prepare UI
 			renderMenuOpen = false;
 			processProgressOpen = true;
 			processProgress = 0;
@@ -975,9 +981,14 @@
 				const eLoggerFlags loggerFlags = eLoggerFlags.UseStandardError | eLoggerFlags.SkipFormatMessage;
 				Library.setLogSink(eLogLevel.Debug, loggerFlags);
 
-				var model = Library.loadModel("ggml\\ggml-base.en.bin");
+				var ggml = "ggml\\ggml-base.en.bin";
+				var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), ggml);
+				var exists = File.Exists(path);
+				var model = Library.loadModel(path);
 				using Context context = model.createContext();
 				context.parameters.setFlag(eFullParamsFlags.NoContext, true);
+				context.parameters.strategy = eSamplingStrategy.Greedy;
+				context.parameters.max_len = whisperMaxWords;
 				new CommandLineArgs().apply(ref context.parameters);
 				using iMediaFoundation mf = Library.initMediaFoundation();
 				var whisperOut = new StringBuilder();
@@ -1188,9 +1199,10 @@
 							if (totalFrames < 1)
 								throw new Exception("No frames found in the selected video");
 							stream.Seek(0, SeekOrigin.Begin);
-							await File.WriteAllBytesAsync(Path.Combine(Common.binInfo.TemporaryFilesFolder, videoFileSeed), stream.ToArray());
+							var tempFile = Path.Combine(Common.binInfo.TemporaryFilesFolder, videoFileSeed);
+							await File.WriteAllBytesAsync(tempFile, stream.ToArray());
 							var converted = await FFMpegArguments
-							.FromPipeInput(new StreamPipeSource(stream))
+							.FromFileInput(tempFile, false)
 							.OutputToFile(outputFiles, true,
 						options => options
 						.WithArgument(new FFMpegCore.Arguments.CustomArgument(@"-r 30")))
@@ -1250,7 +1262,7 @@
 			if (frames.Count == 0)
 				return;
 			var logoDuration = frames.Count / 30.0F;
-			Layers[0].Add(new VideoClip(logoDuration, totalDuration - outroDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Loop });
+			Layers[0].Add(new VideoClip(introDuration, totalDuration - outroDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Loop });
 
 
 			// Lets add the burn

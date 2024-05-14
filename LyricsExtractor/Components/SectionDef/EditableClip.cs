@@ -727,29 +727,29 @@ namespace SubtitleEditor.SectionDef
 			// Draw overlay image
 			if (Data != null)
 			{
-				// determine time per length unit equal to width of frame
-				float layerHeight = (Height - ZoomBarHeight * 2 - sbh) / (float)layersCount;
-				var frameWidth = (layerHeight - 3) * (await Data[0].Get()).Width / (await Data[0].Get()).Height;
-                float gToV (float xg) => (float)(xg * (max - min) / Width + min);
-                float vToG(float xv) => (float)((xv - min) / (max - min) * Width);
-                var v1 = gToV(0);
-				var v2 = gToV(frameWidth);
-                var dv = v2 - v1;
-				for (var xv = Start; xv < End; xv+= dv) // starting from minv, increment xv in frame width equivalent intervals				
-                {
-                    // we have the v now. get the frame;
-                    var index = getIndex(xv);
-                    if (index < 0)
-						continue;
-                    var data = await Data[index].Get();
+				//// determine time per length unit equal to width of frame
+				//float layerHeight = (Height - ZoomBarHeight * 2 - sbh) / (float)layersCount;
+				//var frameWidth = (layerHeight - 3) * (await Data[0].Get()).Width / (await Data[0].Get()).Height;
+    //            float gToV (float xg) => (float)(xg * (max - min) / Width + min);
+    //            float vToG(float xv) => (float)((xv - min) / (max - min) * Width);
+    //            var v1 = gToV(0);
+				//var v2 = gToV(frameWidth);
+    //            var dv = v2 - v1;
+				//for (var xv = Start; xv < End; xv+= dv) // starting from minv, increment xv in frame width equivalent intervals				
+    //            {
+    //                // we have the v now. get the frame;
+    //                var index = getIndex(xv);
+    //                if (index < 0)
+				//		continue;
+    //                var data = await Data[index].Get();
 
-					var zsRec = new RectangleF(
-                        (int)Math.Round(((double)xv - min) / (max - min) * Width) + 1,
-                        ZoomBarHeight * 2 + layerHeight * layerIndex + 1,
-                        frameWidth,
-                        layerHeight - 3);
-                    g.canvas.DrawImage(data, new SKRect(zsRec.Left, zsRec.Top, zsRec.Right, zsRec.Bottom));
-                }
+				//	var zsRec = new RectangleF(
+    //                    (int)Math.Round(((double)xv - min) / (max - min) * Width) + 1,
+    //                    ZoomBarHeight * 2 + layerHeight * layerIndex + 1,
+    //                    frameWidth,
+    //                    layerHeight - 3);
+    //                g.canvas.DrawImage(data, new SKRect(zsRec.Left, zsRec.Top, zsRec.Right, zsRec.Bottom));
+    //            }
 			}
 		}
     }
