@@ -176,10 +176,26 @@
 			</MudNavGroup>
 			<MudNavGroup Title="Automation" Expanded="true">
 				<MudNavLink OnClick="() => {SVA_MenuOpen = true; menuOpen = false; }">Single video</MudNavLink>
+				<MudNavLink OnClick="() => { clearCacheConfirmation = true; } ">Clear Cache</MudNavLink>
 			</MudNavGroup>
 		</MudNavMenu>
 	</MudNavMenu>
 </MudDrawer>
+
+<MudDialog @bind-IsVisible="clearCacheConfirmation" Options="new DialogOptions() { FullWidth = true }">
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			<MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3" /> Render
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+			<MudText Typo="Typo.body1">This will delete any converted videos from the server, indly confirm.</MudText> 				
+	</DialogContent>
+	<DialogActions>
+		<MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> clearCacheConfirmation = false">Cancel</MudButton>
+		<MudButton Variant="Variant.Filled" Color="Color.Error" Class="px-10" OnClick=@(() => { foreach(var fileSet in new string[]{"background*", "whisper*", "render*.jpg", "burn*.png", "outro*.png", "intro*.png", "logo*.png" }) foreach(var f in Directory.GetFiles(Common.binInfo.TemporaryFilesFolder, fileSet)) File.Delete(f); Snackbar.Add("Cache cleared. Kindly reload the page...", Severity.Warning); clearCacheConfirmation = false; })>Yes, clear</MudButton>
+	</DialogActions>
+</MudDialog>
 
 @* Render Menu *@
 <MudDialog @bind-IsVisible="renderMenuOpen" Options="new DialogOptions() { FullWidth = true }">
@@ -470,6 +486,7 @@
 	{
 		ComponentHasRendered = true;
 	}
+	bool clearCacheConfirmation = false;
 	bool menuOpen;
 	int renderFrameHeight = 1080;
 	bool renderAbort = false;
@@ -633,7 +650,7 @@
 			{
 				log += String.Format(str, args) + "\r\n";
 			}
-			if (false)
+			if (true)
 			{				
 				foreach (var f in Directory.GetFiles(Common.binInfo.TemporaryFilesFolder, renderFileSeed + "*"))
 				{
@@ -814,6 +831,8 @@
 			downloadingFileProgressOpen = true;
 			InvokeAsync(StateHasChanged);
 			Snackbar.Add("Video compiled successfully");
+			var total = st.Elapsed;
+			total = total;
 		}).Start();
 	}
 

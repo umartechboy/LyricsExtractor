@@ -634,7 +634,7 @@ namespace SubtitleEditor.SectionDef
             NotifySeekChange();
             //Console.WriteLine("tp = " + tp + ", hovSec = " + hovSec);
         }
-        public void OnPaint(SKBitmapViewPaintArgs e)
+        public async Task OnPaintAsync(SKBitmapViewPaintArgs e)
         {
             var g = Graphics.FromCanvas(e.Canvas);
             g.canvas.ClipRect(new SKRect(LabelsSectionWidth, 0, Width, Height));
@@ -677,11 +677,11 @@ namespace SubtitleEditor.SectionDef
                     0, zsw, LayersSectionWidth, zsw);
                 // all sections Background
                 if (zoomSection != null)
-                    zoomSection.OnPaintBefore(-1, Layers.Count, Minimum, Maximum, LayersSectionWidth, Height - sbh, g, Minimum, Maximum);
+                    await zoomSection.OnPaintBeforeAsync(-1, Layers.Count, Minimum, Maximum, LayersSectionWidth, Height - sbh, g, Minimum, Maximum);
 
                 for (int layerIndex = 0; layerIndex < Layers.Count; layerIndex++)
                     for (int i = 0; i < Layers[layerIndex].Count; i++)
-                        Layers[layerIndex][i].OnPaintBefore(layerIndex, Layers.Count, ShowMin, ShowMax, LayersSectionWidth, Height - sbh, g, Minimum, Maximum);
+                        await Layers[layerIndex][i].OnPaintBeforeAsync(layerIndex, Layers.Count, ShowMin, ShowMax, LayersSectionWidth, Height - sbh, g, Minimum, Maximum);
 
                 //draw the grid
                 for (int i = (int)Math.Round(ShowMin); i < ShowMax; i++)
@@ -730,7 +730,7 @@ namespace SubtitleEditor.SectionDef
                     zoomSection.OnPaintAfter(g);
 
                 if (seekBar != null)
-                    seekBar.OnPaintBefore(-1, Layers.Count, ShowMin, ShowMax, LayersSectionWidth, Height, g, Minimum, Maximum); ;
+                    await seekBar.OnPaintBeforeAsync(-1, Layers.Count, ShowMin, ShowMax, LayersSectionWidth, Height, g, Minimum, Maximum); ;
 
                 for (int layerIndex = 0; layerIndex < Layers.Count; layerIndex++)
                     for (int i = 0; i < Layers[layerIndex].Count; i++)

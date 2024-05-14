@@ -49,11 +49,11 @@ namespace SubtitleEditor.SectionDef
         protected RectangleF zsRec = new RectangleF();
 
         //some items need to be painted the grid is painted.
-        public virtual void OnPaintBefore(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
+        public virtual async Task OnPaintBeforeAsync(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
         {
-            // Handled by chlid classes
-        }
-        public virtual async Task RenderAsync(double position, SKCanvas canvas, RenderConfig config)
+			// Handled by chlid classes
+		}
+		public virtual async Task RenderAsync(double position, SKCanvas canvas, RenderConfig config)
         {
 
         }

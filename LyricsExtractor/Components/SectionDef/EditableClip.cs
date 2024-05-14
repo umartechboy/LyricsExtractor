@@ -2,7 +2,6 @@
 using LyricsExtractor.Services;
 using SkiaSharp;
 using System.Drawing;
-using Color = System.Drawing.Color;
 
 namespace SubtitleEditor.SectionDef
 {
@@ -12,7 +11,7 @@ namespace SubtitleEditor.SectionDef
         {
 
         }
-		public override void OnPaintBefore(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
+		public override async Task OnPaintBeforeAsync(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
 		{
             try
             {
@@ -149,7 +148,7 @@ namespace SubtitleEditor.SectionDef
 
 		}
         //some items need to be painted the grid is painted.
-        public override void OnPaintBefore(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
+        public override async Task OnPaintBeforeAsync(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
         {
             try
             {
@@ -305,7 +304,7 @@ namespace SubtitleEditor.SectionDef
         {
 
         }
-        public override void OnPaintBefore(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
+        public override async Task OnPaintBeforeAsync(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
         {
             //this rect will be used for overview section
             Rectangle zsRec2 = new Rectangle();
@@ -567,9 +566,9 @@ namespace SubtitleEditor.SectionDef
                 return 0;
             else return (float)left[ind];
         }
-		public override void OnPaintBefore(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
+		public override async Task OnPaintBeforeAsync(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
 		{
-			base.OnPaintBefore(layerIndex, layersCount, min, max, Width, Height, g, bMin, bMax);
+			await base.OnPaintBeforeAsync(layerIndex, layersCount, min, max, Width, Height, g, bMin, bMax);
             if (Data == null)
                 return;
             float layerHeight = (Height - ZoomBarHeight * 2 - sbh) / (float)layersCount;
@@ -722,25 +721,38 @@ namespace SubtitleEditor.SectionDef
             else
             { }
         }
-        //public override void OnPaintBefore(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
-        //{
-        //    base.OnPaintBefore(layerIndex, layersCount, min, max, Width, Height, g, bMin, bMax);
-        //    // Draw overlay images
-        //    if (Data != null)
-        //    {
-        //        float layerHeight = (Height - ZoomBarHeight * 2 - sbh) / (float)layersCount;
-        //        var p
-        //        for (int x0 = 0; ;)
-        //        {
-        //            var zsRec = new RectangleF(
-        //                (int)Math.Round(((double)Start - min) / (max - min) * Width) + 1,
-        //                ZoomBarHeight * 2 + layerHeight * layerIndex + 1,
-        //                (layerHeight - 3) * Data.Width / Data.Height,
-        //                layerHeight - 3);
-        //            g.canvas.DrawBitmap(Data, new SKRect(zsRec.Left, zsRec.Top, zsRec.Right, zsRec.Bottom));
-        //        }
-        //    }
-        //}
+        public override async Task OnPaintBeforeAsync(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
+		{
+			await base.OnPaintBeforeAsync(layerIndex, layersCount, min, max, Width, Height, g, bMin, bMax);
+			// Draw overlay image
+			if (Data != null)
+			{
+				// determine time per length unit equal to width of frame
+				float layerHeight = (Height - ZoomBarHeight * 2 - sbh) / (float)layersCount;
+				var frameWidth = (layerHeight - 3) * (await Data[0].Get()).Width / (await Data[0].Get()).Height;
+                float gToV (float xg) => (float)(xg * (max - min) / Width + min);
+                float vToG(float xv) => (float)((xv - min) / (max - min) * Width);
+                var v1 = gToV(0);
+				var v2 = gToV(frameWidth);
+                var dv = v2 - v1;
+				for (var xv = Start; xv < End; xv+= vToG(dv)) // starting from minv, increment xv in frame width equivalent intervals				
+                {
+                    // we have the v now. get the frame;
+                    var index = getIndex(xv);
+                    if (index < 0)
+						continue;
+                    var data = await Data[index].Get();
+
+					var zsRec = new RectangleF(
+                        (int)Math.Round(((double)Start - min) / (max - min) * Width) + 1,
+                        ZoomBarHeight * 2 + layerHeight * layerIndex + 1,
+                        frameWidth,
+                        layerHeight - 3);
+                    g.canvas.DrawImage(data, new SKRect(zsRec.Left, zsRec.Top, zsRec.Right, zsRec.Bottom));
+                    break;
+                }
+			}
+		}
     }
     public class PhotoClip : LayerClip
     {
@@ -777,9 +789,9 @@ namespace SubtitleEditor.SectionDef
                 }
             }
         }
-		public override void OnPaintBefore(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
+		public override async Task OnPaintBeforeAsync(int layerIndex, int layersCount, double min, double max, int Width, int Height, Graphics g, double bMin, double bMax)
 		{
-			base.OnPaintBefore(layerIndex, layersCount, min, max, Width, Height, g, bMin, bMax);
+			await  base.OnPaintBeforeAsync(layerIndex, layersCount, min, max, Width, Height, g, bMin, bMax);
             // Draw overlay image
             if (Data != null)
             {
