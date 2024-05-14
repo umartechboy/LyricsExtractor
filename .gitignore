@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 /FFMpeg/temp
 *.bin
+ReleaseDir/V0.1.zip
