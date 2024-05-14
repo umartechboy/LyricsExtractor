@@ -7,10 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="Properties\Resources\fonts\Anton-Regular.ttf" />
+    <None Remove="Properties\Resources\fonts\edosz.ttf" />
     <None Remove="Properties\Resources\fonts\Jacquard12Charted-Regular.ttf" />
     <None Remove="Properties\Resources\fonts\Jersey15-Regular.ttf" />
     <None Remove="Properties\Resources\ggml\ggml-base.bin" />
@@ -20,11 +18,17 @@
     <None Remove="Properties\Resources\ggml\ggml-tiny.en-q5_1.bin" />
     <None Remove="Properties\Resources\user_data\background.jpg" />
     <None Remove="Properties\Resources\user_data\concatenated.webm" />
+    <None Remove="Properties\Resources\user_data\concatenated_logos.mov" />
     <None Remove="Properties\Resources\user_data\cool_burn.mp4" />
     <None Remove="Properties\Resources\user_data\edosz.ttf" />
+    <None Remove="Properties\Resources\user_data\intro.mov" />
     <None Remove="Properties\Resources\user_data\intro.webm" />
     <None Remove="Properties\Resources\user_data\karma.mp3" />
     <None Remove="Properties\Resources\user_data\outro.mov" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources\fonts\edosz.ttf" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,8 +48,10 @@
     <EmbeddedResource Include="Properties\Resources\fonts\Jersey15-Regular.ttf" />
     <EmbeddedResource Include="Properties\Resources\user_data\background.jpg" />
     <EmbeddedResource Include="Properties\Resources\user_data\concatenated.webm" />
+    <EmbeddedResource Include="Properties\Resources\user_data\concatenated_logos.mov" />
     <EmbeddedResource Include="Properties\Resources\user_data\cool_burn.mp4" />
     <EmbeddedResource Include="Properties\Resources\user_data\edosz.ttf" />
+    <EmbeddedResource Include="Properties\Resources\user_data\intro.mov" />
     <EmbeddedResource Include="Properties\Resources\user_data\intro.webm" />
     <EmbeddedResource Include="Properties\Resources\user_data\karma.mp3" />
     <EmbeddedResource Include="Properties\Resources\user_data\outro.mov" />
@@ -53,6 +59,7 @@
 
   <ItemGroup>
     <Folder Include="FFMpeg\" />
+    <Folder Include="ggml\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -85,6 +92,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="FFMpeg\ffprobe.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ggml\ggml-base.en-q5_1.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ggml\ggml-base.en.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ggml\ggml-medium.en-q5_0.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ggml\ggml-tiny.en-q5_1.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Whisper.dll">

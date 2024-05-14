@@ -195,9 +195,9 @@
 				<MudText Typo="Typo.body1">Resolution</MudText>
 			</MudItem>
 			<MudItem md="6">
-				<MudSelect @bind-Value="@renderRes" Variant="Variant.Outlined">
-					<MudSelectItem Value="1920">FHD 1920x1080</MudSelectItem>
-					<MudSelectItem Value="1080">HD 1080x720</MudSelectItem>
+				<MudSelect @bind-Value="@renderFrameHeight" Variant="Variant.Outlined">
+					<MudSelectItem Value="1080">FHD 1920x1080</MudSelectItem>
+					<MudSelectItem Value="720">HD 1080x720</MudSelectItem>
 					<MudSelectItem Value="320">Draft 320x180</MudSelectItem>
 				</MudSelect>
 			</MudItem>
@@ -341,15 +341,27 @@
 	<DialogContent>
 
 		<MudGrid>
-			<MudText Typo="Typo.body1">@processProgressText</MudText> 
-				@if (processProgress >= 0)
+			@if (processIsRender && previewImageSrc != "")
 			{
-				<MudProgressLinear Color
-				="Color.Error"  Indeterminate
-				="processProgress == 0 || processProgress >= 100" Value
-				="@processProgress" Class
-				="my-7" />
+				<MudItem md="4">
+				</MudItem>
+				<MudItem em md="4">
+					<img style="width: 100%; height: 200px; object-fit: cover;" src="@previewImageSrc" />
+				</MudItem>
+				<MudItem md="4">
+				</MudItem>
 			}
+			<MudItem md="12">
+				<MudText Typo="Typo.body1">@processProgressText</MudText> 
+					@if (processProgress >= 0)
+				{
+					<MudProgressLinear Color
+					="Color.Error"  Indeterminate
+					="processProgress == 0 || processProgress >= 100" Value
+					="@processProgress" Class
+					="my-7" />
+				}
+			</MudItem>
 		</MudGrid>
 
 	</DialogContent>
@@ -383,9 +395,9 @@
 	{
 		config = new RenderConfig()
 			{
-				SubTitlesFont = new SkiaSharp.SKFont(SkiaSharp.SKTypeface.FromFamilyName("Roboto")) { Size = 10 },
+				SubTitlesFont = new SkiaSharp.SKFont(SkiaSharp.SKTypeface.FromFamilyName("Edo SZ")) { Size = 6 },
 				SubtitleColor = SkiaSharp.SKColors.White,
-				ShadowColor = SkiaSharp.SKColors.Blue,
+				ShadowColor = SkiaSharp.SKColors.Black,
 				AspectRatio = 16 / 9.0F,
 				ShadowSize = 3,
 				ShadowDistance = 2,
@@ -400,7 +412,9 @@
 
 		TypeFaces = new List<SkiaSharp.SKTypeface>();
 		var availableFont = new string[] {
+		"fonts/edosz.ttf",
 		"fonts/Jersey15-Regular.ttf",
+		"fonts/Jacquard12Charted-Regular.ttf",
 		"fonts/Anton-Regular.ttf"
 	};
 		foreach (var font in availableFont)
@@ -457,13 +471,14 @@
 		ComponentHasRendered = true;
 	}
 	bool menuOpen;
-	int renderRes = 1920;
+	int renderFrameHeight = 1080;
 	bool renderAbort = false;
 	string renderQuality = "medium";
 	string renderOutputFile = "";
 	bool renderMenuOpen;
 
 	bool processIsRender = true;
+	string previewImageSrc = "";
 	bool progressDiscrete;
 	bool processProgressOpen;
 	double processProgress = 0;
@@ -607,13 +622,13 @@
 			{
 				try
 				{
-					File.Delete(f);
+					//File.Delete(f);
 				}
 				catch (Exception ex)
 				{ }
 			}
 			//Render Frames
-			config.TargetSize = new SkiaSharp.SKSize() { Height = renderRes, Width = renderRes * config.AspectRatio };
+			config.TargetSize = new SkiaSharp.SKSize() { Height = renderFrameHeight, Width = renderFrameHeight * config.AspectRatio };
 			var framesFileNames = new List<string>();
 			var duration = sectionBarControl.sectionBar.Maximum;
 			var TotalThreads = 4;
@@ -626,78 +641,103 @@
 			{
 				log += String.Format(str, args) + "\r\n";
 			}
-			int totalRendered = 0;
-			for (int _ti = 0; _ti < TotalThreads; _ti++)
+			if (false)
 			{
-				var mre = new ManualResetEvent(false);
-				mres.Add(mre);
-				new Thread(async (tiParam) =>
+				using (var previewBmp = new SKBitmap((int)(100 * config.TargetSize.Width / config.TargetSize.Width), (int)100))
 				{
-					var ti = (int)tiParam;
-					Log("Thread {0} started", ti);
-					//using (var ctx = OpenGLRenderer.GRContextCreator.Get((int)config.TargetSize.Width, (int)config.TargetSize.Height))
-					using(var bmp = new SKBitmap((int)config.TargetSize.Width, (int)config.TargetSize.Height))
+					using (var previewCanvas = new SKCanvas(previewBmp))
 					{
-						//using (var surface = SkiaSharp.SKSurface.Create(ctx, true, new SKImageInfo((int)config.TargetSize.Width, (int)config.TargetSize.Height)))
-						using (var canvas = new SKCanvas(bmp))
+						int totalRendered = 0;
+						for (int _ti = 0; _ti < TotalThreads; _ti++)
 						{
-							//var canvas = surface.Canvas;
-
-							Log("Canvas {0} created", ti);
-							using (var backPaint = new SKPaint()
+							var mre = new ManualResetEvent(false);
+							mres.Add(mre);
+							new Thread(async (tiParam) =>
 							{
-								Color = SKColors.Black,
-								IsStroke = false
-							})
-							{
-
-								for (int fi = ti; fi < sectionBarControl.sectionBar.Maximum * 30 && framesToRender-- > 0; fi += TotalThreads)
+								var ti = (int)tiParam;
+								Log("Thread {0} started", ti);
+								//using (var ctx = OpenGLRenderer.GRContextCreator.Get((int)config.TargetSize.Width, (int)config.TargetSize.Height))
+								using (var bmp = new SKBitmap((int)config.TargetSize.Width, (int)config.TargetSize.Height))
 								{
-									var t = fi / 30.0D;
-									using (var ms = new MemoryStream())
+									//using (var surface = SkiaSharp.SKSurface.Create(ctx, true, new SKImageInfo((int)config.TargetSize.Width, (int)config.TargetSize.Height)))
+									using (var canvas = new SKCanvas(bmp))
 									{
+										//var canvas = surface.Canvas;
 
-										Log("Thread {0} rendering {1}", ti, fi);
-										//canvas.DrawRect(0, 0, (int)config.TargetSize.Width, (int)config.TargetSize.Height, backPaint);
+										Log("Canvas {0} created", ti);
+										using (var backPaint = new SKPaint()
+										{
+											Color = SKColors.Black,
+											IsStroke = false
+										})
+										{
 
-										//Console.WriteLine($"Render @{fi} ({t}s)");
-										var sx = ((int)config.TargetSize.Width) / 100.0F;
-										canvas.Scale(sx, sx); // fit the frame
-										await sectionBarControl.RenderCurrentFrameAtT(canvas, t, config);
-										sectionBarControl.sectionBar.ClearFrameCacheAt(t);
-										//var snp = surface.Snapshot();
-										//var enc = snp.Encode(SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
-										//enc.SaveTo(ms);
-										bmp.Encode(ms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
-										var buffer = ms.ToArray();
+											for (int fi = ti; fi < sectionBarControl.sectionBar.Maximum * 30 && framesToRender-- > 0; fi += TotalThreads)
+											{
+												var t = fi / 30.0D;
+												using (var ms = new MemoryStream())
+												{
 
-										var jpgFile = Path.Combine(
-											Common.binInfo.TemporaryFilesFolder,
-											renderFileSeed + (fi + 1).ToString().PadLeft(renderFrameFileNumberSize, '0') + renderFrameExtension);
-										framesFileNames.Add(jpgFile);
-										ms.Seek(0, SeekOrigin.Begin);
-										Log("Thread {0} saving {1}", ti, fi);
-										await File.WriteAllBytesAsync(jpgFile, ms.ToArray());
-										processProgress = (totalRendered / 30.0F) / sectionBarControl.sectionBar.Maximum * 100;
-										processProgressText = $"Please wait while your video is created... ({fi + 1}/{Math.Round(duration * 30, 0)})";
-										InvokeAsync(StateHasChanged);
+													Log("Thread {0} rendering {1}", ti, fi);
+													canvas.ResetMatrix();
+													canvas.DrawRect(0, 0, (int)bmp.Width, (int)bmp.Height, backPaint);
+													//canvas.Clear(SKColors.Black);
+													//Console.WriteLine($"Render @{fi} ({t}s)");
+													var sx = ((int)config.TargetSize.Width) / 100.0F;
+													canvas.Scale(sx, sx); // fit the frame
+													await sectionBarControl.RenderCurrentFrameAtT(canvas, t, config);
+													sectionBarControl.sectionBar.ClearFrameCacheAt(t);
+													//var snp = surface.Snapshot();
+													//var enc = snp.Encode(SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
+													//enc.SaveTo(ms);
+													bmp.Encode(ms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
+													var buffer = ms.ToArray();
+
+													var jpgFile = Path.Combine(
+														Common.binInfo.TemporaryFilesFolder,
+														renderFileSeed + (fi + 1).ToString().PadLeft(renderFrameFileNumberSize, '0') + renderFrameExtension);
+													framesFileNames.Add(jpgFile);
+													ms.Seek(0, SeekOrigin.Begin);
+													Log("Thread {0} saving {1}", ti, fi);
+													await File.WriteAllBytesAsync(jpgFile, ms.ToArray());
+													totalRendered++;
+													if (ti == 0)
+													{
+														processProgress = (totalRendered / 30.0F) / sectionBarControl.sectionBar.Maximum * 100;
+														processProgressText = $"Please wait while your video is created... ({fi + 1}/{Math.Round(duration * 30, 0)})";
+														// previewCanvas.DrawImage(SKImage.FromEncodedData(buffer),
+														// 	new SKRect(0, 0, bmp.Width, bmp.Height),
+														// 	new SKRect(0, 0, previewBmp.Width, previewBmp.Height)
+														// );
+														using (var pms = new MemoryStream())
+														{
+															//var prev = previewBmp.Encode(pms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
+
+															//string base64Image = Convert.ToBase64String(pms.ToArray());
+															//previewImageSrc = $"data:image/jpeg;base64,{base64Image}";
+														}
+														InvokeAsync(StateHasChanged);
+													}
+												}
+											}
+										}
 									}
 								}
-							}
+								mre.Set();
+							}).Start(_ti);
 						}
 					}
-					mre.Set();
-				}).Start(_ti);
+				}
+				// 7000
+				// 3500 with static bitmap
+				// 2600 with SKImage
+				// 1700 With GLSurace
+				// 850 With Soft render and multithreading.
+				foreach (var mre in mres)
+					mre.WaitOne();
+				var doneIn = st.ElapsedMilliseconds;
+				processProgress = 0;
 			}
-			// 7000
-			// 3500 with static bitmap
-			// 2600 with SKImage
-			// 1700 With GLSurace
-			// 850 With Soft render and multithreading.
-			foreach (var mre in mres) 
-				mre.WaitOne();
-			var doneIn = st.ElapsedMilliseconds;
-			processProgress = 0;
 			processProgressText = "Encoding video";
 			InvokeAsync(StateHasChanged);
 			// Add audio if we have it
@@ -723,12 +763,13 @@
 			Common.binInfo.TemporaryFilesFolder,
 			renderFileSeed + "%0" + renderFrameFileNumberSize + "d" + renderFrameExtension);
 			args.AddRange(new List<string>(new string[] {
+		"-hwaccel", "cuda",
+		"-hwaccel_output_format", "cuda",
 		"-i", jpgFilePattern,
 		"-pix_fmt", "yuv420p",
 		"-r", "30",
-		"-c:v", "libx264",
+		"-c:v", "h264_nvenc",
 		"-framerate", "30",
-		"-r", "30",
 		"-crf", "18",
 		"-preset", renderQuality,
 		}));
@@ -911,7 +952,7 @@
 				const eLoggerFlags loggerFlags = eLoggerFlags.UseStandardError | eLoggerFlags.SkipFormatMessage;
 				Library.setLogSink(eLogLevel.Debug, loggerFlags);
 
-				var model = Library.loadModel("C:\\Users\\techboy\\Documents\\GitHub\\SubtitleEditor_WASM\\LyricsExtractor\\LyricsExtractor\\Properties\\Resources\\ggml\\ggml-base.en.bin");
+				var model = Library.loadModel("ggml\\ggml-base.en.bin");
 				using Context context = model.createContext();
 				context.parameters.setFlag(eFullParamsFlags.NoContext, true);
 				new CommandLineArgs().apply(ref context.parameters);
@@ -1039,11 +1080,11 @@
 	// Automation -- Single File
 	bool SVA_MenuOpen = false;
 	bool downloadingFileProgressOpen { get; set; }
-	AutomationOption SVA_IntroOption = new AutomationOption(){ Label = "Intro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/intro.webm"};
+	AutomationOption SVA_IntroOption = new AutomationOption(){ Label = "Intro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/intro.mov"};
 	AutomationOption SVA_OutroOption = new AutomationOption(){ Label = "Outro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/outro.mov"};
 	AutomationOption SVA_BackgroundOption = new AutomationOption(){ Label = "Background", AcceptedFormats = ".jpg, .png, .bmp", DefaultDataSource = "/user_data/background.jpg"};
 	AutomationOption SVA_BurnOption = new AutomationOption(){ Label = "Burn Effect", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/cool_burn.mp4"};
-	AutomationOption SVA_LogoOption = new AutomationOption(){ Label = "Logo", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/concatenated.webm"};
+	AutomationOption SVA_LogoOption = new AutomationOption() { Label = "Logo", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/concatenated_logos.mov" };
 	AutomationOption SVA_AudioOption = new AutomationOption() { Label = "Audio", HasDefault = false, AcceptedFormats = ".mp3, .wav, .ogg"};
 	List<AutomationOption> SVA_Options = new List<AutomationOption>();
 	bool SVA_OptionsIncomplete { get => SVA_Options.Any(o => o.Data == null); }
@@ -1110,7 +1151,7 @@
 						totalFrames++;
 					else break;
 				}
-				
+				string errs = "";
 				if (totalFrames == 0) // Not already decoded
 				{
 					try
@@ -1137,6 +1178,10 @@
 							InvokeAsync(StateHasChanged);
 
 						}, info.Duration)
+						.NotifyOnError((str)=>
+						{
+							errs+=str + "\r\n";
+						})
 						.ProcessAsynchronously(true, Common.binInfo);
 
 						}
@@ -1156,15 +1201,13 @@
 				return ConvertPNGsToSKBitmaps(totalFrames, Common.binInfo.TemporaryFilesFolder, framesSeed, framesIndexSize, framesExtension);
 			}
 			List<CachedSKImage> frames;
-			double introDuration = 3;
-			double outroDuration = 3;
 			// Process Intro
 			processProgressTitle = "Processing videos";
 			InvokeAsync(StateHasChanged);
 			frames = await getVideoFrames("intro", SVA_IntroOption);
 			if (frames.Count == 0)
 				return;
-			introDuration = frames.Count / 30.0F;
+			var introDuration = frames.Count / 30.0F;
 			Layers[0].Add(new VideoClip(0, introDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Stretch });
 
 			// Process Outro
@@ -1173,7 +1216,7 @@
 			frames = await getVideoFrames("outro", SVA_OutroOption);
 			if (frames.Count == 0)
 				return;
-			outroDuration = frames.Count / 30.0F;
+			var outroDuration = frames.Count / 30.0F;
 			Layers[0].Add(new VideoClip(totalDuration - outroDuration, totalDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Stretch });
 
 			// Process Logo
@@ -1182,7 +1225,8 @@
 			frames = await getVideoFrames("logo", SVA_LogoOption);
 			if (frames.Count == 0)
 				return;
-			Layers[0].Add(new VideoClip(introDuration, totalDuration - outroDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Loop });
+			var logoDuration = frames.Count / 30.0F;
+			Layers[0].Add(new VideoClip(logoDuration, totalDuration - outroDuration) { Data = frames.ToArray(), StretchingMode = VideoClipEditor.StretchingModes.Loop });
 
 
 			// Lets add the burn
@@ -1201,10 +1245,10 @@
 				});
 
 			// Lets add the Background
-			Layers[3].Add(new PhotoClip(introDuration, totalDuration - outroDuration)
+			Layers[3].Add(new PhotoClip(0, totalDuration - outroDuration)
 				{
 					Label = "background",
-					//Data = SkiaSharp.SKBitmap.Decode(SVA_BackgroundOption.Data) 
+					Data = SkiaSharp.SKImage.FromEncodedData(SVA_BackgroundOption.Data) 
 				});
 
 			// All Done!

@@ -103,6 +103,26 @@
         </MudItem>
     }
 </MudGrid>
+
+@* Process Progress Dialog *@
+<MudDialog @bind-IsVisible="processProgressOpen" Options="new DialogOptions() { FullWidth = true }">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.AutoFixHigh" Class="mr-3" />@processProgressTitle
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+
+        <MudGrid>
+            <MudText Typo="Typo.body1">@processProgressText</MudText>
+            @if (processProgress >= 0)
+            {
+                <MudProgressLinear Color="Color.Error" Indeterminate="processProgress == 0 || processProgress >= 100" Value="@processProgress" Class="my-7" />
+            }
+        </MudGrid>
+
+    </DialogContent>
+</MudDialog>
 @inject ISnackbar Snackbar
 @code {
     [Parameter]
@@ -140,6 +160,12 @@
     [Parameter]
     public EventCallback<VideoClipEditor> OnAChange { get; set; }
     System.Text.StringBuilder FFLog = new System.Text.StringBuilder();
+
+    bool processProgressOpen;
+    double processProgress = 0;
+    string processProgressText = "Working";
+    string processProgressTitle = "";
+
     protected async Task OnATextChanged(string d)
     {
         await OnAChange.InvokeAsync(this);
@@ -223,6 +249,27 @@
         }
         return frames;
     }
+    async Task<byte[]> UploadFileWithProgress(IBrowserFile file)
+    {
+        processProgressOpen = true;
+        processProgressTitle = "Uploading data";
+        processProgressText = "Please wait while " + file.Name + " is uploaded to the cloud";
+        var stream = file.OpenReadStream(file.Size);
+        InvokeAsync(StateHasChanged);
+
+        var data = new byte[file.Size];
+        int total = 0;
+        while (total < file.Size)
+        {
+            total += await stream.ReadAsync(data, total, (int)file.Size - total);
+            processProgress = total / (double)file.Size * 100.0D;
+            InvokeAsync(StateHasChanged);
+        }
+        stream.Close();
+        processProgressOpen = false;
+        InvokeAsync(StateHasChanged);
+        return data;
+    }
     protected async Task VideoUploaderFilesSelected(IBrowserFile file)
     {
         converting = true;
@@ -237,18 +284,14 @@
         var framesExtension = ".png";
         var framesSeed = Path.GetFileNameWithoutExtension(file.Name) + "_frame_";
         var outputFiles = Path.Combine(ffmpegTemp, $"{framesSeed}%0{framesIndexSize}d.png");
-        var binInfo = new FFMpegCore.FFOptions()
-            {
-                BinaryFolder = "FFMpeg/bin",
-                TemporaryFilesFolder = ffmpegTemp
-            };
+    
         try
         {
-            using (var stream = new MemoryStream())
+            var bytes = await UploadFileWithProgress(file);
+            using (var stream = new MemoryStream(bytes))
             {
-                await file.OpenReadStream(200000000).CopyToAsync(stream);
                 stream.Seek(0, SeekOrigin.Begin);
-                var info = await FFProbe.AnalyseAsync(stream, binInfo);
+                var info = await FFProbe.AnalyseAsync(stream, Common.binInfo);
                 totalFrames = (int)Math.Round(info.Duration.TotalSeconds * 30);
 
                 if (totalFrames < 1)
@@ -267,7 +310,7 @@
                     InvokeAsync(() => { StateHasChanged(); });
 
                 }, info.Duration)
-                .ProcessAsynchronously(true, binInfo);
+                .ProcessAsynchronously(true, Common.binInfo);
                 if (file.ContentType.Contains("video/"))
                 {
                     stream.Seek(0, SeekOrigin.Begin);

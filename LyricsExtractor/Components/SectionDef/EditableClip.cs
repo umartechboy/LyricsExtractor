@@ -872,13 +872,13 @@ namespace SubtitleEditor.SectionDef
         }
         public override async Task RenderAsync(double position, SKCanvas canvas, RenderConfig config)
         {
-            if (Source?.Trim().Length > 0 && position >= Start - config.SubtitleOverlap && position <= End + config.SubtitleOverlap)
+            if (Source?.Trim().Length > 0 && position >= Start && position <= End)
             {
                 float opacity = 1;
-                if (position <= Start)
-                    opacity = (float)((position - (Start - config.SubtitleOverlap)) / config.SubtitleOverlap);
-                else if (position > End)
-                    opacity = (float)(((End + config.SubtitleOverlap) - position) / config.SubtitleOverlap);
+                if (position <= Start + config.SubtitleOverlap)
+                    opacity = 1 - (float)((Start + config.SubtitleOverlap - position) / config.SubtitleOverlap);
+                else if (position > End - config.SubtitleOverlap)
+                    opacity = 1 - (float)((position - (End - config.SubtitleOverlap)) / config.SubtitleOverlap);
                 DrawWrapLines(config.SubtitleLocation.X, config.SubtitleLocation.Y, Source, 90, canvas,
                 new SKPaint(config.SubTitlesFont)
                 {
