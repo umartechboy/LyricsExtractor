@@ -605,6 +605,7 @@
 		new Thread(async () =>
 		{
 			processIsRender = true;
+			double outputFPS = 25; // FFMPEG expects 25
 			// Prepare UI
 			renderMenuOpen = false;
 			processProgressOpen = true;
@@ -618,15 +619,6 @@
 			var renderFileSeed = "render_";
 			var renderFrameExtension = ".jpg";
 			var renderFrameFileNumberSize = 4;
-			foreach (var f in Directory.GetFiles(Common.binInfo.TemporaryFilesFolder, renderFileSeed + "*"))
-			{
-				try
-				{
-					//File.Delete(f);
-				}
-				catch (Exception ex)
-				{ }
-			}
 			//Render Frames
 			config.TargetSize = new SkiaSharp.SKSize() { Height = renderFrameHeight, Width = renderFrameHeight * config.AspectRatio };
 			var framesFileNames = new List<string>();
@@ -642,7 +634,17 @@
 				log += String.Format(str, args) + "\r\n";
 			}
 			if (false)
-			{
+			{				
+				foreach (var f in Directory.GetFiles(Common.binInfo.TemporaryFilesFolder, renderFileSeed + "*"))
+				{
+					try
+					{
+						//File.Delete(f);
+					}
+					catch (Exception ex)
+					{ }
+				}
+
 				using (var previewBmp = new SKBitmap((int)(100 * config.TargetSize.Width / config.TargetSize.Width), (int)100))
 				{
 					using (var previewCanvas = new SKCanvas(previewBmp))
@@ -672,9 +674,9 @@
 										})
 										{
 
-											for (int fi = ti; fi < sectionBarControl.sectionBar.Maximum * 30 && framesToRender-- > 0; fi += TotalThreads)
+											for (int fi = ti; fi < sectionBarControl.sectionBar.Maximum * outputFPS && framesToRender-- > 0; fi += TotalThreads)
 											{
-												var t = fi / 30.0D;
+												var t = fi / outputFPS;
 												using (var ms = new MemoryStream())
 												{
 
@@ -765,13 +767,15 @@
 			args.AddRange(new List<string>(new string[] {
 		"-hwaccel", "cuda",
 		"-hwaccel_output_format", "cuda",
+		"-framerate", "30",
 		"-i", jpgFilePattern,
 		"-pix_fmt", "yuv420p",
-		"-r", "30",
 		"-c:v", "h264_nvenc",
-		"-framerate", "30",
+		"-r", "30",
 		"-crf", "18",
 		"-preset", renderQuality,
+		"-c:a", "aac", 
+		"-b:a", "160k"
 		}));
 			if (audioClip != null)
 			{

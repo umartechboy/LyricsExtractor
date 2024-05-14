@@ -21,6 +21,7 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+[Tt]emp/
 x64/
 x86/
 [Ww][Ii][Nn]32/
@@ -399,3 +400,4 @@ FodyWeavers.xsd
 /FFMpeg/temp
 *.bin
 ReleaseDir/V0.1.zip
+/LyricsExtractor/FFMpeg/temp
