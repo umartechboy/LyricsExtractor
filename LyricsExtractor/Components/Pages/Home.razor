@@ -1188,11 +1188,12 @@
 							if (totalFrames < 1)
 								throw new Exception("No frames found in the selected video");
 							stream.Seek(0, SeekOrigin.Begin);
+							await File.WriteAllBytesAsync(Path.Combine(Common.binInfo.TemporaryFilesFolder, videoFileSeed), stream.ToArray());
 							var converted = await FFMpegArguments
 							.FromPipeInput(new StreamPipeSource(stream))
 							.OutputToFile(outputFiles, true,
 						options => options
-						.WithArgument(new FFMpegCore.Arguments.CustomArgument(@"-vf fps=30")))
+						.WithArgument(new FFMpegCore.Arguments.CustomArgument(@"-r 30")))
 						.NotifyOnProgress((p) =>
 						{
 							var fi = Math.Round((p / 100 * info.Duration).TotalSeconds * 30);
