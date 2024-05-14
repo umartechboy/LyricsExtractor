@@ -81,7 +81,7 @@
     [Parameter]
     public string SelectedImage { get; set; }
     [Parameter]
-    public SkiaSharp.SKBitmap SelectedImageData { get; set; }
+    public SkiaSharp.SKImage SelectedImageData { get; set; }
     [Parameter]
     public float Size { get; set; }
     [Parameter]
@@ -157,7 +157,7 @@
         await stream.ReadAsync(inputFileDataBuffer);
         // Create image preview, pepare for video conversion
         SelectedImage = $"data:{file.ContentType};base64,{Convert.ToBase64String(inputFileDataBuffer)}";
-        SelectedImageData = SkiaSharp.SKBitmap.Decode(inputFileDataBuffer);
+        SelectedImageData = SkiaSharp.SKImage.FromEncodedData(inputFileDataBuffer);
         StateHasChanged();
         await OnAChange.InvokeAsync(this);
     }

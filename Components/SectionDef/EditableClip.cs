@@ -620,7 +620,7 @@ namespace SubtitleEditor.SectionDef
 		{
 			this.Color = System.Drawing.Color.FromArgb(255, 113, 91);
 		}
-		public CachedSKBitmap[]? Data { get; set; }
+		public CachedSKImage[]? Data { get; set; }
 		public float Size { get; set; } = 100;
         public SKBlendMode BlendMode { get; set; } = SKBlendMode.SrcOver;
         public VideoClipEditor.StretchingModes StretchingMode { get; set; } = VideoClipEditor.StretchingModes.Clip;
@@ -693,7 +693,7 @@ namespace SubtitleEditor.SectionDef
                 {
                     //Console.WriteLine("Render VideoClip: " + Source+" " + Label + ": " + indexToRender);
                     paint.Color = paint.Color.WithAlpha((byte)Opacity);
-                    canvas.DrawBitmap(bmp, new SKRect(r.Left, r.Top, r.Right, r.Bottom), paint);
+                    canvas.DrawImage(bmp, new SKRect(r.Left, r.Top, r.Right, r.Bottom), paint);
                 }
 			}
             else
@@ -744,7 +744,7 @@ namespace SubtitleEditor.SectionDef
     }
     public class PhotoClip : LayerClip
     {
-        public SKBitmap Data { get; set; }
+        public SKImage Data { get; set; }
         public float Size { get; set; } = 100;
         public SKBlendMode BlendMode { get; set; } = SKBlendMode.SrcOver;
         public int Opacity { get; set; } = 255;
@@ -773,7 +773,7 @@ namespace SubtitleEditor.SectionDef
                 {
                     Console.WriteLine("Render Photo: " + Source + " " + Label);
                     paint.Color = paint.Color.WithAlpha((byte)Opacity);
-                    canvas.DrawBitmap(Data, new SKRect(r.Left, r.Top, r.Right, r.Bottom), paint);
+                    canvas.DrawImage(Data, new SKRect(r.Left, r.Top, r.Right, r.Bottom), paint);
                 }
             }
         }
@@ -789,7 +789,7 @@ namespace SubtitleEditor.SectionDef
 					ZoomBarHeight * 2 + layerHeight * layerIndex + 1,
 					(layerHeight - 3) * Data.Width / Data.Height,
 					layerHeight - 3);
-                g.canvas.DrawBitmap(Data, new SKRect(zsRec.Left, zsRec.Top, zsRec.Right, zsRec.Bottom));
+                g.canvas.DrawImage(Data, new SKRect(zsRec.Left, zsRec.Top, zsRec.Right, zsRec.Bottom));
             }
 		}
 	}

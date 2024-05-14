@@ -25,11 +25,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="wwwroot\Components\Automation\AutomationOption.cs" />
+    <Compile Include="wwwroot\Components\SectionDef\common.cs" />
+    <Compile Include="wwwroot\Components\SectionDef\EditableClip.cs" />
+    <Compile Include="wwwroot\Components\SectionDef\sectionBar.cs" />
+    <Compile Include="wwwroot\Components\SectionDef\sections.cs" />
+    <Compile Include="wwwroot\Components\SectionDef\WebPort.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FFmpegBlazor" Version="1.0.0.7" />
     <PackageReference Include="FFMpegCore" Version="5.1.0" />
     <PackageReference Include="MudBlazor" Version="6.19.1" />
     <PackageReference Include="SkiaSharp" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.Views" Version="2.88.8" />
     <PackageReference Include="SkiaSharp.Views.Blazor" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.Views.Desktop.Common" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.Views.Forms" Version="2.88.8" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,10 +59,16 @@
     <EmbeddedResource Include="Properties\Resources\user_data\intro.webm" />
     <EmbeddedResource Include="Properties\Resources\user_data\karma.mp3" />
     <EmbeddedResource Include="Properties\Resources\user_data\outro.mov" />
+    <EmbeddedResource Include="wwwroot\Components\Layout\MainLayout.razor.css" />
+    <EmbeddedResource Include="wwwroot\Components\Layout\NavMenu.razor.css" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="FFMpeg\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenGLRenderer\OpenGLRenderer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

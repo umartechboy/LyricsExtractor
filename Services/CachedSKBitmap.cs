@@ -2,15 +2,15 @@
 
 namespace LyricsExtractor.Services
 {
-    public class CachedSKBitmap
+    public class CachedSKImage
     {
         string source;
-        SKBitmap cache;
-        public async Task<SKBitmap> Get()
+        SKImage cache;
+        public async Task<SKImage> Get()
         {
             if (cache == null)
             {
-                cache = SKBitmap.Decode(source);
+                cache = SKImage.FromEncodedData(source);
             }
             return cache;
         }
@@ -22,7 +22,7 @@ namespace LyricsExtractor.Services
             cache = null;
 		}
 
-		public CachedSKBitmap(string source)
+		public CachedSKImage(string source)
         {
             this.source = source;
         }

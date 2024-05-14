@@ -108,7 +108,7 @@
     [Parameter]
     public string? SelectedVideo { get; set; }
     [Parameter]
-    public CachedSKBitmap[]? SelectedVideoData { get; set; }
+    public CachedSKImage[]? SelectedVideoData { get; set; }
     [Parameter]
     public float Size { get; set; }
     [Parameter]
@@ -201,9 +201,9 @@
         Opacity = value;
         await OnAChange.InvokeAsync(this);
     }
-    protected async Task<List<CachedSKBitmap>> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
+    protected async Task<List<CachedSKImage>> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
     {
-        var frames = new List<CachedSKBitmap>();
+        var frames = new List<CachedSKImage>();
         for (int i = 1; i <= totalFrames; i++)
         {
             var f = Path.Combine(dir, frameSeed + i.ToString().PadLeft(indexChars, '0') + extension);
@@ -213,7 +213,7 @@
 
             try
             {
-                var bmp = new CachedSKBitmap(f);
+                var bmp = new CachedSKImage(f);
                 frames.Add(bmp);
             }
             catch (Exception ex)

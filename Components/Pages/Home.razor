@@ -17,6 +17,7 @@
 @using SkiaSharp.Views.Blazor
 @using SubtitleEditor.SectionDef
 @using Editors
+@using System.Diagnostics
 @using Whisper
 
 @inject IDialogService DialogService
@@ -588,63 +589,86 @@
 	{
 		new Thread(async () =>
 		{
-			processIsRender = true;
-			// Prepare UI
-			renderMenuOpen = false;
-			processProgressOpen = true;
-			processProgress = 0;
-			processProgressTitle = "Creating your video";
-			processProgressText = "Please wait...";
-			InvokeAsync(StateHasChanged);
+		processIsRender = true;
+		// Prepare UI
+		renderMenuOpen = false;
+		processProgressOpen = true;
+		processProgress = 0;
+		processProgressTitle = "Creating your video";
+		processProgressText = "Please wait...";
+		InvokeAsync(StateHasChanged);
 
-			renderAbort = false;
+		renderAbort = false;
 
-			var renderFileSeed = "render_";
-			var renderFrameExtension = ".jpg";
-			var renderFrameFileNumberSize = 4;
-			foreach (var f in Directory.GetFiles(Common.binInfo.TemporaryFilesFolder, renderFileSeed + "*"))
+		var renderFileSeed = "render_";
+		var renderFrameExtension = ".jpg";
+		var renderFrameFileNumberSize = 4;
+		foreach (var f in Directory.GetFiles(Common.binInfo.TemporaryFilesFolder, renderFileSeed + "*"))
+		{
+			try
 			{
-				try
-				{
-					File.Delete(f);
-				}
-				catch (Exception ex)
-				{ }
+				File.Delete(f);
 			}
-			//Render Frames
-			config.TargetSize = new SkiaSharp.SKSize() { Height = renderRes, Width = renderRes * config.AspectRatio };
-			var framesFileNames = new List<string>();
-			var duration = sectionBarControl.sectionBar.Maximum;
-			for (int fi = 0; fi < sectionBarControl.sectionBar.Maximum * 30; fi++)
-			{
-				var t = fi / 30.0D;
-				using (var skBitmap = new SkiaSharp.SKBitmap((int)config.TargetSize.Width, (int)config.TargetSize.Height))
-				{
-					using (var ms = new MemoryStream())
-					{
-						//Console.WriteLine($"Render @{fi} ({t}s)");
-						var canvas = new SkiaSharp.SKCanvas(skBitmap);
-						var sx = skBitmap.Width / 100;
-						canvas.Scale(sx, sx); // fit the frame
-						await sectionBarControl.RenderCurrentFrameAtT(canvas, t, config);
-						sectionBarControl.sectionBar.ClearFrameCacheAt(t);
-						skBitmap.Encode(ms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
-						var buffer = ms.ToArray();
+			catch (Exception ex)
+			{ }
+		}
+		//Render Frames
+		config.TargetSize = new SkiaSharp.SKSize() { Height = renderRes, Width = renderRes * config.AspectRatio };
+		var framesFileNames = new List<string>();
+		var duration = sectionBarControl.sectionBar.Maximum;
 
-						var jpgFile = Path.Combine(
-							Common.binInfo.TemporaryFilesFolder, 
-							renderFileSeed + (fi + 1).ToString().PadLeft(renderFrameFileNumberSize, '0') + renderFrameExtension);
-						framesFileNames.Add(jpgFile);
-						ms.Seek(0, SeekOrigin.Begin);
-						await File.WriteAllBytesAsync(jpgFile, ms.ToArray());
-						processProgress = t / sectionBarControl.sectionBar.Maximum * 100;
-						processProgressText = $"Please wait while your video is created... ({fi + 1}/{Math.Round(duration * 30, 0)})";
-						InvokeAsync(StateHasChanged);
+		int framesToRender = 200;
+		var st = Stopwatch.StartNew();
+		var v = new SkiaSharp.Views.Blazor.SKGLView();
+		//var ctx1 = v.;
+		var ctx = OpenGLRenderer.GRContextCreator.Get((int)config.TargetSize.Width, (int)config.TargetSize.Height);
+
+		//using (var ctx = SkiaSharp.GRContext.CreateGl())
+		{
+			using (var surface = SkiaSharp.SKSurface.Create(ctx, true, new SKImageInfo((int)config.TargetSize.Width, (int)config.TargetSize.Height)))
+			{
+				var canvas = surface.Canvas;
+				using (var backPaint = new SKPaint()
+				{
+					Color = SKColors.Black,
+					IsStroke = false
+				}){
+					for (int fi = 0; fi < sectionBarControl.sectionBar.Maximum * 30 && framesToRender-- > 0; fi++)
+					{
+						var t = fi / 30.0D;
+						using (var ms = new MemoryStream())
+						{
+							canvas.DrawRect(0, 0, (int)config.TargetSize.Width, (int)config.TargetSize.Height), backPaint)
+							//Console.WriteLine($"Render @{fi} ({t}s)");
+							var sx = ((int)config.TargetSize.Width) / 100.0F;
+							canvas.Scale(sx, sx); // fit the frame
+							await sectionBarControl.RenderCurrentFrameAtT(canvas, t, config);
+							sectionBarControl.sectionBar.ClearFrameCacheAt(t);
+							var snp = surface.Snapshot();
+							var enc = snp.Encode(SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
+							enc.SaveTo(ms);
+							var buffer = ms.ToArray();
+
+							var jpgFile = Path.Combine(
+								Common.binInfo.TemporaryFilesFolder,
+								renderFileSeed + (fi + 1).ToString().PadLeft(renderFrameFileNumberSize, '0') + renderFrameExtension);
+							framesFileNames.Add(jpgFile);
+							ms.Seek(0, SeekOrigin.Begin);
+							await File.WriteAllBytesAsync(jpgFile, ms.ToArray());
+							processProgress = t / sectionBarControl.sectionBar.Maximum * 100;
+							processProgressText = $"Please wait while your video is created... ({fi + 1}/{Math.Round(duration * 30, 0)})";
+							InvokeAsync(StateHasChanged);
+						}
 					}
 				}
-				GC.Collect();
-				InvokeAsync(StateHasChanged);
-			}
+			}}
+			var doneIn = st.ElapsedMilliseconds;
+			
+			// 7000
+			// 3500 with static bitmap
+			// 2600 with SKImage
+			// With GLSurace
+
 			processProgress = 0;
 			processProgressText = "Encoding video";
 			InvokeAsync(StateHasChanged);
@@ -926,7 +950,7 @@
 	{
 		processProgressOpen = true;
 		processProgressTitle = "Uploading data";
-		processProgressTitle = "Please wait while " + file.Name + " is uploaded to the cloud";
+		processProgressText = "Please wait while " + file.Name + " is uploaded to the cloud";
 		var stream = file.OpenReadStream(file.Size);
 		InvokeAsync(StateHasChanged);
 
@@ -1015,9 +1039,9 @@
 			processProgressTitle = "Preparing to render";
 			processProgressText = "Creating the canvas";
 			InvokeAsync(StateHasChanged);
-			List<CachedSKBitmap> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
+			List<CachedSKImage> ConvertPNGsToSKBitmaps(int totalFrames, string dir, string frameSeed, int indexChars, string extension)
 			{
-				var frames = new List<CachedSKBitmap>();
+				var frames = new List<CachedSKImage>();
 				for (int i = 1; i <= totalFrames; i++)
 				{
 					var f = Path.Combine(dir, frameSeed + i.ToString().PadLeft(indexChars, '0') + extension);
@@ -1027,7 +1051,7 @@
 
 					try
 					{
-						var bmp = new CachedSKBitmap(f);
+						var bmp = new CachedSKImage(f);
 						frames.Add(bmp);
 					}
 					catch (Exception ex)
@@ -1037,7 +1061,7 @@
 				}
 				return frames;
 			}
-			async Task<List<CachedSKBitmap>> getVideoFrames(string videoFileSeed, AutomationOption option)
+			async Task<List<CachedSKImage>> getVideoFrames(string videoFileSeed, AutomationOption option)
 			{
 				videoFileSeed = videoFileSeed +"_" + Common.shortCheckSum(option.Data);
 				InvokeAsync(StateHasChanged);
@@ -1103,7 +1127,7 @@
 
 				return ConvertPNGsToSKBitmaps(totalFrames, Common.binInfo.TemporaryFilesFolder, framesSeed, framesIndexSize, framesExtension);
 			}
-			List<CachedSKBitmap> frames;
+			List<CachedSKImage> frames;
 			double introDuration = 3;
 			double outroDuration = 3;
 			// Process Intro
@@ -1331,7 +1355,7 @@
 
 	// Photo Clip Editor
 
-	protected SkiaSharp.SKBitmap PhotoEditorData { get; set; }
+	protected SkiaSharp.SKImage PhotoEditorData { get; set; }
 	protected float GraphicEditorSize { get; set; }
 	protected float GraphicEditorXPosition {get; set; }
 	protected float GraphicEditorYPosition { get; set; }
@@ -1388,7 +1412,7 @@
 
 	// Video Clip Editor
 	protected VideoClipEditor.StretchingModes VideoEditorStretchingMode { get; set; }
-	protected CachedSKBitmap[]? VideoEditorData { get; set; }
+	protected CachedSKImage[]? VideoEditorData { get; set; }
 	public async Task VideoEditorOnAChange(VideoClipEditor videoEditor)
 	{
 		if (ClipUnderEditing == null)
