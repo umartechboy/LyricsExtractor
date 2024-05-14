@@ -2,6 +2,9 @@
 @using MudBlazor.Utilities
 @using SkiaSharp
 @using SubtitleEditor.SectionDef
+
+@inject IDialogService DialogService
+
 <MudGrid>
     <MudItem md="3" Class="py-0">
          <MudNumericField @bind-Value="StartingHH" TextChanged="@OnATextChanged" Label="hours" Immediate="true"  Variant="Variant.Filled" Min="0.0" Max="1000" />
@@ -76,6 +79,26 @@
         </MudFileUpload>
     </MudItem>
 </MudGrid>
+
+@* Process Progress Dialog *@
+<MudDialog @bind-IsVisible="processProgressOpen" Options="new DialogOptions() { FullWidth = true }">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.AutoFixHigh" Class="mr-3" />@processProgressTitle
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+
+        <MudGrid>
+            <MudText Typo="Typo.body1">@processProgressText</MudText>
+            @if (processProgress >= 0)
+            {
+                <MudProgressLinear Color="Color.Error" Indeterminate="processProgress == 0 || processProgress >= 100" Value="@processProgress" Class="my-7" />
+            }
+        </MudGrid>
+
+    </DialogContent>
+</MudDialog>
 @inject ISnackbar Snackbar
 @code {
     [Parameter]
@@ -110,6 +133,12 @@
     public double DurationFF { get; set; }
     [Parameter]
     public EventCallback<PhotoClipEditor> OnAChange { get; set; }
+
+    bool processProgressOpen;
+    double processProgress = 0;
+    string processProgressText = "Working";
+    string processProgressTitle = "";
+
     protected async Task OnATextChanged(string d)
     {
         await OnAChange.InvokeAsync(this);
@@ -147,14 +176,31 @@
         Opacity = value;
         await OnAChange.InvokeAsync(this);
     }
+    async Task<byte[]> UploadFileWithProgress(IBrowserFile file)
+    {
+        processProgressOpen = true;
+        processProgressTitle = "Uploading data";
+        processProgressText = "Please wait while " + file.Name + " is uploaded to the cloud";
+        var stream = file.OpenReadStream(file.Size);
+        InvokeAsync(StateHasChanged);
+
+        var data = new byte[file.Size];
+        int total = 0;
+        while (total < file.Size)
+        {
+            total += await stream.ReadAsync(data, total, (int)file.Size - total);
+            processProgress = total / (double)file.Size * 100.0D;
+            InvokeAsync(StateHasChanged);
+        }
+        stream.Close();
+        processProgressOpen = false;
+        InvokeAsync(StateHasChanged);
+        return data;
+    }
     protected async Task ImageUploaderFilesSelected(IBrowserFile file)
     {
         //read all bytes
-        using var stream = file.OpenReadStream(100000000); //Max size for file that can be read
-        var inputFileDataBuffer = new byte[file.Size];
-
-        //read all bytes
-        await stream.ReadAsync(inputFileDataBuffer);
+        var inputFileDataBuffer = await UploadFileWithProgress(file);
         // Create image preview, pepare for video conversion
         SelectedImage = $"data:{file.ContentType};base64,{Convert.ToBase64String(inputFileDataBuffer)}";
         SelectedImageData = SkiaSharp.SKImage.FromEncodedData(inputFileDataBuffer);

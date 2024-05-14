@@ -673,7 +673,7 @@ namespace SubtitleEditor.SectionDef
                 var bmp = await Data[indexToRender].Get();
                 if (bmp == null)
                 {
-                    Console.WriteLine("bmp null at: " + indexToRender);
+                    //Console.WriteLine("bmp null at: " + indexToRender);
                     //await (RenderAsync(position, canvas, config));
                     return;
                 }
@@ -771,7 +771,7 @@ namespace SubtitleEditor.SectionDef
                     IsAntialias = true // enable antialiasing if needed
                 })
                 {
-                    Console.WriteLine("Render Photo: " + Source + " " + Label);
+                    //Console.WriteLine("Render Photo: " + Source + " " + Label);
                     paint.Color = paint.Color.WithAlpha((byte)Opacity);
                     canvas.DrawImage(Data, new SKRect(r.Left, r.Top, r.Right, r.Bottom), paint);
                 }
