@@ -24,7 +24,6 @@
     <PackageReference Include="SkiaSharp" Version="2.88.8">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.8" />
   </ItemGroup>
   
   <ItemGroup>

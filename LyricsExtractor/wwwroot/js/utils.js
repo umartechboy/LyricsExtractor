@@ -9,6 +9,19 @@
     document.body.removeChild(a);
     window.URL.revokeObjectURL(blobUrl);
 };
+window.downloadFileFromStream = async (fileName, contentStreamReference) => {
+    console.log('Triggering file download: ', fileName)
+    console.log('Stream: ', contentStreamReference)
+    const arrayBuffer = await contentStreamReference.arrayBuffer();
+    const blob = new Blob([arrayBuffer]);
+    const url = URL.createObjectURL(blob);
+    const anchorElement = document.createElement('a');
+    anchorElement.href = url;
+    anchorElement.download = fileName ?? '';
+    anchorElement.click();
+    anchorElement.remove();
+    URL.revokeObjectURL(url);
+  }
 window.loadWaveFileFromBuffer = async (waveBuffer) => {
     const wavesurfer = WaveSurfer.create({
         container: '#waveform',

@@ -11,6 +11,8 @@
     @onclick:preventDefault="true">
 	<SKBitmapView @ref=skView 
 	    OnPaintBitmap="@OnPaint"
+        BitmapScale="1"
+        RenderQuality="70"
         @onmousemove="OnMouseMove"
         @onmousedown="OnMouseDown"
         @onmouseup="OnMouseUp"

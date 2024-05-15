@@ -32,6 +32,8 @@
 	public string Style { get; set; } = "height: 100%; width: 100%;";
 	[Parameter]
 	public int RenderQuality { get; set; } = 80;
+	[Parameter]
+	public int BitmapScale { get; set; } = 2;
 
 	string imgId = Guid.NewGuid().ToString();
 	string imgSrc;
@@ -47,8 +49,11 @@
 					continue;
 				if (isInvalid)
 					InvokeAsync(() =>
-					{
-						OnPaintBitmap.InvokeAsync(new SKBitmapViewPaintArgs(Info));
+					{ // rescale graphics
+						Info.Canvas.Save();
+						Info.Canvas.Scale(1 / (float)Info.BitmapScale, 1 / (float)Info.BitmapScale);
+						OnPaintBitmap.InvokeAsync(new SKBitmapViewPaintArgs(Info));						
+						Info.Canvas.Restore();
 						imgSrc = ConvertToBase64String(Info.Bitmap.Encode(SKEncodedImageFormat.Jpeg, RenderQuality).ToArray());
 						StateHasChanged();
 					});
@@ -92,7 +97,7 @@
 	public void ElementSizeChanged(double width, double height)
 	{
 		if (Info.Bitmap != null) Info.Bitmap.Dispose();
-		Info = new SKBitmapViewInfo((int)width, (int)height);
+		Info = new SKBitmapViewInfo((int)width, (int)height, BitmapScale);
 	}
 	public void Invalidate()
 	{
@@ -114,19 +119,23 @@
 
 	public class SKBitmapViewInfo
 	{
-		public int Width { get => Bitmap == null ? 0 : Bitmap.Width; }
-		public int Height { get => Bitmap == null ? 0 : Bitmap.Height; }
+		public int BitmapScale {get ; set;} = 2;
+		public int Width { get => Bitmap == null ? 0 : Bitmap.Width * BitmapScale; }
+		public int Height { get => Bitmap == null ? 0 : Bitmap.Height * BitmapScale; }
 		public SKBitmap? Bitmap { get; private set; }
 		public SKCanvas? Canvas { get; private set; }
 		public SKBitmapViewInfo()
 		{
 
 		}
-		public SKBitmapViewInfo(int width, int height)
+		public SKBitmapViewInfo(int width, int height, int scale = 2)
 		{
 			if (width == 0 || height == 0)
 				return;
-			Bitmap = new SKBitmap(width, height);
+			if (scale <= 0)
+				scale = 1;
+			BitmapScale = scale;
+			Bitmap = new SKBitmap(width / BitmapScale, height / BitmapScale);
 			Canvas = new SKCanvas(Bitmap);
 		}
 

@@ -37,6 +37,8 @@
 				<div style="width: 100%; height: 70vh; position: relative; left: 0px; top: 0px;">
 					<SKBitmapView @ref=renderPreview
 						OnPaintBitmap="async (e) => await OnRenderPaint(e)"
+						RenderQuality="50"
+						BitmapScale="2"
 					></SKBitmapView>
 					<audio @ontimeupdate="onAudioTimeUpdate" id="@audioElementID" src=@audioSrc controls style="position: absolute; width: 100%; height: 20px; top: calc(100% - 20px); left: 0px;">
 						Your browser does not support the audio element.
@@ -486,6 +488,10 @@
 		Console.WriteLine("FFMPEG Temp: {0}", Common.binInfo.TemporaryFilesFolder);
 		Console.WriteLine("Executing from: {0}", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 		Console.WriteLine("ExecutingAssembly: {0}", Assembly.GetExecutingAssembly().Location);
+
+		if (File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FFMpeg/Temp/renderOutput.mp4"))){
+			renderOutputFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FFMpeg/Temp/renderOutput.mp4");
+		}
 	}
 	protected override void OnAfterRender(bool firstRender)
 	{
@@ -500,7 +506,7 @@
 	string renderOutputFile = "";
 	bool renderMenuOpen;
 
-	bool processIsRender = true;
+	bool processIsRender = false;
 	string previewImageSrc = "";
 	bool progressDiscrete;
 	bool processProgressOpen;
@@ -621,7 +627,13 @@
 	async Task TriggerDownload(string fName)
 	{
 		var outBuffer = await System.IO.File.ReadAllBytesAsync(fName);
-		await Runtime.InvokeVoidAsync("downloadFile", "Render Output" + Path.GetExtension(fName), outBuffer);
+		
+		Snackbar.Add("Your download will begin in a while...", Severity.Info);
+		
+        using var streamRef = new DotNetStreamReference(stream: new MemoryStream(outBuffer));
+        await Runtime.InvokeVoidAsync("downloadFileFromStream", "Render Output" + Path.GetExtension(fName), streamRef);
+
+		//await Runtime.InvokeVoidAsync("downloadFile", "Render Output" + Path.GetExtension(fName), outBuffer);
 	}
 	async Task RenderAll()
 	{
@@ -833,6 +845,7 @@
 			processProgressText = "Your file is ready to be downloaded";
 			processProgress = -1;
 			renderOutputFile = fName;
+			processIsRender = false;
 			processProgressOpen = false;
 			downloadingFileProgressOpen = true;
 			InvokeAsync(StateHasChanged);
