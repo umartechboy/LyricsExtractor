@@ -37,7 +37,7 @@
 				<div style="width: 100%; height: 70vh; position: relative; left: 0px; top: 0px;">
 					<SKBitmapView @ref=renderPreview
 						OnPaintBitmap="async (e) => await OnRenderPaint(e)"
-						RenderQuality="50"
+						RenderQuality="70"
 						BitmapScale="2"
 					></SKBitmapView>
 					<audio @ontimeupdate="onAudioTimeUpdate" id="@audioElementID" src=@audioSrc controls style="position: absolute; width: 100%; height: 20px; top: calc(100% - 20px); left: 0px;">
@@ -315,11 +315,14 @@
 						}
 				</MudItem>
 			}
-			<MudItem Class="pa-2 px-8 align-start d-flex" md="12" >
-				<MudText Class="pa-2 px-8" Typo="Typo.subtitle2">@whisperMaxWords</MudText>
-				<MudSpacer />
-				<MudSlider T="int" @bind-Value="@whisperMaxWords" Immediate=true Min="5" Max="60">Maximum characters per line</MudSlider>
-			</MudItem>
+			@if(false)
+			{				
+				<MudItem Class="pa-2 px-8 align-start d-flex" md="12" >
+					<MudText Class="pa-2 px-8" Typo="Typo.subtitle2">@whisperMaxWords</MudText>
+					<MudSpacer />
+					<MudSlider T="int" @bind-Value="@whisperMaxWords" Immediate=true Min="5" Max="60">Maximum characters per line</MudSlider>
+				</MudItem>
+			}
 		</MudGrid>
 
 	</DialogContent>
@@ -1000,9 +1003,9 @@
 				var model = Library.loadModel(path);
 				using Context context = model.createContext();
 				context.parameters.setFlag(eFullParamsFlags.NoContext, true);
+				new CommandLineArgs().apply(ref context.parameters);
 				context.parameters.strategy = eSamplingStrategy.Greedy;
 				context.parameters.max_len = whisperMaxWords;
-				new CommandLineArgs().apply(ref context.parameters);
 				using iMediaFoundation mf = Library.initMediaFoundation();
 				var whisperOut = new StringBuilder();
 				var whisperReader = new WhisperReader();

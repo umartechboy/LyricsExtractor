@@ -637,17 +637,34 @@ namespace SubtitleEditor.SectionDef
         public async Task OnPaintAsync(SKBitmapViewPaintArgs e)
         {
             var g = Graphics.FromCanvas(e.Canvas);
-            g.canvas.ClipRect(new SKRect(LabelsSectionWidth, 0, Width, Height));
+            g.canvas.Save();
+            g.canvas.ClipRect(new SKRect(0, 0, LabelsSectionWidth, Height));
             float layerHeight = (Height - zsw * 2 - sbh) / (float)Layers.Count;
             // Draw layer labels section
             g.FillRectangle(Color.DarkGray, 0, zsw * 2, LabelsSectionWidth, Height - zsw * 2 - sbh);
 
-            for (int layersIndex = 0; layersIndex <= Layers.Count; layersIndex++)
+			var strs = new List<string>() { "Forground", "Lyrics", "Background 1", "Background 2", "Audio" };
+			// Layer labels
+			while (strs.Count < Layers.Count) strs.Add("");
+
+			for (int layersIndex = 0; layersIndex < Layers.Count; layersIndex++)
+			{
+                Color c = Color.White;
+                if (Layers[layersIndex].Count > 0)
+                    c = Layers[layersIndex][0].Color;
+				// draw layer separators
+				var s = strs[layersIndex];
+                var h = 18;
+				float sw = g.MeasureString(s, "ARIAL", h).Width;
+				g.DrawString(s, "ARIAL", h, c, new PointF( LabelsSectionWidth - 10 - sw, (float)(zsw * 2 - 1 + layerHeight * layersIndex + layerHeight - h / 2)));
+				g.DrawString(s, "ARIAL", h, c, new PointF(LabelsSectionWidth - 10 - sw, (float)(zsw * 2 - 1 + layerHeight * layersIndex + layerHeight - h / 2)));
+			}
+			for (int layersIndex = 0; layersIndex <= Layers.Count; layersIndex++)
             {
                 // draw layer separators
                 g.DrawLine(Color.FromArgb(130, Color.White), 1, 0, zsw * 2 - 1 + layerHeight * layersIndex, LabelsSectionWidth, zsw * 2 + layerHeight * layersIndex);
-            }
-
+			}
+            g.canvas.Restore();
             g.canvas.ClipRect(new SKRect(LabelsSectionWidth, 0, Width, Height));
             // Draw Layers now
             e.Canvas.Translate(LabelsSectionWidth, 0);

@@ -316,7 +316,7 @@ namespace SubtitleEditor.SectionDef
                 // Start of first section on the right is min. if there is no section, max of Start of zoom Bar is max
                 // Width is not same as max. Width is the graphical length.
                 // Stays the same for all layers
-                float layerHeight = (Height - ZoomBarHeight * 2 - sbh) / (float)layersCount;
+                float layerHeight = (Height - ZoomBarHeight * 2) / (float)layersCount;
                 zsRec = new RectangleF(
                     (int)Math.Round(((double)Start - min) / (max - min) * Width),
                     ZoomBarHeight * 2 + layerHeight * layerIndex,
@@ -329,10 +329,10 @@ namespace SubtitleEditor.SectionDef
                     (int)Math.Round(((double)End - Start) / (bMax - bMin) * Width),
                     ZoomBarHeight);
 
-                Color cNormal = Color.FromArgb(50, this.Color);
-                Color cHover = Color.FromArgb(80, this.Color);
-                Color cSelect = Color.FromArgb(160, this.Color);
-                Color cHeld = Color.FromArgb(120, this.Color);
+                Color cNormal = Color.FromArgb(100, this.Color);
+                Color cHover = Color.FromArgb(160, this.Color);
+                Color cSelect = Color.FromArgb(250, this.Color);
+                Color cHeld = Color.FromArgb(230, this.Color);
 
 
                 Color c1 = cNormal;
@@ -794,7 +794,7 @@ namespace SubtitleEditor.SectionDef
             // Draw overlay image
             if (Data != null)
             {
-				float layerHeight = (Height - ZoomBarHeight * 2 - sbh) / (float)layersCount;
+				float layerHeight = (Height - ZoomBarHeight * 2) / (float)layersCount;
 				var zsRec = new RectangleF(
 					(int)Math.Round(((double)Start - min) / (max - min) * Width) + 1,
 					ZoomBarHeight * 2 + layerHeight * layerIndex + 1,
