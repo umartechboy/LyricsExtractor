@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Deepgram" Version="4.0.1" />
     <PackageReference Include="FFmpegBlazor" Version="1.0.0.7" />
     <PackageReference Include="FFMpegCore" Version="5.1.0" />
     <PackageReference Include="MudBlazor" Version="6.19.1" />
@@ -51,7 +52,6 @@
     <EmbeddedResource Include="Properties\Resources\user_data\concatenated_logos.mov" />
     <EmbeddedResource Include="Properties\Resources\user_data\cool_burn.mp4" />
     <EmbeddedResource Include="Properties\Resources\user_data\edosz.ttf" />
-    <EmbeddedResource Include="Properties\Resources\user_data\intro.mov" />
     <EmbeddedResource Include="Properties\Resources\user_data\intro.webm" />
     <EmbeddedResource Include="Properties\Resources\user_data\karma.mp3" />
     <EmbeddedResource Include="Properties\Resources\user_data\outro.mov" />

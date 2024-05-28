@@ -3,6 +3,7 @@
 @using System.Text
 @using System.Net.Http.Headers
 @using System.Text.Json
+@using Deepgram
 @using FFMpegCore
 @using FFMpegCore.Arguments
 @using FFMpegCore.Pipes
@@ -257,7 +258,7 @@
 
 	</DialogContent>
 	<DialogActions>
-		<MudCheckBox @bind-Value="@useCloudWhisper" Label="Use Cloud" Disabled="true"></MudCheckBox>
+		<MudCheckBox @bind-Value="@useDeepgram" Label="Use Deepgram" Disabled="true"></MudCheckBox>
 		<MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> whisperMenuOpen = false">Close</MudButton>        
 		
 		<MudFileUpload T="IBrowserFile" Accept=".mp3, .wav, .ogg" FilesChanged=@(async (file) =>{whisperMenuOpen = false;  processProgressOpen = true; StateHasChanged(); await UploadAudioForWhisper(file); }) MaximumFileCount="100">
@@ -477,7 +478,7 @@
 					catch (Exception ex)
 					{
 
-						//Console.WriteLine(file + " could not be copied at " + to + ": " + ex);
+					//Console.WriteLine(file + " could not be copied at " + to + ": " + ex);
 					}
 				}
 			}
@@ -555,7 +556,7 @@
 	{
 		var viewCanvas = e.Canvas;
 
-		//cache the sizes
+        //cache the sizes
 		var width = (float)e.Info.Width;
 		var height = (float)(e.Info.Width / config.AspectRatio);
 		if (height > e.Info.Height)
@@ -613,7 +614,7 @@
 			await VideoClipEditor.FFMpeg.Load(); //parameter false means not to trigger events in ffmpeg Clase instance
 
 		}
-		//if (FFmpegFactory.Runtime == null)
+        //if (FFmpegFactory.Runtime == null)
 		// In cas renderer has already called it.
 		if (!hasInitFFMPEG)
 		{
@@ -630,11 +631,11 @@
 	async Task TriggerDownload(string fName)
 	{
 		var outBuffer = await System.IO.File.ReadAllBytesAsync(fName);
-		
+
 		Snackbar.Add("Your download will begin in a while...", Severity.Info);
-		
-        using var streamRef = new DotNetStreamReference(stream: new MemoryStream(outBuffer));
-        await Runtime.InvokeVoidAsync("downloadFileFromStream", "Render Output" + Path.GetExtension(fName), streamRef);
+
+		using var streamRef = new DotNetStreamReference(stream: new MemoryStream(outBuffer));
+		await Runtime.InvokeVoidAsync("downloadFileFromStream", "Render Output" + Path.GetExtension(fName), streamRef);
 
 		//await Runtime.InvokeVoidAsync("downloadFile", "Render Output" + Path.GetExtension(fName), outBuffer);
 	}
@@ -677,7 +678,7 @@
 				{
 					try
 					{
-						//File.Delete(f);
+					//File.Delete(f);
 					}
 					catch (Exception ex)
 					{ }
@@ -699,10 +700,10 @@
 								//using (var ctx = OpenGLRenderer.GRContextCreator.Get((int)config.TargetSize.Width, (int)config.TargetSize.Height))
 								using (var bmp = new SKBitmap((int)config.TargetSize.Width, (int)config.TargetSize.Height))
 								{
-									//using (var surface = SkiaSharp.SKSurface.Create(ctx, true, new SKImageInfo((int)config.TargetSize.Width, (int)config.TargetSize.Height)))
+								//using (var surface = SkiaSharp.SKSurface.Create(ctx, true, new SKImageInfo((int)config.TargetSize.Width, (int)config.TargetSize.Height)))
 									using (var canvas = new SKCanvas(bmp))
 									{
-										//var canvas = surface.Canvas;
+									//var canvas = surface.Canvas;
 
 										Log("Canvas {0} created", ti);
 										using (var backPaint = new SKPaint()
@@ -751,7 +752,7 @@
 														// );
 														using (var pms = new MemoryStream())
 														{
-															//var prev = previewBmp.Encode(pms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
+														//var prev = previewBmp.Encode(pms, SkiaSharp.SKEncodedImageFormat.Jpeg, 100);
 
 															//string base64Image = Convert.ToBase64String(pms.ToArray());
 															//previewImageSrc = $"data:image/jpeg;base64,{base64Image}";
@@ -768,8 +769,8 @@
 						}
 					}
 				}
-				// 7000
-				// 3500 with static bitmap
+							// 7000
+						// 3500 with static bitmap
 				// 2600 with SKImage
 				// 1700 With GLSurace
 				// 850 With Soft render and multithreading.
@@ -790,7 +791,7 @@
 			{
 				if (audioClip.Source != "")
 				{
-					//VideoClipEditor.FFMpeg.WriteFile(audioClip.Source, ((AudioClip)audioClip).Data);
+				//VideoClipEditor.FFMpeg.WriteFile(audioClip.Source, ((AudioClip)audioClip).Data);
 					var durationStr = (TimeSpan.FromSeconds(audioClip.Start)).ToString(@"hh\:mm\:ss");
 					args.Add("-itsoffset"); args.Add(durationStr);
 					args.Add("-i"); args.Add(audioClip.Source);
@@ -873,8 +874,8 @@
 	List<GgmlModel> ggmlOptions;
 	GgmlModel modelToUse;
 	bool whisperMenuOpen = false;
-	bool useCloudWhisper = false;
-	async Task<double> ExtractLyricsAndFill(byte[] mp3, string fileName, bool useCloudWhisper)
+	bool useDeepgram = false;
+	async Task<double> ExtractLyricsAndFill(byte[] mp3, string fileName, bool useDeepgram)
 	{
 		processProgressTitle = "Extract Lyrics";
 		processProgressTitle = "Busy...";
@@ -899,8 +900,8 @@
 					stream.Seek(0, SeekOrigin.Begin);
 					var info = await FFProbe.AnalyseAsync(stream, Common.binInfo);
 					duration = info.Duration.TotalSeconds;
-					// if (duration < 1)
-					// {
+			// if (duration < 1)
+				// {
 					// 	Console.WriteLine(info);
 					// 	try { 
 					// 		await File.WriteAllBytesAsync(Path.Combine(Common.binInfo.TemporaryFilesFolder, "test.mp3"), mp3);
@@ -954,7 +955,7 @@
 			await File.WriteAllBytesAsync(
 					backgroundAudioWaveFile,
 				wave);
-			// Will make sure this doesn't get triggered for the next conversion on the same file
+				// Will make sure this doesn't get triggered for the next conversion on the same file
 		}
 		else // we don't neet to convert. Just find the duration
 		{
@@ -983,40 +984,66 @@
 		int totalWords = 0;
 		int totalSubs = 0;
 		double confidance = 0;
-
-		processProgressText = "Preparing Whisper";
-		InvokeAsync(StateHasChanged);
-		if (useCloudWhisper)
+		if (useDeepgram)
 		{
 
+			JsonSerializerOptions options = new(JsonSerializerDefaults.Web)
+				{
+					WriteIndented = true
+				};
+
+			Environment.SetEnvironmentVariable("DEEPGRAM_API_KEY", "a690f0cb39e1d089204c312efb1b7060ebbba335");
+			// Set "DEEPGRAM_API_KEY" environment variable to your Deepgram API Key
+            var deepgramClient = new PreRecordedClient();
+
+            var response = await deepgramClient.TranscribeFile(wave,
+                    new Deepgram.Models.PreRecorded.v1.PreRecordedSchema()
+				  {
+					  Model = "nova-2",
+				  });
+
+			Console.WriteLine(response);
 		}
 		else
 		{
+			processProgressText = "Preparing Whisper";
+			InvokeAsync(StateHasChanged);
 			if (!File.Exists(whisperOutputCacheFile)) // File not saved yet
 			{
 				const eLoggerFlags loggerFlags = eLoggerFlags.UseStandardError | eLoggerFlags.SkipFormatMessage;
-				Library.setLogSink(eLogLevel.Debug, loggerFlags);
+				Whisper.Library.setLogSink(eLogLevel.Debug, loggerFlags);
 
 				var ggml = "ggml\\ggml-base.en.bin";
 				var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), ggml);
 				var exists = File.Exists(path);
-				var model = Library.loadModel(path);
+				var model = Whisper.Library.loadModel(path);
 				using Context context = model.createContext();
 				context.parameters.setFlag(eFullParamsFlags.NoContext, true);
 				new CommandLineArgs().apply(ref context.parameters);
 				context.parameters.strategy = eSamplingStrategy.Greedy;
 				context.parameters.max_len = whisperMaxWords;
-				using iMediaFoundation mf = Library.initMediaFoundation();
+				using iMediaFoundation mf = Whisper.Library.initMediaFoundation();
 				var whisperOut = new StringBuilder();
 				var whisperReader = new WhisperReader();
 				whisperReader.OnSegment += (seg, probability) =>
 				{
 					totalWords += seg.text.Split(' ').Length;
 					// Add a new clip for this
-					var subClip = new SubtitleClip(seg.time.begin.TotalSeconds, seg.time.end.TotalSeconds, seg.text);
-					sectionBarControl.sectionBar.Layers[1].Add(subClip);
-					sectionBarControl.ResetMaxTime();
+					// Lets divide long lines based on comma
+					var subTexts = seg.text.Split(',');
+					TimeSpan added = new TimeSpan();
+					foreach(var subText in subTexts)
+					{
+						var tDuration = seg.time.end - seg.time.begin;
+						var thisDuration = subText.Length / (float)seg.text.Length * tDuration;
+						var start = (seg.time.begin + added).TotalSeconds;
+						var end = (seg.time.begin + added + thisDuration).TotalSeconds;
+						var subClip = new SubtitleClip(start, end, subText);
+						sectionBarControl.sectionBar.Layers[1].Add(subClip);
+						sectionBarControl.ResetMaxTime();
 
+						added += thisDuration;
+					}
 					processProgressText = (++totalSubs) + ": " + seg.text;
 
 					confidance += probability;
@@ -1091,7 +1118,7 @@
 
 		new Thread(async () =>
 		{
-			var duration = await ExtractLyricsAndFill(mp3, file.Name, useCloudWhisper);
+			var duration = await ExtractLyricsAndFill(mp3, file.Name, useDeepgram);
 
 			// Layer 0 -- Intro, Outro, Logo
 			if (sectionBarControl.sectionBar.Layers[0].Count <= 1) // Intro/Outro/Logo
@@ -1130,7 +1157,7 @@
 	// Automation -- Single File
 	bool SVA_MenuOpen = false;
 	bool downloadingFileProgressOpen { get; set; }
-	AutomationOption SVA_IntroOption = new AutomationOption(){ Label = "Intro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/intro.mov"};
+	AutomationOption SVA_IntroOption = new AutomationOption(){ Label = "Intro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/intro.webm"};
 	AutomationOption SVA_OutroOption = new AutomationOption(){ Label = "Outro", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/outro.mov"};
 	AutomationOption SVA_BackgroundOption = new AutomationOption(){ Label = "Background", AcceptedFormats = ".jpg, .png, .bmp", DefaultDataSource = "/user_data/background.jpg"};
 	AutomationOption SVA_BurnOption = new AutomationOption(){ Label = "Burn Effect", AcceptedFormats = ".mp4, .mov, .avi, .webm", DefaultDataSource = "/user_data/cool_burn.mp4"};
