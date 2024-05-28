@@ -401,3 +401,7 @@ FodyWeavers.xsd
 *.bin
 ReleaseDir/V0.1.zip
 /LyricsExtractor/FFMpeg/temp
+LyricsExtractor/Properties/Resources/user_data/concatenated_logos.mov
+LyricsExtractor/Properties/Resources/user_data/ffmpeg.exe
+LyricsExtractor/Properties/Resources/user_data/ffprobe.exe
+LyricsExtractor/Properties/Resources/user_data/intro.mov
