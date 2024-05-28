@@ -176,6 +176,7 @@
 						}
 					</MudItem>
 				}
+				<MudNavLink OnClick="() => editLyrics() = true">Edit Lyrics</MudNavLink>
 			</MudNavGroup>
 			<MudNavGroup Title="Automation" Expanded="true">
 				<MudNavLink OnClick="() => {SVA_MenuOpen = true; menuOpen = false; }">Single video</MudNavLink>
@@ -259,7 +260,7 @@
 	</DialogContent>
 	<DialogActions>
 		<MudCheckBox @bind-Value="@useDeepgram" Label="Use Deepgram" Disabled="true"></MudCheckBox>
-		<MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> whisperMenuOpen = false">Close</MudButton>        
+		@* <MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> whisperMenuOpen = false">Close</MudButton>         *@
 		
 		<MudFileUpload T="IBrowserFile" Accept=".mp3, .wav, .ogg" FilesChanged=@(async (file) =>{whisperMenuOpen = false;  processProgressOpen = true; StateHasChanged(); await UploadAudioForWhisper(file); }) MaximumFileCount="100">
 			<ButtonTemplate>
@@ -1125,6 +1126,19 @@
 
 		Snackbar.Add($"Audio was processed successfully and lyrics where added to the timeline. Total {totalSubs} lyrics containing {totalWords} words exracted.");
 		return duration;
+	}
+	// populates a dialog with currently loaded lyrics for editing
+	async Task editLyrics(){
+		lyricsToEdit  = new List<CaptionItem>();
+		var subLayer = sectionBarControl.sectionBar.Layers.Find(l => l.Any(clip => clip is SubtitleClip)).OfType<SubtitleClip>();
+		lyricsToEdit.AddRange(subLayer.Select(clip => new CaptionItem
+		{
+			Text = clip.Label,
+			Start = TimeSpan.FromSeconds(clip.Start),
+			End = TimeSpan.FromSeconds(clip.Start)
+		} ));
+		lyricsEditorOpen = true;
+		StateHasChanged();
 	}
 	async Task<byte[]> UploadFileWithProgress(IBrowserFile file)
 	{
