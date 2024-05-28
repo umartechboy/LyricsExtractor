@@ -215,4 +215,10 @@ sealed class WhisperReader : Callbacks
             Console.WriteLine("  -f FNAME, --file FNAME    [{0,-7}] path of the input audio file", "");
         }
     }
+    public class CaptionItem
+    {
+        public string Text { get; set; } = "";
+		public TimeSpan Start { get; set; }
+		public TimeSpan End { get; set; }
+	}
 }
