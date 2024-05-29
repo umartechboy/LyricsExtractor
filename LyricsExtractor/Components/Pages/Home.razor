@@ -289,7 +289,7 @@
 		<MudGrid>
 			@foreach(var lyric in lyricsToEdit)
 			{
-				<MudItem md="3">
+				<MudItem md="2">
 					<MudText Typo="Typo.body1">
 						@string.Format("{0:00}:{1:00}.{2:00}",
 												lyric.Start.Minutes,
@@ -297,7 +297,7 @@
 												lyric.Start.Milliseconds / 1000.0F * 30)
 					</MudText>
 				</MudItem>
-				<MudItem md="3">
+				<MudItem md="2">
 					<MudText Typo="Typo.body1">
 						@string.Format("{0:00}:{1:00}.{2:00}",
 												lyric.End.Minutes,
@@ -305,9 +305,12 @@
 												lyric.End.Milliseconds / 1000.0F * 30)
 					</MudText>
 				</MudItem>
-				<MudItem md="6">
+				<MudItem md="7">
 					<MudInput Value="@lyric.Text" ValueChanged="(v) => splitLyricIfNeeded(lyric, v)" Lines="2" T="string"></MudInput>
 				</MudItem>
+				<MudItem md="1">
+					<MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="() => removeLyric(lyric)" Color="Color.Warning"></MudIconButton>
+				</MudItem>	
 			}
 		</MudGrid>
 	</DialogContent>
@@ -1162,6 +1165,12 @@
 		sectionBarControl.sectionBar.Invalidate();
 		lyricsEditorOpen = false;
 		StateHasChanged();
+	}
+	async Task removeLyric(CaptionItem item)
+	{
+		lyricsToEdit.Remove(item);
+		StateHasChanged();
+		return;
 	}
 	async Task splitLyricIfNeeded(CaptionItem item, string newText)
 	{
