@@ -1,0 +1,146 @@
+﻿@using LyricsExtractor.Services
+@using SubtitleEditor.SectionDef
+
+<MudDialog @bind-IsVisible="@LyricsEditorOpen" Options="new DialogOptions() { FullWidth = true }">
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			<MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3" /> Edit Lyrics
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+		<MudGrid>
+			@foreach (var lyric in LyricsToEdit)
+			{
+				<MudItem md="2">
+					<MudText Typo="Typo.body1">
+						@string.Format("{0:00}:{1:00}.{2:00}",
+												lyric.Start.Minutes,
+												lyric.Start.Seconds,
+												lyric.Start.Milliseconds / 1000.0F * 30)
+					</MudText>
+				</MudItem>
+				<MudItem md="2">
+					<MudText Typo="Typo.body1">
+						@string.Format("{0:00}:{1:00}.{2:00}",
+												lyric.End.Minutes,
+												lyric.End.Seconds,
+												lyric.End.Milliseconds / 1000.0F * 30)
+					</MudText>
+				</MudItem>
+				<MudItem md="6">
+					<MudInput Value="@lyric.Text" ValueChanged="(v) => splitLyricIfNeeded(lyric, v)" Lines="2" T="string"></MudInput>
+				</MudItem>
+				<MudItem md="1">
+					<MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => addLyricAfter(lyric)" Color="Color.Warning"></MudIconButton>
+				</MudItem>
+				<MudItem md="1">
+					<MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="() => removeLyric(lyric)" Color="Color.Warning"></MudIconButton>
+				</MudItem>
+			}
+		</MudGrid>
+	</DialogContent>
+	<DialogActions>
+		<MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> applyLyrics()">Apply Changes</MudButton>
+	</DialogActions>
+</MudDialog>
+@code {
+	List<CaptionItem> LyricsToEdit { get; set; }
+	SectionBar SectionBar { get; set; }
+	bool LyricsEditorOpen { get; set; }
+
+	// populates a dialog with currently loaded lyrics for editing
+	public async Task EditLyrics(SectionBar sectionBar)
+	{
+		this.SectionBar = sectionBar;
+		LyricsEditorOpen = true;
+		LyricsToEdit = new List<CaptionItem>();
+		var subLayer = SectionBar.Layers.Find(l => l.Any(clip => clip is SubtitleClip)).OfType<SubtitleClip>();
+		LyricsToEdit.AddRange(subLayer.Select(clip => new CaptionItem
+			{
+				Text = clip.Source,
+				Start = TimeSpan.FromSeconds(clip.Start),
+				End = TimeSpan.FromSeconds(clip.End)
+			}));
+		LyricsEditorOpen = true;
+		StateHasChanged();
+	}
+	async Task applyLyrics()
+	{
+		var subLayer = SectionBar.Layers.Find(l => l.Any(clip => clip is SubtitleClip));
+		subLayer.RemoveAll(c => c is SubtitleClip);
+		subLayer.AddRange(LyricsToEdit.Select(clip => new SubtitleClip(
+			clip.Start.TotalSeconds,
+			clip.End.TotalSeconds,
+			clip.Text
+		)));
+		SectionBar.Invalidate();
+		LyricsEditorOpen = false;
+		StateHasChanged();
+	}
+	async Task removeLyric(CaptionItem item)
+	{
+		LyricsToEdit.Remove(item);
+		StateHasChanged();
+	}
+	async Task addLyricAfter(CaptionItem item)
+	{
+		if (LyricsToEdit.Last() == item)
+		{
+			LyricsToEdit.Add(new CaptionItem
+				{
+					Start = item.Start + (item.End - item.Start) / 2,
+					End = item.End,
+				});
+			item.End = LyricsToEdit.Last().Start;
+		}
+		else
+		{
+			var item2 = LyricsToEdit[LyricsToEdit.IndexOf(item) + 1];
+			var newItem = new CaptionItem
+				{
+					Start = item.Start + (item.End - item.Start) / 3 * 2,
+					End = item2.Start + (item2.End - item2.Start) / 3,
+				};
+			LyricsToEdit.Insert(LyricsToEdit.IndexOf(item2), newItem);
+			item.End = LyricsToEdit.Last().Start;
+			item2.Start = LyricsToEdit.Last().End;
+		}
+	}
+	async Task splitLyricIfNeeded(CaptionItem item, string newText)
+	{
+		if (newText == "")
+		{
+			LyricsToEdit.Remove(item);
+			StateHasChanged();
+			return;
+		}
+		if (!newText.Contains("\n"))
+			return;
+		item.Text = newText;
+		for (int i = 0; i < LyricsToEdit.Count; i++)
+		{
+			var lyric = LyricsToEdit[i];
+			var text = lyric.Text;
+			if (text.Contains("\n"))
+			{
+				// Lets divide based on \n
+				var subTexts = text.Split('\n');
+				var timeBegin = lyric.Start;
+				var timeEnd = lyric.End;
+				var tDuration = timeEnd - timeBegin;
+				var p1Duration = text.Split('\n')[1].Length / (float)text.Length * tDuration;
+				var p2Duration = tDuration - p1Duration;
+				var part2 = new CaptionItem
+					{
+						Text = text.Split('\n')[1],
+						Start = lyric.Start + p1Duration,
+						End = lyric.Start + tDuration
+					};
+				lyric.End -= p2Duration;
+				lyric.Text = text.Split('\n')[0];
+				LyricsToEdit.Insert(LyricsToEdit.IndexOf(lyric) + 1, part2);
+			}
+		}
+		StateHasChanged();
+	}
+}

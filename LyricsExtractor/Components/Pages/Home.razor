@@ -146,6 +146,8 @@
 		</MudItem>
 	</MudItem>
 </MudGrid>
+@* Lyrics Editor *@
+<LyricsEditor @ref="@lyricsEditor"></LyricsEditor>
 
 @* Main Menu *@
 <MudDrawer @bind-Open="@menuOpen" Anchor="Anchor.End" Elevation="1" Variant="@DrawerVariant.Temporary">
@@ -176,7 +178,7 @@
 						}
 					</MudItem>
 				}
-				<MudNavLink OnClick="async () => await editLyrics()">Edit Lyrics</MudNavLink>
+				<MudNavLink OnClick="async () => await lyricsEditor.EditLyrics(sectionBarControl.sectionBar)">Edit Lyrics</MudNavLink>
 			</MudNavGroup>
 			<MudNavGroup Title="Automation" Expanded="true">
 				<MudNavLink OnClick="() => {SVA_MenuOpen = true; menuOpen = false; }">Single video</MudNavLink>
@@ -279,45 +281,6 @@
 
 @* Lyrics Editor*@
 
-<MudDialog @bind-IsVisible="@lyricsEditorOpen" Options="new DialogOptions() { FullWidth = true }">
-	<TitleContent>
-		<MudText Typo="Typo.h6">
-			<MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3" /> Edit Lyrics
-		</MudText>
-	</TitleContent>
-	<DialogContent>
-		<MudGrid>
-			@foreach(var lyric in lyricsToEdit)
-			{
-				<MudItem md="2">
-					<MudText Typo="Typo.body1">
-						@string.Format("{0:00}:{1:00}.{2:00}",
-												lyric.Start.Minutes,
-												lyric.Start.Seconds,
-												lyric.Start.Milliseconds / 1000.0F * 30)
-					</MudText>
-				</MudItem>
-				<MudItem md="2">
-					<MudText Typo="Typo.body1">
-						@string.Format("{0:00}:{1:00}.{2:00}",
-												lyric.End.Minutes,
-												lyric.End.Seconds,
-												lyric.End.Milliseconds / 1000.0F * 30)
-					</MudText>
-				</MudItem>
-				<MudItem md="7">
-					<MudInput Value="@lyric.Text" ValueChanged="(v) => splitLyricIfNeeded(lyric, v)" Lines="2" T="string"></MudInput>
-				</MudItem>
-				<MudItem md="1">
-					<MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="() => removeLyric(lyric)" Color="Color.Warning"></MudIconButton>
-				</MudItem>	
-			}
-		</MudGrid>
-	</DialogContent>
-	<DialogActions>
-		<MudButton Variant="Variant.Filled" Color="Color.Transparent" Class="px-10" OnClick="()=> applyLyrics()">Apply Changes</MudButton>
-	</DialogActions>
-</MudDialog>
 
 @* Single Automation Menu *@
 <MudDialog @bind-IsVisible="SVA_MenuOpen" Options="new DialogOptions() { FullWidth = true }">
@@ -547,14 +510,12 @@
 	int whisperMaxWords { get; set; } = 10;
 	bool clearCacheConfirmation = false;
 	bool menuOpen;
-	bool lyricsEditorOpen = false;
 	int renderFrameHeight = 1080;
 	bool renderAbort = false;
 	string renderQuality = "medium";
 	string renderOutputFile = "";
 	bool renderMenuOpen;
-	List<CaptionItem> lyricsToEdit = new List<CaptionItem>();
-
+	LyricsEditor lyricsEditor;
 	bool processIsRender = false;
 	string previewImageSrc = "";
 	bool progressDiscrete;
@@ -1139,75 +1100,6 @@
 
 		Snackbar.Add($"Audio was processed successfully and lyrics where added to the timeline. Total {totalSubs} lyrics containing {totalWords} words exracted.");
 		return duration;
-	}
-	// populates a dialog with currently loaded lyrics for editing
-	async Task editLyrics(){
-		lyricsToEdit  = new List<CaptionItem>();
-		var subLayer = sectionBarControl.sectionBar.Layers.Find(l => l.Any(clip => clip is SubtitleClip)).OfType<SubtitleClip>();
-		lyricsToEdit.AddRange(subLayer.Select(clip => new CaptionItem
-		{
-			Text = clip.Source,
-			Start = TimeSpan.FromSeconds(clip.Start),
-			End = TimeSpan.FromSeconds(clip.End)
-		} ));
-		lyricsEditorOpen = true;
-		StateHasChanged();
-	}
-	async Task applyLyrics()
-	{
-		var subLayer = sectionBarControl.sectionBar.Layers.Find(l => l.Any(clip => clip is SubtitleClip));
-		subLayer.RemoveAll(c => c is SubtitleClip);
-		subLayer.AddRange(lyricsToEdit.Select(clip => new SubtitleClip(
-			clip.Start.TotalSeconds,
-			clip.End.TotalSeconds,
-			clip.Text
-		)));
-		sectionBarControl.sectionBar.Invalidate();
-		lyricsEditorOpen = false;
-		StateHasChanged();
-	}
-	async Task removeLyric(CaptionItem item)
-	{
-		lyricsToEdit.Remove(item);
-		StateHasChanged();
-		return;
-	}
-	async Task splitLyricIfNeeded(CaptionItem item, string newText)
-	{
-		if (newText == "")
-		{
-			lyricsToEdit.Remove(item);
-			StateHasChanged();
-			return;
-		}
-		if (!newText.Contains("\n"))
-			return;
-		item.Text = newText;
-		for (int i = 0; i < lyricsToEdit.Count; i++)
-		{
-			var lyric = lyricsToEdit[i];
-			var text = lyric.Text;
-			if (text.Contains("\n"))
-			{
-				// Lets divide based on \n
-				var subTexts = text.Split('\n');
-				var timeBegin = lyric.Start;
-				var timeEnd = lyric.End;
-				var tDuration = timeEnd - timeBegin;
-				var p1Duration = text.Split('\n')[1].Length / (float)text.Length * tDuration;
-				var p2Duration = tDuration - p1Duration;
-				var part2 = new CaptionItem
-					{
-						Text = text.Split('\n')[1],
-						Start = lyric.Start + p1Duration,
-						End = lyric.Start + tDuration
-					};
-				lyric.End -= p2Duration;
-				lyric.Text = text.Split('\n')[0];
-				lyricsToEdit.Insert(lyricsToEdit.IndexOf(lyric) + 1, part2);
-			}
-		}
-		StateHasChanged();
 	}
 	async Task<byte[]> UploadFileWithProgress(IBrowserFile file)
 	{

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LyricsExtractor", "LyricsExtractor\LyricsExtractor.csproj", "{BFB5EEEA-3EA8-4AE2-BC7A-B31E0FB73574}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenGLRenderer", "OpenGLRenderer\OpenGLRenderer.csproj", "{BCB449A6-138A-43F1-A360-3008FB4F0EE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenGLRenderer", "OpenGLRenderer\OpenGLRenderer.csproj", "{BCB449A6-138A-43F1-A360-3008FB4F0EE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
